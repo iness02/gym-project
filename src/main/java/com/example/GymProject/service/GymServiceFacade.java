@@ -13,6 +13,7 @@ public class GymServiceFacade {
         this.trainerService = trainerService;
         this.trainingService = trainingService;
     }
+
     public TraineeService getTraineeService() {
         return traineeService;
     }

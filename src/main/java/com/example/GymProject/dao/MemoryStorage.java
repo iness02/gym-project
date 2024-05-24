@@ -8,6 +8,7 @@ import java.util.List;
 
 @Component
 public class MemoryStorage {
+
     private TrainerDao trainerRepository;
     private TraineeDao traineeRepository;
     private TrainingDao trainingRepository;
@@ -16,6 +17,7 @@ public class MemoryStorage {
     public TrainerDao getTrainerRepository() {
         return trainerRepository;
     }
+
     @Autowired
     public void setTrainerRepository(TrainerDao trainerRepository) {
         this.trainerRepository = trainerRepository;
@@ -24,6 +26,7 @@ public class MemoryStorage {
     public TraineeDao getTraineeRepository() {
         return traineeRepository;
     }
+
     @Autowired
     public void setTraineeRepository(TraineeDao traineeRepository) {
         this.traineeRepository = traineeRepository;
@@ -31,6 +34,7 @@ public class MemoryStorage {
     public TrainingDao getTrainingRepository() {
         return trainingRepository;
     }
+
     @Autowired
     public void setTrainingRepository(TrainingDao trainingRepository) {
         this.trainingRepository = trainingRepository;
