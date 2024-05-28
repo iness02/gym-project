@@ -64,25 +64,26 @@ public class Trainee extends User {
     }
 
     @Override
-    public String toString() {
-        return "Trainee{" +
-                "dateOfBirth=" + dateOfBirth +
-                ", address='" + address + '\'' +
-                ", userId='" + userId + '\'' +
-                "} " + super.toString();
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        if (!super.equals(object)) return false;
-        Trainee trainee = (Trainee) object;
-        return Objects.equals(userId, trainee.userId);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Trainee trainee = (Trainee) o;
+        return Objects.equals(dateOfBirth, trainee.dateOfBirth) && Objects.equals(address, trainee.address) && Objects.equals(userId, trainee.userId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), userId);
+        return Objects.hash(super.hashCode(), dateOfBirth, address, userId);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Trainee{");
+        sb.append("dateOfBirth=").append(dateOfBirth);
+        sb.append(", address='").append(address).append('\'');
+        sb.append(", userId='").append(userId).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

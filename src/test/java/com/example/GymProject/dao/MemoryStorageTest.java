@@ -1,14 +1,18 @@
 package com.example.GymProject.dao;
 
+import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Trainer;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {AppConfig.class})
 public class MemoryStorageTest {
     @Autowired
     private MemoryStorage memoryStorage;

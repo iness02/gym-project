@@ -1,10 +1,12 @@
 package com.example.GymProject.dao;
 
+import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.TrainingType;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,74 +16,51 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Repository
 public class TrainerDao {
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
     private final Map<String, Trainer> trainerMap = new HashMap<>();
-    @Value("${trainerFilePath}")
-    private String trainerFilePath;
+    //@Value("${trainerFilePath}")
+    private String trainerFilePath="C:\\Users\\User\\Downloads\\GymProject\\GymProject\\src\\main\\resources\\trainerRepository.txt";
     public List<Trainer> findAll() {
         return new ArrayList<>(trainerMap.values());
     }
 
     public void create(Trainer trainer) {
-        try {
-            if (trainer.getUserId() == null) {
-                logger.warning("Trainer userId is null");
-                throw new IllegalArgumentException("UserId cannot be null");
-            }
-            trainerMap.put(trainer.getUserId(), trainer);
-            logger.info("Inserted New Trainer");
-        } catch (Exception e){
-            logger.severe("Error While Inserting New Value");
-            throw new IllegalArgumentException(e);
-        }
+        Assert.notNull(trainer.getUserId(), "Trainer userId is null");
+        trainerMap.put(trainer.getUserId(), trainer);
+        logger.info("Inserted New Trainer");
+
     }
 
     public Trainer select(String key) {
         Trainer trainer;
-        try {
-            if (trainerMap.containsKey(key)) {
-                logger.info("Trainer found");
-                trainer = trainerMap.get(key);
-            } else {
-                logger.warning("Wrong Key, Trainer not Found");
-                throw new IllegalArgumentException("Trainer Not Found");
-            }
-            return trainer;
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+        Assert.isTrue(trainerMap.containsKey(key), "Wrong Key, Trainer not Found");
+        logger.info("Trainer found");
+        trainer = trainerMap.get(key);
+        return trainer;
+
     }
 
     public void update(String key, Trainer trainer) {
-        try {
-            if (key == null) {
-                logger.warning("Trainer userId is null");
-                throw new IllegalArgumentException("UserId cannot be null");
-            }
-            trainerMap.put(key, trainer);
-            logger.info("Trainer Updated");
-        } catch (Exception e){
-            logger.warning("Trainer has not been Updated");
-            throw new IllegalArgumentException(e);
-        }
+        Assert.notNull(key,"Trainer userId is null");
+        Assert.notNull(trainer,"The trainer parameter cannot be null");
+        trainerMap.put(key, trainer);
+        logger.info("Trainer Updated");
+
     }
+
     public void delete(String key){
-        try {
-            if (trainerMap.containsKey(key)){
-                trainerMap.remove(key);
-                logger.info("Trainer Removed Successfully!");
-            }else {
-                logger.warning("Trainer has not been Removed");
-                throw new IllegalArgumentException("Wrong Key");
-            }
-        } catch (Exception e){
-            throw new IllegalArgumentException(e);
-        }
+        Assert.notNull(key,"UserId cannot be null");
+        Assert.isTrue(trainerMap.containsKey(key), "Wrong Key");
+        trainerMap.remove(key);
+        logger.info("Trainer Removed Successfully!");
+
     }
+
     public boolean containsKey(String key) {
         return trainerMap.containsKey(key);
     }
@@ -114,7 +93,7 @@ public class TrainerDao {
                 trainerMap.put(userId, trainer);
             }
         } catch (Exception e) {
-            logger.warning("File can not be found!");
+            logger.error("File can not be found!");
             throw new FileNotFoundException("Wrong File");
         } finally {
 

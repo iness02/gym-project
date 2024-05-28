@@ -1,7 +1,5 @@
 package com.example.GymProject.model;
 
-
-
 import java.util.Objects;
 
 public class Trainer extends User {
@@ -9,11 +7,6 @@ public class Trainer extends User {
     private String userId;
 
     public Trainer() {
-    }
-    public Trainer(String firstName, String lastName, Boolean isActive,
-                   TrainingType specialization) {
-        super(firstName, lastName, isActive);
-        this.specialization = specialization;
     }
 
     public Trainer(String firstName, String lastName, String username, String password,
@@ -51,25 +44,27 @@ public class Trainer extends User {
         this.userId = userId;
     }
 
+
     @Override
     public String toString() {
-        return "Trainer{" +
-                "specialization=" + specialization +
-                ", userId='" + userId + '\'' +
-                "} " + super.toString();
+        final StringBuilder sb = new StringBuilder("Trainer{");
+        sb.append("specialization=").append(specialization);
+        sb.append(", userId='").append(userId).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        if (!super.equals(object)) return false;
-        Trainer trainer = (Trainer) object;
-        return Objects.equals(userId, trainer.userId);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Trainer trainer = (Trainer) o;
+        return specialization == trainer.specialization && Objects.equals(userId, trainer.userId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), userId);
+        return Objects.hash(super.hashCode(), specialization, userId);
     }
 }

@@ -2,19 +2,23 @@ package com.example.GymProject.dao;
 
 
 
+import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.Training;
 import com.example.GymProject.model.TrainingType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {AppConfig.class})
 public class TrainingDaoTest {
     @Autowired
     private TrainingDao trainingDao;
