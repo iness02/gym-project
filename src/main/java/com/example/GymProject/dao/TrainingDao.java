@@ -28,8 +28,8 @@ public class TrainingDao {
     private final Map<String, Training> trainingMap = new HashMap<>();
     private TraineeDao traineeDao;
     private TrainerDao trainerDao;
-   // @Value("${trainingFilePath}")
-    private String trainingFilePath="C:\\Users\\User\\Downloads\\GymProject\\GymProject\\src\\main\\resources\\trainingRepository.txt";
+   @Value("${trainingFilePath}")
+    private String trainingFilePath;
 
     @Autowired
     public void setTraineeDao(TraineeDao traineeDao) {

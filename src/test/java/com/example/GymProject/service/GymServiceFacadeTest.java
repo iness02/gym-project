@@ -2,7 +2,7 @@ package com.example.GymProject.service;
 
 
 import com.example.GymProject.config.AppConfig;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -16,17 +16,17 @@ import static org.junit.jupiter.api.Assertions.*;
     private GymServiceFacade gymServiceFacade;
 
     @Test
-    void getTraineeService() {
+   public void getTraineeService() {
         assertNotNull(gymServiceFacade.getTraineeService());
     }
 
     @Test
-    void getTrainerService() {
+   public void getTrainerService() {
         assertNotNull(gymServiceFacade.getTrainerService());
     }
 
     @Test
-    void getTrainingService() {
+   public void getTrainingService() {
         assertNotNull(gymServiceFacade.getTrainingService());
     }
 }

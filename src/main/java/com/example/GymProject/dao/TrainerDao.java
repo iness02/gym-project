@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
 public class TrainerDao {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
     private final Map<String, Trainer> trainerMap = new HashMap<>();
-    //@Value("${trainerFilePath}")
-    private String trainerFilePath="C:\\Users\\User\\Downloads\\GymProject\\GymProject\\src\\main\\resources\\trainerRepository.txt";
+    @Value("${trainerFilePath}")
+    private String trainerFilePath;
     public List<Trainer> findAll() {
         return new ArrayList<>(trainerMap.values());
     }

@@ -2,7 +2,7 @@ package com.example.GymProject.service;
 
 import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.model.Trainee;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -14,11 +14,12 @@ import java.util.NoSuchElementException;
 import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {AppConfig.class})public class TraineeServiceTest {
+@ContextConfiguration(classes = {AppConfig.class})
+public class TraineeServiceTest {
     @Autowired
     private TraineeService traineeService;
     @Test
-    void selectTraineeTest(){
+    public void selectTraineeTest(){
         traineeService.createTrainee("Inesa", "Hakobyan", true,
                 LocalDate.now(), "Armenia", "inesa123");
 
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
     }
 
     @Test
-    void createTraineeWithSimilarUsernameTest(){
+    public void createTraineeWithSimilarUsernameTest(){
         traineeService.createTrainee("Inesa", "Hakobyan", true,
                 LocalDate.now(), "Armenia", "inesa123");
         traineeService.createTrainee("Inesa", "Hakobyan", true,
@@ -36,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
                 traineeService.selectTrainee("inesa1234").getUsername());
     }
     @Test
-    void createTraineeWithDifferentUsernameTest(){
+    public void createTraineeWithDifferentUsernameTest(){
         traineeService.createTrainee("Nune", "Hakobyan", true,
                 LocalDate.now(), "Armenia", "nune123");
         traineeService.createTrainee("Inesa", "Hakobyan", true,
@@ -46,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.*;
                 traineeService.selectTrainee("inesa1234").getUsername());
     }
     @Test
-    void updateTraineeTest(){
+    public void updateTraineeTest(){
         traineeService.createTrainee("Inesa", "Hakobyan", true,
                 LocalDate.now(), "Armenia", "inesa123");
 
@@ -58,11 +59,11 @@ import static org.junit.jupiter.api.Assertions.*;
         assertEquals("Hayk", traineeService.selectTrainee("inesa123").getFirstName());
     }
     @Test
-    void updateTraineeFailTest(){
+    public  void updateNonExistedTraineeFailTest(){
         assertThrows(NoSuchElementException.class, () -> traineeService.updateTrainee("test", new Trainee()));
     }
     @Test
-    void deleteTraineeTest(){
+    public void deleteTraineeTest(){
         traineeService.createTrainee("Inesa", "Hakobyan", true,
                 LocalDate.now(), "Armenia", "inesa123");
 

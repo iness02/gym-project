@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
 @Repository
 public class TraineeDao {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
-    //@Value("${traineeFilePath}")
-    private String traineeFilePath="C:\\Users\\User\\Downloads\\GymProject\\GymProject\\src\\main\\resources\\traineeRepository.txt";
+    @Value("${traineeFilePath}")
+    private String traineeFilePath;
     private final Map<String, Trainee> traineeMap = new HashMap<>();
 
     public List<Trainee> findAll() {

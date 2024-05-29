@@ -1,6 +1,8 @@
 package com.example.GymProject.service;
 
 import com.example.GymProject.dao.MemoryStorage;
+import com.example.GymProject.dao.TraineeDao;
+import com.example.GymProject.dao.TrainerDao;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.TrainingType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,19 +15,17 @@ import static com.example.GymProject.util.Utils.usernameExists;
 
 @Service
 public class TrainerService {
-    private MemoryStorage memoryStorage;
-
     @Autowired
-    public void setMemoryStorage(MemoryStorage memoryStorage) {
-        this.memoryStorage = memoryStorage;
-    }
+    private MemoryStorage memoryStorage;
+    @Autowired
+    private TrainerDao trainerDao;
 
     public void createTrainer(String firstName, String lastName, Boolean isActive,
                               TrainingType specialization, String userId) {
         Trainer trainer = new Trainer(firstName, lastName, isActive, specialization, userId);
-        boolean contains = usernameExists(memoryStorage.getUsernames(), trainer);
-        trainer.setUsername(generateUsername(trainer.getFirstName(), trainer.getLastName(), contains));
-        memoryStorage.getTrainerRepository().create(trainer);
+        boolean exists = usernameExists(memoryStorage.getUsernames(), trainer);
+        trainer.setUsername(generateUsername(trainer.getFirstName(), trainer.getLastName(), exists));
+       trainerDao.create(trainer);
     }
 
     public Trainer selectTrainer(String key) {

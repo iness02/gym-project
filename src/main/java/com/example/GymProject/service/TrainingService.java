@@ -1,6 +1,7 @@
 package com.example.GymProject.service;
 
 import com.example.GymProject.dao.MemoryStorage;
+import com.example.GymProject.dao.TrainingDao;
 import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.Training;
@@ -12,31 +13,25 @@ import java.time.LocalDate;
 
 @Service
 public class TrainingService {
+    @Autowired
     private MemoryStorage memoryStorage;
+    @Autowired
     private TraineeService traineeService;
+    @Autowired
     private TrainerService trainerService;
     @Autowired
-    public void setMemoryStorage(MemoryStorage memoryStorage) {
-        this.memoryStorage = memoryStorage;
-    }
-    @Autowired
-    public void setTraineeService(TraineeService traineeService) {
-        this.traineeService = traineeService;
-    }
-    @Autowired
-    public void setTrainerService(TrainerService trainerService) {
-        this.trainerService = trainerService;
-    }
+    private TrainingDao trainingDao;
+
     public void createTraining(String traineeId, String trainerId, String trainingName,
                                TrainingType trainingType, LocalDate trainingDate, Integer trainingDuration){
         Trainee trainee = traineeService.selectTrainee(traineeId);
         Trainer trainer = trainerService.selectTrainer(trainerId);
         Training training = new Training(trainee, trainer, trainingName,
                 trainingType, trainingDate, trainingDuration);
-        memoryStorage.getTrainingRepository().create(training);
+        trainingDao.create(training);
     }
     public Training selectTraining(String key){
-        return memoryStorage.getTrainingRepository().select(key);
+        return memoryStorage.getTrainingDao().select(key);
     }
 
 }

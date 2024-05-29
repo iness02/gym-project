@@ -25,22 +25,22 @@ public class MemoryStorageTest {
 
 
     @Test
-    void getTrainerRepositoryTest() {
+    public void getTrainerRepositoryTest() {
         assertEquals(memoryStorage.getTrainerRepository(), trainerDao);
     }
 
     @Test
-    void getTraineeRepositoryTest() {
-        assertEquals(memoryStorage.getTraineeRepository(), traineeDao);
+   public void getTraineeRepositoryTest() {
+        assertEquals(memoryStorage.getTraineeDao(), traineeDao);
     }
 
     @Test
-    void getTrainingRepositoryTest() {
-        assertEquals(memoryStorage.getTrainingRepository(), trainingDao);
+    public void getTrainingRepositoryTest() {
+        assertEquals(memoryStorage.getTrainingDao(), trainingDao);
     }
 
     @Test
-    void getUsernamesTest() {
+    public void getUsernames_findAll() {
         for(Trainee trainee : traineeDao.findAll()){
             traineeDao.delete(trainee.getUserId());
         }
