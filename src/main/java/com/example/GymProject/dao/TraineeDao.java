@@ -4,6 +4,7 @@ import com.example.GymProject.model.Trainee;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,74 +15,53 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Repository
 public class TraineeDao {
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
     @Value("${traineeFilePath}")
     private String traineeFilePath;
     private final Map<String, Trainee> traineeMap = new HashMap<>();
 
-    public List<Trainee> findAll(){
+    public List<Trainee> findAll() {
         return new ArrayList<>(traineeMap.values());
     }
 
-    public void create(Trainee trainee){
-        try {
-            if (trainee.getUserId() == null) {
-                logger.warning("Trainee userId is null");
-                throw new IllegalArgumentException("UserId cannot be null");
-            }
-            traineeMap.put(trainee.getUserId(), trainee);
-            logger.info("Inserted New Trainee");
-        } catch (Exception e){
-          logger.severe("Error While Inserting New Value");
-            throw new IllegalArgumentException(e);
-        }
+    public void create(Trainee trainee) {
+
+        Assert.notNull(trainee.getUserId(), "UserId cannot be null");
+        traineeMap.put(trainee.getUserId(), trainee);
+        logger.info("Inserted New Trainee");
+
     }
 
-    public Trainee select(String key){
+    public Trainee select(String key) {
+
         Trainee trainee;
-        try {
-            if(traineeMap.containsKey(key)){
-                logger.info("Trainee found");
-                trainee = traineeMap.get(key);
-            }else{
-               logger.warning("Wrong Key, Trainee not Found");
-                throw new IllegalArgumentException("Trainee Not Found");
-            }
-            return trainee;
-        } catch (Exception e){
-            throw new IllegalArgumentException(e);
-        }
+        Assert.isTrue(traineeMap.containsKey(key), "Trainee Not Found");
+        logger.info("Trainee found");
+        trainee = traineeMap.get(key);
+
+        return trainee;
+
     }
 
-    public void update(String key, Trainee trainee){
-        try {
-            if (key == null) {
-               logger.warning("Trainee userId is null");
-                throw new IllegalArgumentException("UserId cannot be null");
-            }
-            traineeMap.put(key, trainee);
-            logger.info("Trainee Updated");
-        } catch (Exception e){
-          logger.warning("Trainee has not been Updated");
-            throw new IllegalArgumentException(e);
-        }
+    public void update(String key, Trainee trainee) {
+        Assert.notNull(key,"UserId cannot be null");
+        Assert.notNull(trainee,"The trainee parameter cannot be null");
+        traineeMap.put(key, trainee);
+        logger.info("Trainee Updated");
+
     }
-    public void delete(String key){
-        try {
-            if (traineeMap.containsKey(key)){
-                traineeMap.remove(key);
-                logger.info("Trainee Removed Successfully!");
-            }else {
-               logger.warning("Trainee has not been Removed");
-                throw new IllegalArgumentException("Wrong Key");
-            }
-        } catch (Exception e){
-            throw new IllegalArgumentException(e);
-        }
+
+    public void delete(String key) {
+        Assert.notNull(key,"UserId cannot be null");
+        Assert.isTrue(traineeMap.containsKey(key), "Wrong Key");
+        traineeMap.remove(key);
+        logger.info("Trainee Removed Successfully!");
+
     }
 
     public boolean containsKey(String key) {
@@ -92,13 +72,13 @@ public class TraineeDao {
     public void init() throws Exception {
         BufferedReader br = null;
         try {
-          logger.info("Starting Populating Trainee Storage");
+            logger.info("Starting Populating Trainee Storage");
             File file = new File(traineeFilePath);
             br = new BufferedReader(new FileReader(file));
             String line;
             Trainee trainee;
 
-            while ((line = br.readLine()) != null){
+            while ((line = br.readLine()) != null) {
 
                 String[] traineeInfo = line.split(",");
 
@@ -111,17 +91,17 @@ public class TraineeDao {
                 String address = traineeInfo[6];
                 String userId = traineeInfo[7];
 
-                trainee = new Trainee(firstName,lastName,username,password,
-                        isActive,dob,address,userId);
+                trainee = new Trainee(firstName, lastName, username, password,
+                        isActive, dob, address, userId);
 
                 traineeMap.put(userId, trainee);
             }
-        } catch (Exception e){
-           logger.warning("File can not be found!");
+        } catch (Exception e) {
+            logger.error("File can not be found!");
             throw new FileNotFoundException("Wrong File");
         } finally {
-            if (br != null){
-            logger.info("Closing Buffered Reader");
+            if (br != null) {
+                logger.info("Closing Buffered Reader");
                 br.close();
             }
         }

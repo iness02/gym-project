@@ -7,11 +7,12 @@ import org.springframework.context.annotation.PropertySource;
 
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 @PropertySource("classpath:application.properties")
 public class Utils {
     private final static String ALLOWED_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    private static final Logger logger = Logger.getLogger(Utils.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(Utils.class.getName());
     private static int serialNumber = 0;
     private static StringBuilder sb;
     public static String generateUsername(String firstName, String lastName, boolean exists){

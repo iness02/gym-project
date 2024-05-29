@@ -1,23 +1,27 @@
 package com.example.GymProject.service;
 
+import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.model.TrainingType;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.time.LocalDate;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static org.junit.jupiter.api.Assertions.*;
-@SpringBootTest
-class TrainingServiceTest {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {AppConfig.class})
+public class TrainingServiceTest {
     @Autowired
     private TrainingService trainingService;
     @Autowired
     private GymServiceFacade gymServiceFacade;
 
     @Test
-    void createTrainingTest() {
+    public void createTrainingTest() {
         gymServiceFacade.getTraineeService().createTrainee("Inesa", "Hakobyan", true,
                 LocalDate.now(), "Armenia", "inesa123");
 
@@ -29,7 +33,7 @@ class TrainingServiceTest {
     }
 
     @Test
-    void selectTrainingTest() {
+    public void selectTrainingTest() {
         gymServiceFacade.getTraineeService().createTrainee("Inesa", "Hakobyan", true,
                 LocalDate.now(), "Armenia", "inesa123");
 

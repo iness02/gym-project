@@ -23,20 +23,20 @@ public class MemoryStorage {
         this.trainerRepository = trainerRepository;
     }
 
-    public TraineeDao getTraineeRepository() {
+    public TraineeDao getTraineeDao() {
         return traineeRepository;
     }
 
     @Autowired
-    public void setTraineeRepository(TraineeDao traineeRepository) {
+    public void setTraineeDao(TraineeDao traineeRepository) {
         this.traineeRepository = traineeRepository;
     }
-    public TrainingDao getTrainingRepository() {
+    public TrainingDao getTrainingDao() {
         return trainingRepository;
     }
 
     @Autowired
-    public void setTrainingRepository(TrainingDao trainingRepository) {
+    public void setTrainingDao(TrainingDao trainingRepository) {
         this.trainingRepository = trainingRepository;
     }
     public List<String> getUsernames(){

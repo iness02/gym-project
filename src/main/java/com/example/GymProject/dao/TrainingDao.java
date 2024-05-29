@@ -8,6 +8,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,15 +19,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Repository
 public class TrainingDao {
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
     private final Map<String, Training> trainingMap = new HashMap<>();
     private TraineeDao traineeDao;
     private TrainerDao trainerDao;
-    @Value("${trainingFilePath}")
+   @Value("${trainingFilePath}")
     private String trainingFilePath;
 
     @Autowired
@@ -48,47 +50,29 @@ public class TrainingDao {
     }
 
     public void create(Training training) {
-        try {
-            if (training.getTraineeId() == null || training.getTrainerId() == null) {
-                logger.warning("Trainee/Trainer Not Found");
-                throw new IllegalArgumentException("Trainee/Trainer Not Found");
-            }
-            trainingMap.put(training.getTrainingName(), training);
-            logger.info("Inserted New Training");
-        } catch (Exception e) {
-            logger.warning("Error While Inserting Value");
-            throw new IllegalArgumentException("Wrong Value");
-        }
+        Assert.notNull(training.getTraineeId(),"Trainee not found");
+        Assert.notNull(training.getTrainerId(),"Trainer not found");
+        trainingMap.put(training.getTrainingName(), training);
+        logger.info("Inserted New Training");
+
     }
 
     public Training select(String key) {
         Training training;
-        try {
-            if (trainingMap.containsKey(key)) {
-                logger.info("Training Found");
-                training = trainingMap.get(key);
-            } else {
-                logger.warning("Wrong Key, Training Not Found");
-                throw new IllegalArgumentException("Training Not Found");
-            }
-            return training;
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+        Assert.isTrue(trainingMap.containsKey(key),"Wrong Key, Training Not Found");
+        logger.info("Training Found");
+        training = trainingMap.get(key);
+
+        return training;
+
     }
 
     public void delete(String key) {
-        try {
-            if (trainingMap.containsKey(key)) {
-                trainingMap.remove(key);
-                logger.info("Training Removed Successfully!");
-            } else {
-                logger.warning("Training has not been Removed");
-                throw new IllegalArgumentException("Wrong Key");
-            }
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+
+        Assert.isTrue(trainingMap.containsKey(key),"Wrong Key, Training has not been Removed");
+        trainingMap.remove(key);
+        logger.info("Training Removed Successfully!");
+
     }
 
     @PostConstruct
@@ -121,7 +105,7 @@ public class TrainingDao {
                 trainingMap.put(trainingName, training);
             }
         } catch (Exception e) {
-            logger.warning("File can not be found!");
+            logger.error("File can not be found!");
             throw new FileNotFoundException("Wrong File");
         } finally {
             if (br != null) {

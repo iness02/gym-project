@@ -1,10 +1,16 @@
-package com.example.GymProject.dao;
+package com.example.GymProject.file;
 
-import org.junit.jupiter.api.Test;
+import com.example.GymProject.config.AppConfig;
+import com.example.GymProject.dao.TraineeDao;
+import com.example.GymProject.dao.TrainerDao;
+import com.example.GymProject.dao.TrainingDao;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -12,7 +18,8 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {AppConfig.class})
 public class WrongFileTest {
     @Mock
     private BufferedReader bufferedReader;
@@ -24,21 +31,21 @@ public class WrongFileTest {
     private TrainingDao trainingDao;
 
     @Test
-    void traineeDaoTest() throws IOException {
+    public void traineeDao_init_fileNotFound_throwsException_Test() throws IOException {
         Mockito.when(bufferedReader.readLine()).thenThrow(IOException.class);
 
         assertThrows(FileNotFoundException.class, () -> traineeDao.init());
     }
 
     @Test
-    void trainerDaoTest() throws IOException {
+    public void trainerDao_init_fileNotFound_throwsException_Test() throws IOException {
         Mockito.when(bufferedReader.readLine()).thenThrow(IOException.class);
 
         assertThrows(FileNotFoundException.class, () -> trainerDao.init());
     }
 
     @Test
-    void trainingDaoTest() throws IOException {
+   public void trainingDao_init_fileNotFound_throwsException_Test() throws IOException {
         Mockito.when(bufferedReader.readLine()).thenThrow(IOException.class);
 
         assertThrows(FileNotFoundException.class, () -> trainingDao.init());
