@@ -1,6 +1,5 @@
 package com.example.GymProject.dao;
 
-
 import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.TrainingType;

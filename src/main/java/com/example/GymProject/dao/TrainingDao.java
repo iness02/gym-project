@@ -7,13 +7,12 @@ import com.example.GymProject.model.TrainingType;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +29,11 @@ public class TrainingDao {
     private TrainerDao trainerDao;
    @Value("${trainingFilePath}")
     private String trainingFilePath;
+    private final ResourceLoader resourceLoader;
+
+    public TrainingDao(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 
     @Autowired
     public void setTraineeDao(TraineeDao traineeDao) {
@@ -45,7 +49,7 @@ public class TrainingDao {
         return new ArrayList<>(trainingMap.values());
     }
 
-    public boolean containsKey(String key) {
+    protected boolean containsKey(String key) {
         return trainingMap.containsKey(key);
     }
 
@@ -80,8 +84,8 @@ public class TrainingDao {
         BufferedReader br = null;
         try {
             logger.info("Starting Populating Training Storage");
-            File file = new File(trainingFilePath);
-            br = new BufferedReader(new FileReader(file));
+            Resource resource = resourceLoader.getResource(trainingFilePath);
+            br = new BufferedReader(new InputStreamReader(resource.getInputStream()));
             String line;
             Training training;
 

@@ -1,7 +1,6 @@
 package com.example.GymProject.service;
 
 import com.example.GymProject.dao.MemoryStorage;
-import com.example.GymProject.dao.TraineeDao;
 import com.example.GymProject.dao.TrainerDao;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.TrainingType;

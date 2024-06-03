@@ -3,13 +3,12 @@ package com.example.GymProject.dao;
 import com.example.GymProject.model.Trainee;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +26,11 @@ public class TraineeDao {
 
     public List<Trainee> findAll() {
         return new ArrayList<>(traineeMap.values());
+    }
+    private final ResourceLoader resourceLoader;
+
+    public TraineeDao(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
     }
 
     public void create(Trainee trainee) {
@@ -73,8 +77,8 @@ public class TraineeDao {
         BufferedReader br = null;
         try {
             logger.info("Starting Populating Trainee Storage");
-            File file = new File(traineeFilePath);
-            br = new BufferedReader(new FileReader(file));
+            Resource resource = resourceLoader.getResource(traineeFilePath);
+            br = new BufferedReader(new InputStreamReader(resource.getInputStream()));
             String line;
             Trainee trainee;
 

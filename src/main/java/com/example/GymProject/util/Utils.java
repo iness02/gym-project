@@ -2,13 +2,12 @@ package com.example.GymProject.util;
 
 
 import com.example.GymProject.model.User;
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.PropertySource;
 
 import java.util.List;
 import java.util.Random;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 @PropertySource("classpath:application.properties")
 public class Utils {
     private final static String ALLOWED_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";

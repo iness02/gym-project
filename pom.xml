@@ -4,8 +4,8 @@
 	<artifactId>spring-core</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Spring Core</name>
-	<description>Spring Core Description</description>
-
+	<description>A Spring Core-based CRM system for managing gym operations,
+		including trainee and trainer profiles, and training sessions.</description>
 
 	<properties>
 		<spring.version>6.1.8</spring.version>
@@ -64,11 +64,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId>tomcat-embed-core</artifactId>
-			<version>10.0.17</version> <!-- Use the version compatible with your project -->
-		</dependency>
-		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 			<version>6.1.6</version>
@@ -86,5 +81,17 @@
 		</dependency>
 
 	</dependencies>
-
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
+				<configuration>
+					<mainClass>com.example.MainApp</mainClass>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
+
