@@ -26,6 +26,8 @@ public class TrainerDao {
     @Value("${trainerFilePath}")
     private String trainerFilePath;
     private final ResourceLoader resourceLoader;
+    private BufferedReader br;
+
 
     public TrainerDao(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
@@ -35,36 +37,38 @@ public class TrainerDao {
         return new ArrayList<>(trainerMap.values());
     }
 
+    public void setBufferedReader(BufferedReader br) {
+        this.br = br;
+    }
+
     public void create(Trainer trainer) {
+        Assert.notNull(trainer, "Trainer cannot be null");
         Assert.notNull(trainer.getUserId(), "Trainer userId is null");
         trainerMap.put(trainer.getUserId(), trainer);
-        logger.info("Inserted New Trainer");
-
+        logger.info("Inserted new trainer");
     }
 
-    public Trainer select(String key) {
+    public Trainer select(String userId) {
         Trainer trainer;
-        Assert.isTrue(trainerMap.containsKey(key), "Wrong Key, Trainer not Found");
+        Assert.isTrue(trainerMap.containsKey(userId), "Wrong key, Trainer not found");
         logger.info("Trainer found");
-        trainer = trainerMap.get(key);
+        trainer = trainerMap.get(userId);
         return trainer;
-
     }
 
-    public void update(String key, Trainer trainer) {
-        Assert.notNull(key,"Trainer userId is null");
-        Assert.notNull(trainer,"The trainer parameter cannot be null");
-        trainerMap.put(key, trainer);
-        logger.info("Trainer Updated");
-
+    public void update(String userId, Trainer trainer) {
+        Assert.notNull(trainer, "Trainer cannot be null");
+        Assert.notNull(userId, "Trainer userId is null");
+        Assert.notNull(trainer, "The trainer parameter cannot be null");
+        trainerMap.put(userId, trainer);
+        logger.info("Trainer updated");
     }
 
-    public void delete(String key){
-        Assert.notNull(key,"UserId cannot be null");
-        Assert.isTrue(trainerMap.containsKey(key), "Wrong Key");
-        trainerMap.remove(key);
-        logger.info("Trainer Removed Successfully!");
-
+    public void delete(String userId) {
+        Assert.notNull(userId, "UserId cannot be null");
+        Assert.isTrue(trainerMap.containsKey(userId), "Wrong key");
+        trainerMap.remove(userId);
+        logger.info("Trainer removed successfully!");
     }
 
     public boolean containsKey(String key) {
@@ -73,9 +77,8 @@ public class TrainerDao {
 
     @PostConstruct
     public void init() throws Exception {
-        BufferedReader br = null;
         try {
-            logger.info("Starting Populating Trainer Storage");
+            logger.info("Starting populating trainer storage");
             Resource resource = resourceLoader.getResource(trainerFilePath);
             br = new BufferedReader(new InputStreamReader(resource.getInputStream()));
             String line;
@@ -99,13 +102,13 @@ public class TrainerDao {
             }
         } catch (Exception e) {
             logger.error("File cannot be found!");
-            throw new FileNotFoundException("Wrong File");
+            throw new FileNotFoundException("Wrong file");
         } finally {
             if (br != null) {
                 logger.info("Closing Buffered Reader");
                 br.close();
             }
         }
-        logger.info("Populating Trainer Storage Ended Successfully!");
+        logger.info("Populating trainer storage ended successfully!");
     }
 }

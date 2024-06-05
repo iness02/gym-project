@@ -9,7 +9,8 @@ public class GymProjectApplication {
 
 	public static void main(String[] args) {
 
-		new AnnotationConfigApplicationContext(AppConfig.class);
+		AnnotationConfigApplicationContext context= new AnnotationConfigApplicationContext(AppConfig.class);
+		System.out.println(context.getBean("trainerDao"));
 	}
 
 }

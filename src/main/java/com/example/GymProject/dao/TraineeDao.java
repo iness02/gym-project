@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,49 +24,51 @@ public class TraineeDao {
     @Value("${traineeFilePath}")
     private String traineeFilePath;
     private final Map<String, Trainee> traineeMap = new HashMap<>();
+    private BufferedReader br;
 
     public List<Trainee> findAll() {
         return new ArrayList<>(traineeMap.values());
     }
+
     private final ResourceLoader resourceLoader;
 
     public TraineeDao(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 
-    public void create(Trainee trainee) {
+    public void setBufferedReader(BufferedReader br) {
+        this.br = br;
+    }
 
+    public void create(Trainee trainee) {
+        Assert.notNull(trainee, "Trainee cannot be null");
         Assert.notNull(trainee.getUserId(), "UserId cannot be null");
         traineeMap.put(trainee.getUserId(), trainee);
-        logger.info("Inserted New Trainee");
+        logger.info("Inserted new trainee");
 
     }
 
-    public Trainee select(String key) {
-
+    public Trainee select(String userId) {
         Trainee trainee;
-        Assert.isTrue(traineeMap.containsKey(key), "Trainee Not Found");
+        Assert.isTrue(traineeMap.containsKey(userId), "Trainee not found");
         logger.info("Trainee found");
-        trainee = traineeMap.get(key);
-
+        trainee = traineeMap.get(userId);
         return trainee;
-
     }
 
-    public void update(String key, Trainee trainee) {
-        Assert.notNull(key,"UserId cannot be null");
-        Assert.notNull(trainee,"The trainee parameter cannot be null");
-        traineeMap.put(key, trainee);
-        logger.info("Trainee Updated");
-
+    public void update(String userId, Trainee trainee) {
+        Assert.notNull(trainee, "Trainee cannot be null");
+        Assert.notNull(userId, "UserId cannot be null");
+        Assert.notNull(trainee, "The trainee parameter cannot be null");
+        traineeMap.put(userId, trainee);
+        logger.info("Trainee updated");
     }
 
-    public void delete(String key) {
-        Assert.notNull(key,"UserId cannot be null");
-        Assert.isTrue(traineeMap.containsKey(key), "Wrong Key");
-        traineeMap.remove(key);
-        logger.info("Trainee Removed Successfully!");
-
+    public void delete(String userId) {
+        Assert.notNull(userId, "UserId cannot be null");
+        Assert.isTrue(traineeMap.containsKey(userId), "Wrong key");
+        traineeMap.remove(userId);
+        logger.info("Trainee removed successfully!");
     }
 
     public boolean containsKey(String key) {
@@ -74,9 +77,8 @@ public class TraineeDao {
 
     @PostConstruct
     public void init() throws Exception {
-        BufferedReader br = null;
         try {
-            logger.info("Starting Populating Trainee Storage");
+            logger.info("Starting populating trainee storage");
             Resource resource = resourceLoader.getResource(traineeFilePath);
             br = new BufferedReader(new InputStreamReader(resource.getInputStream()));
             String line;
@@ -102,14 +104,14 @@ public class TraineeDao {
             }
         } catch (Exception e) {
             logger.error("File can not be found!");
-            throw new FileNotFoundException("Wrong File");
+            throw new FileNotFoundException("Wrong file");
         } finally {
             if (br != null) {
                 logger.info("Closing Buffered Reader");
                 br.close();
             }
         }
-        logger.info("Populating Trainee Storage Ended Successfully!");
+        logger.info("Populating trainee storage ended successfully!");
     }
 }
 

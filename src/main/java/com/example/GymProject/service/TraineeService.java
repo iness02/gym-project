@@ -35,7 +35,7 @@ public class TraineeService {
     public void updateTrainee(String key, Trainee newTrainee) {
         Trainee trainee = new Trainee();
         if (!memoryStorage.getTraineeDao().containsKey(key)) {
-            throw new NoSuchElementException("Wrong Key, Update Failed!");
+            throw new NoSuchElementException("Wrong key, update failed!");
         }
         boolean contains = usernameExists(memoryStorage.getUsernames(), newTrainee);
 

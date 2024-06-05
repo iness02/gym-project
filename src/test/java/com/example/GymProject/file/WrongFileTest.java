@@ -4,11 +4,13 @@ import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.dao.TraineeDao;
 import com.example.GymProject.dao.TrainerDao;
 import com.example.GymProject.dao.TrainingDao;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -30,10 +32,18 @@ public class WrongFileTest {
     @InjectMocks
     private TrainingDao trainingDao;
 
+    @Before
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        traineeDao.setBufferedReader(bufferedReader);
+        trainerDao.setBufferedReader(bufferedReader);
+        trainingDao.setBufferedReader(bufferedReader);
+    }
+
     @Test
     public void traineeDao_init_fileNotFound_throwsException_Test() throws IOException {
-        Mockito.when(bufferedReader.readLine()).thenThrow(IOException.class);
 
+        Mockito.when(bufferedReader.readLine()).thenThrow(IOException.class);
         assertThrows(FileNotFoundException.class, () -> traineeDao.init());
     }
 
@@ -45,7 +55,7 @@ public class WrongFileTest {
     }
 
     @Test
-   public void trainingDao_init_fileNotFound_throwsException_Test() throws IOException {
+    public void trainingDao_init_fileNotFound_throwsException_Test() throws IOException {
         Mockito.when(bufferedReader.readLine()).thenThrow(IOException.class);
 
         assertThrows(FileNotFoundException.class, () -> trainingDao.init());

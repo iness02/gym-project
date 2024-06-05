@@ -18,8 +18,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TraineeServiceTest {
     @Autowired
     private TraineeService traineeService;
+
     @Test
-    public void selectTraineeTest(){
+    public void selectTraineeTest() {
         traineeService.createTrainee("Inesa", "Hakobyan", true,
                 LocalDate.now(), "Armenia", "inesa123");
 
@@ -27,17 +28,18 @@ public class TraineeServiceTest {
     }
 
     @Test
-    public void createTraineeWithSimilarUsernameTest(){
-        traineeService.createTrainee("Inesa", "Hakobyan", true,
-                LocalDate.now(), "Armenia", "inesa123");
-        traineeService.createTrainee("Inesa", "Hakobyan", true,
-                LocalDate.now(), "Armenia", "inesa1234");
+    public void createTraineeWithSimilarUsernameTest() {
+        traineeService.createTrainee("Karen", "Hakobyan", true,
+                LocalDate.now(), "Armenia", "karen123");
+        traineeService.createTrainee("Karen", "Hakobyan", true,
+                LocalDate.now(), "Armenia", "karen1234");
 
-        assertEquals("Inesa.Hakobyan0",
-                traineeService.selectTrainee("inesa1234").getUsername());
+        assertEquals("Karen.Hakobyan0",
+                traineeService.selectTrainee("karen1234").getUsername());
     }
+
     @Test
-    public void createTraineeWithDifferentUsernameTest(){
+    public void createTraineeWithDifferentUsernameTest() {
         traineeService.createTrainee("Nune", "Hakobyan", true,
                 LocalDate.now(), "Armenia", "nune123");
         traineeService.createTrainee("Inesa", "Hakobyan", true,
@@ -46,8 +48,9 @@ public class TraineeServiceTest {
         assertNotEquals(traineeService.selectTrainee("nune123").getUsername(),
                 traineeService.selectTrainee("inesa1234").getUsername());
     }
+
     @Test
-    public void updateTraineeTest(){
+    public void updateTraineeTest() {
         traineeService.createTrainee("Inesa", "Hakobyan", true,
                 LocalDate.now(), "Armenia", "inesa123");
 
@@ -58,12 +61,14 @@ public class TraineeServiceTest {
 
         assertEquals("Hayk", traineeService.selectTrainee("inesa123").getFirstName());
     }
+
     @Test
-    public  void updateNonExistedTraineeFailTest(){
+    public void updateNonExistedTraineeFailTest() {
         assertThrows(NoSuchElementException.class, () -> traineeService.updateTrainee("test", new Trainee()));
     }
+
     @Test
-    public void deleteTraineeTest(){
+    public void deleteTraineeTest() {
         traineeService.createTrainee("Inesa", "Hakobyan", true,
                 LocalDate.now(), "Armenia", "inesa123");
 

@@ -24,7 +24,7 @@ public class TrainerService {
         Trainer trainer = new Trainer(firstName, lastName, isActive, specialization, userId);
         boolean exists = usernameExists(memoryStorage.getUsernames(), trainer);
         trainer.setUsername(generateUsername(trainer.getFirstName(), trainer.getLastName(), exists));
-       trainerDao.create(trainer);
+        trainerDao.create(trainer);
     }
 
     public Trainer selectTrainer(String key) {
@@ -34,7 +34,7 @@ public class TrainerService {
     public void updateTrainer(String key, Trainer newTrainer) {
         Trainer trainer = new Trainer();
         if (!memoryStorage.getTrainerRepository().containsKey(key)) {
-            throw new NoSuchElementException("Wrong Key, Update Failed!");
+            throw new NoSuchElementException("Wrong key, update failed!");
         }
         boolean contains = usernameExists(memoryStorage.getUsernames(), newTrainer);
 

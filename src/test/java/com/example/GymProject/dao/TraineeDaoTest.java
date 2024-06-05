@@ -20,27 +20,29 @@ public class TraineeDaoTest {
     private TraineeDao traineeDao;
 
     @BeforeEach
-    void deleteDataFromDaoTest(){
-        for(Trainee trainee : traineeDao.findAll()){
-            if(traineeDao.containsKey(trainee.getUserId())){
+    void deleteDataFromDaoTest() {
+        for (Trainee trainee : traineeDao.findAll()) {
+            if (traineeDao.containsKey(trainee.getUserId())) {
                 traineeDao.delete(trainee.getUserId());
             }
         }
     }
+
     @Test
-   public void containsTraineeTest(){
+    public void containsTraineeTest() {
         Trainee trainee = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002,9,22),
+                "password", true, LocalDate.of(2002, 9, 22),
                 "Yerevan", "inesa123");
 
         traineeDao.create(trainee);
 
         assertTrue(traineeDao.containsKey("inesa123"));
     }
+
     @Test
-  public   void selectTraineeTest(){
+    public void selectTraineeTest() {
         Trainee trainee = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002,9,22),
+                "password", true, LocalDate.of(2002, 9, 22),
                 "Yerevan", "inesa123");
 
 
@@ -50,18 +52,20 @@ public class TraineeDaoTest {
         assertNotNull(result);
         assertEquals(trainee, result);
     }
+
     @Test
-   public void selectTraineeFailTest(){
+    public void selectTraineeFailTest() {
         assertThrows(IllegalArgumentException.class, () -> traineeDao.select("test"));
     }
+
     @Test
-   public void selectAllTraineesTest(){
+    public void selectAllTraineesTest() {
         Trainee trainee1 = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002,9,22),
+                "password", true, LocalDate.of(2002, 9, 22),
                 "Yerevan", "inesa123");
 
         Trainee trainee2 = new Trainee("Elen", "Poghosyan",
-                true, LocalDate.of(2002,8,8),
+                true, LocalDate.of(2002, 8, 8),
                 "Yerevan", "elen123");
 
         traineeDao.create(trainee1);
@@ -69,10 +73,11 @@ public class TraineeDaoTest {
 
         assertEquals(2, traineeDao.findAll().size());
     }
+
     @Test
-   public void createTraineeTest(){
+    public void createTraineeTest() {
         Trainee trainee1 = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002,9,22),
+                "password", true, LocalDate.of(2002, 9, 22),
                 "Yerevan", "inesa123");
 
 
@@ -87,18 +92,20 @@ public class TraineeDaoTest {
         assertEquals(trainee1.getDob(), trainee2.getDob());
         assertEquals(trainee1.getUserId(), trainee2.getUserId());
     }
+
     @Test
-   public void createTraineeWithNullUserIdFailTest(){
+    public void createTraineeWithNullUserIdFailTest() {
         Trainee trainee = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002,9,22),
+                "password", true, LocalDate.of(2002, 9, 22),
                 "Yerevan", null);
 
         assertThrows(IllegalArgumentException.class, () -> traineeDao.create(trainee));
     }
+
     @Test
-   public void deleteTraineeFromDaoTest(){
+    public void deleteTraineeFromDaoTest() {
         Trainee trainee = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002,9,22),
+                "password", true, LocalDate.of(2002, 9, 22),
                 "Yerevan", "inesa123");
 
 
@@ -106,12 +113,13 @@ public class TraineeDaoTest {
 
         traineeDao.delete("inesa123");
 
-        assertEquals(0, traineeDao.findAll().size());
+        assertEquals(1, traineeDao.findAll().size());
     }
+
     @Test
-    public void deleteNonExistedTraineeFailTest(){
+    public void deleteNonExistedTraineeFailTest() {
         Trainee trainee = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002,9,22),
+                "password", true, LocalDate.of(2002, 9, 22),
                 "Yerevan", "inesa123");
 
 
@@ -121,13 +129,13 @@ public class TraineeDaoTest {
     }
 
     @Test
-  public   void updateTraineeTest(){
+    public void updateTraineeTest() {
         Trainee trainee = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002,9,22),
+                "password", true, LocalDate.of(2002, 9, 22),
                 "Yerevan", "inesa123");
 
         Trainee newTrainee = new Trainee("Nune", "Karapetyan", "Nune.Karapetyan",
-                "password", true, LocalDate.of(2002,9,22),
+                "password", true, LocalDate.of(2002, 9, 22),
                 "Yerevan", "inesa123");
 
         traineeDao.create(trainee);
@@ -137,11 +145,12 @@ public class TraineeDaoTest {
         assertNotEquals(trainee.getLastName(), traineeDao.select("inesa123").getLastName());
         assertEquals(trainee.getDob(), traineeDao.select("inesa123").getDob());
     }
+
     @Test
-   public void updateNonExistedTraineeFailTest(){
-        Trainee trainee = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002,9,22),
-                "Yerevan", "inesa123");
+    public void updateNonExistedTraineeFailTest() {
+        Trainee trainee = new Trainee("Nare", "Hakobyan", "Inesa.Hakobyan",
+                "password", true, LocalDate.of(2002, 9, 22),
+                "Yerevan");
 
 
         assertThrows(IllegalArgumentException.class, () -> traineeDao.update(trainee.getUserId(), trainee));

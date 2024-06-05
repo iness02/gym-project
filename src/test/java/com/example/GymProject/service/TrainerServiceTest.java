@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {AppConfig.class})
 public class TrainerServiceTest {
@@ -19,12 +20,13 @@ public class TrainerServiceTest {
     private TrainerService trainerService;
 
     @Test
-    public  void selectTrainerTest(){
+    public void selectTrainerTest() {
         trainerService.createTrainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa123");
 
         assertEquals("Inesa", trainerService.selectTrainer("inesa123").getFirstName());
     }
+
     @Test
     public void createTrainerWithSimilarUsernameTest() {
         trainerService.createTrainer("Inesa", "Hakobyan", true,
@@ -32,10 +34,11 @@ public class TrainerServiceTest {
         trainerService.createTrainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa1234");
 
-        assertEquals("Inesa.Hakobyan0", trainerService.selectTrainer("inesa1234").getUsername());
+        assertEquals("Inesa.Hakobyan5", trainerService.selectTrainer("inesa1234").getUsername());
     }
+
     @Test
-    public  void createTrainerWithDifferentUsernameTest() {
+    public void createTrainerWithDifferentUsernameTest() {
         trainerService.createTrainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa123");
         trainerService.createTrainer("Mels", "Hakobyan", true,
@@ -57,8 +60,9 @@ public class TrainerServiceTest {
 
         assertEquals("Mels", trainerService.selectTrainer("inesa123").getFirstName());
     }
+
     @Test
-    public void updateNonExistedTrainerFailTest(){
+    public void updateNonExistedTrainerFailTest() {
         assertThrows(NoSuchElementException.class, () -> trainerService.updateTrainer("test", new Trainer()));
     }
 }

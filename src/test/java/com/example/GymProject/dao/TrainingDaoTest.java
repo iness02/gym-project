@@ -13,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.time.LocalDate;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -22,16 +23,16 @@ public class TrainingDaoTest {
     private TrainingDao trainingDao;
 
     @BeforeEach
-    void deleteDataFromDao(){
-        for(Training training : trainingDao.findAll()){
-            if(trainingDao.containsKey(training.getTrainingName())){
+    void deleteDataFromDao() {
+        for (Training training : trainingDao.findAll()) {
+            if (trainingDao.containsKey(training.getTrainingName())) {
                 trainingDao.delete(training.getTrainingName());
             }
         }
     }
 
     @Test
-    public void containsTrainingTest(){
+    public void containsTrainingTest() {
         Trainee trainee = new Trainee();
         trainee.setUserId("trainee");
 
@@ -44,8 +45,9 @@ public class TrainingDaoTest {
 
         assertTrue(trainingDao.containsKey("myFirstTraining"));
     }
+
     @Test
-   public void createTrainingTest(){
+    public void createTrainingTest() {
         Trainee trainee = new Trainee();
         trainee.setUserId("trainee");
 
@@ -65,7 +67,7 @@ public class TrainingDaoTest {
     }
 
     @Test
-   public void selectTrainingTest(){
+    public void selectTrainingTest() {
         Trainee trainee = new Trainee();
         trainee.setUserId("trainee");
 
@@ -81,12 +83,14 @@ public class TrainingDaoTest {
         assertNotNull(expected);
         assertEquals(expected, training);
     }
+
     @Test
-   public void selectNonExistedTrainingFailTest(){
+    public void selectNonExistedTrainingFailTest() {
         assertThrows(IllegalArgumentException.class, () -> trainingDao.select("test"));
     }
+
     @Test
-   public void selectAllTraining(){
+    public void selectAllTraining() {
         Trainee trainee = new Trainee();
         trainee.setUserId("trainee");
 
@@ -102,8 +106,9 @@ public class TrainingDaoTest {
 
         assertEquals(2, trainingDao.findAll().size());
     }
+
     @Test
-   public void deleteNonExistedTrainingFailTest(){
+    public void deleteNonExistedTrainingFailTest() {
         assertThrows(IllegalArgumentException.class, () -> trainingDao.delete("test"));
     }
 }
