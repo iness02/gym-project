@@ -1,61 +1,45 @@
 package com.example.GymProject.model;
 
-import io.micrometer.common.lang.Nullable;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.time.LocalDate;
+import java.util.Date;
 
-public class Training {
-    private String traineeId;
-    private String trainerId;
+@Entity
+@Table(name = "training")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class Training{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "trainee_id", nullable = false)
+    private Trainee trainee;
+
+    @ManyToOne
+    @JoinColumn(name = "trainer_id", nullable = false)
+    private Trainer trainer;
+
+    @Column(name = "training_name", nullable = false)
     private String trainingName;
+
+    @ManyToOne
+    @JoinColumn(name = "training_type_id", nullable = false)
     private TrainingType trainingType;
-    private LocalDate trainingDate;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "training_date", nullable = false)
+    private Date trainingDate;
+
+    @Column(name = "training_duration", nullable = false)
     private Integer trainingDuration;
-
-    public Training(Trainee trainee, Trainer trainer, String trainingName,
-                    @Nullable TrainingType trainingType, LocalDate trainingDate, Integer trainingDuration) {
-        this.traineeId = trainee.getUserId();
-        this.trainerId = trainer.getUserId();
-        this.trainingName = trainingName;
-        this.trainingType = trainingType;
-        this.trainingDate = trainingDate;
-        this.trainingDuration = trainingDuration;
-    }
-
-    public String getTraineeId() {
-        return traineeId;
-    }
-
-    public String getTrainerId() {
-        return trainerId;
-    }
-
-    public String getTrainingName() {
-        return trainingName;
-    }
-
-    public TrainingType getTrainingType() {
-        return trainingType;
-    }
-
-    public void setTrainingType(TrainingType trainingType) {
-        this.trainingType = trainingType;
-    }
-
-    public Integer getTrainingDuration() {
-        return trainingDuration;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Training{");
-        sb.append("traineeId='").append(traineeId).append('\'');
-        sb.append(", trainerId='").append(trainerId).append('\'');
-        sb.append(", trainingName='").append(trainingName).append('\'');
-        sb.append(", trainingType=").append(trainingType);
-        sb.append(", trainingDate=").append(trainingDate);
-        sb.append(", trainingDuration=").append(trainingDuration);
-        sb.append('}');
-        return sb.toString();
-    }
 }

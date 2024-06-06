@@ -1,7 +1,8 @@
+/*
 package com.example.GymProject.dao;
 
 import com.example.GymProject.model.Trainer;
-import com.example.GymProject.model.TrainingType;
+import com.example.GymProject.model.Trainings;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +93,7 @@ public class TrainerDao {
                 String username = trainerInfo[2];
                 String password = trainerInfo[3];
                 Boolean isActive = Boolean.parseBoolean(trainerInfo[4]);
-                TrainingType specialization = TrainingType.valueOf(trainerInfo[5].toUpperCase());
+                Trainings specialization = Trainings.valueOf(trainerInfo[5].toUpperCase());
                 String userId = trainerInfo[6];
 
                 trainer = new Trainer(firstName, lastName, username, password,
@@ -112,3 +113,4 @@ public class TrainerDao {
         logger.info("Populating trainer storage ended successfully!");
     }
 }
+*/

@@ -1,5 +1,24 @@
 package com.example.GymProject.model;
 
-public enum TrainingType {
-    FITNESS, CARDIO, CYCLE, LIFTING
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "training_type")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class TrainingType{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "training_type_name", nullable = false)
+    private Trainings trainingTypeName;
 }

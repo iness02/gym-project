@@ -1,3 +1,4 @@
+/*
 package com.example.GymProject.dao;
 
 import com.example.GymProject.model.Trainee;
@@ -115,3 +116,4 @@ public class TraineeDao {
     }
 }
 
+*/

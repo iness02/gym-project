@@ -1,9 +1,10 @@
+/*
 package com.example.GymProject.dao;
 
 import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.Training;
-import com.example.GymProject.model.TrainingType;
+import com.example.GymProject.model.Trainings;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -103,7 +104,7 @@ public class TrainingDao {
                 Trainer trainer = trainerDao.select(trainerId);
 
                 String trainingName = trainingInfo[2];
-                TrainingType trainingType = TrainingType.valueOf(trainingInfo[3].toUpperCase());
+                Trainings trainingType = Trainings.valueOf(trainingInfo[3].toUpperCase());
                 LocalDate trainingDate = LocalDate.parse(trainingInfo[4]);
                 Integer trainingDuration = Integer.parseInt(trainingInfo[5]);
 
@@ -123,3 +124,4 @@ public class TrainingDao {
         logger.info("Populating training storage ended successfully!");
     }
 }
+*/

@@ -1,3 +1,4 @@
+/*
 package com.example.GymProject.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,3 +49,4 @@ public class MemoryStorage {
     }
 
 }
+*/

@@ -1,89 +1,40 @@
 package com.example.GymProject.model;
 
-import java.time.LocalDate;
-import java.util.Objects;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
-public class Trainee extends User {
-    private LocalDate dateOfBirth;
+@Entity
+@Table(name = "trainee")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class Trainee{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "date_of_birth")
+    private Date dateOfBirth;
+
+    @Column(name = "address")
     private String address;
-    private String userId;
 
-    public Trainee() {
-    }
-    public Trainee(String firstName, String lastName, Boolean isActive,
-                   LocalDate dob, String address){
-        super(firstName, lastName, isActive);
-        this.dateOfBirth = dob;
-        this.address = address;
-    }
-    public Trainee(String firstName, String lastName, Boolean isActive,
-                   LocalDate dob, String address, String userId){
-        super(firstName, lastName, isActive);
-        this.dateOfBirth = dob;
-        this.address = address;
-        this.userId = userId;
-    }
-    public Trainee(String firstName, String lastName, String username, String password,
-                   Boolean isActive, LocalDate dob, String address) {
-        super(firstName, lastName, username, password, isActive);
-        this.dateOfBirth = dob;
-        this.address = address;
-    }
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    public Trainee(String firstName, String lastName, String username, String password,
-                   Boolean isActive, LocalDate dob, String address, String userId) {
-        super(firstName, lastName, username, password, isActive);
-        this.dateOfBirth = dob;
-        this.address = address;
-        this.userId = userId;
-    }
-
-    public LocalDate getDob() {
-        return dateOfBirth;
-    }
-
-    public void setDob(LocalDate dob) {
-        this.dateOfBirth = dob;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Trainee trainee = (Trainee) o;
-        return Objects.equals(dateOfBirth, trainee.dateOfBirth) && Objects.equals(address, trainee.address) && Objects.equals(userId, trainee.userId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), dateOfBirth, address, userId);
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Trainee{");
-        sb.append("dateOfBirth=").append(dateOfBirth);
-        sb.append(", address='").append(address).append('\'');
-        sb.append(", userId='").append(userId).append('\'');
-        sb.append('}');
-        return sb.toString();
-    }
+    @ManyToMany
+    @JoinTable(name = "trainee",
+            joinColumns = @JoinColumn(name = "trainee_id"),
+            inverseJoinColumns = @JoinColumn(name = "training_id"))
+    private Set<Trainer> trainers = new HashSet<>();
 }
