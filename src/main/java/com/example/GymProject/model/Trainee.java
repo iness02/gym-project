@@ -14,8 +14,6 @@ import java.util.Set;
 @Table(name = "trainee")
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 public class Trainee{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,4 +35,44 @@ public class Trainee{
             joinColumns = @JoinColumn(name = "trainee_id"),
             inverseJoinColumns = @JoinColumn(name = "training_id"))
     private Set<Trainer> trainers = new HashSet<>();
+
+    public Long getId() {
+        return id;
+    }
+
+    public Date getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public Set<Trainer> getTrainers() {
+        return trainers;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setDateOfBirth(Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setTrainers(Set<Trainer> trainers) {
+        this.trainers = trainers;
+    }
 }

@@ -95,7 +95,7 @@ public class TraineeService {
         Trainee trainee = traineeDAO.getTraineeByUsername(username);
         if (trainee != null) {
             logger.info("Activation/Deactivation was successfully performed for trainee {}", username);
-            trainee.getUser().setIsActive(isActive);
+            trainee.getUser().setActive(isActive);
             userService.updateUser(EntityMapper.INSTANCE.userToUserDTO(trainee.getUser()));
         }
     }

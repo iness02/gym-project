@@ -10,8 +10,6 @@ import lombok.Setter;
 @Table(name = "training_type")
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 public class TrainingType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,4 +18,20 @@ public class TrainingType {
     @Enumerated(EnumType.STRING)
     @Column(name = "training_type_name", nullable = false)
     private Trainings trainingTypeName;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Trainings getTrainingTypeName() {
+        return trainingTypeName;
+    }
+
+    public void setTrainingTypeName(Trainings trainingTypeName) {
+        this.trainingTypeName = trainingTypeName;
+    }
 }

@@ -10,8 +10,6 @@ import lombok.Setter;
 @Table(name = "trainer")
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 public class Trainer{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,4 +21,27 @@ public class Trainer{
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    public User getUser() {
+        return user;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getSpecialization() {
+        return specialization;
+    }
+
+    public void setSpecialization(String specialization) {
+        this.specialization = specialization;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

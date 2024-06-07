@@ -5,8 +5,8 @@ import com.example.GymProject.dao.UserDao;
 import com.example.GymProject.dto.UserDTO;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.User;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -15,26 +15,27 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {AppConfig.class})
 public class UserServiceTest {
+
     @Mock
     private UserDao userDAO;
 
     @InjectMocks
     private UserService userService;
 
-    @BeforeEach
-    void setUp() {
+    @Before
+    public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-   public void testMatchUsernameAndPassword() {
+    public void testMatchUsernameAndPassword() {
         String username = "testUser";
         String password = "testPass";
         User user = new User();
@@ -68,7 +69,7 @@ public class UserServiceTest {
     }
 
     @Test
-   public void testUpdateUser() {
+    public void testUpdateUser() {
         UserDTO userDTO = new UserDTO();
         userDTO.setUsername("testUser");
         User user = new User();

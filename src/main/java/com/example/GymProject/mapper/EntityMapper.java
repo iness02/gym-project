@@ -21,10 +21,6 @@ public interface EntityMapper {
 
     Training trainingDTOToTraining(TrainingDTO trainingDTO);
 
-    TrainingTypeDTO trainingTypeToTrainingTypeDTO(TrainingType trainingType);
-
-    TrainingType trainingTypeDTOToTrainingType(TrainingTypeDTO trainingTypeDTO);
-
     UserDTO userToUserDTO(User user);
 
     User userDTOToUser(UserDTO userDTO);
