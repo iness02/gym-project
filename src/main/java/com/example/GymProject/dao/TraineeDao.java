@@ -1,119 +1,127 @@
-/*
 package com.example.GymProject.dao;
 
 import com.example.GymProject.model.Trainee;
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.stereotype.Repository;
-import org.springframework.util.Assert;
-
-import java.io.*;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.example.GymProject.model.Training;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import java.util.Date;
+import java.util.List;
 
 @Repository
 public class TraineeDao {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
-    @Value("${traineeFilePath}")
-    private String traineeFilePath;
-    private final Map<String, Trainee> traineeMap = new HashMap<>();
-    private BufferedReader br;
+    @Autowired
+    private SessionFactory sessionFactory;
 
-    public List<Trainee> findAll() {
-        return new ArrayList<>(traineeMap.values());
+    public Trainee createTrainee(Trainee trainee) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            logger.info("Creating trainee with username: {}", trainee.getUser().getUsername());
+            session.persist(trainee);
+            transaction.commit();
+            logger.info("Successfully created trainee with username: {}", trainee.getUser().getUsername());
+            return trainee;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+                logger.warn("Transaction rolled back while creating trainee with username: {}", trainee.getUser().getUsername());
+            }
+            logger.error("Error occurred while creating trainee with username: {}", trainee.getUser().getUsername(), e);
+            throw e;
+        }
     }
 
-    private final ResourceLoader resourceLoader;
-
-    public TraineeDao(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
+    public Trainee getTraineeByUsername(String username) {
+        try (Session session = sessionFactory.openSession()) {
+            logger.info("Fetching trainee with username: {}", username);
+            Trainee trainee = session.createQuery("FROM Trainee WHERE user.username = :username", Trainee.class)
+                    .setParameter("username", username)
+                    .uniqueResult();
+            if (trainee != null) {
+                logger.info("Successfully fetched trainee with username: {}", username);
+            } else {
+                logger.warn("No trainee found with username: {}", username);
+            }
+            return trainee;
+        } catch (Exception e) {
+            logger.error("Error occurred while fetching trainee with username: {}", username, e);
+            throw e;
+        }
     }
 
-    public void setBufferedReader(BufferedReader br) {
-        this.br = br;
+
+    public Trainee updateTrainee(Trainee trainee) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            logger.info("Updating trainee with username: {}", trainee.getUser().getUsername());
+            session.merge(trainee);
+            transaction.commit();
+            logger.info("Successfully updated trainee with username: {}", trainee.getUser().getUsername());
+            return trainee;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+                logger.warn("Transaction rolled back while updating trainee with username: {}", trainee.getUser().getUsername());
+            }
+            logger.error("Error occurred while updating trainee with username: {}", trainee.getUser().getUsername(), e);
+            throw e;
+        }
     }
 
-    public void create(Trainee trainee) {
-        Assert.notNull(trainee, "Trainee cannot be null");
-        Assert.notNull(trainee.getUserId(), "UserId cannot be null");
-        traineeMap.put(trainee.getUserId(), trainee);
-        logger.info("Inserted new trainee");
+    public void deleteTraineeByUsername(String username) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            logger.info("Deleting trainee and their trainings with username: {}", username);
 
-    }
+            Trainee trainee = getTraineeByUsername(username);
+            if (trainee != null) {
+                List<Training> trainings = session.createQuery("FROM Training WHERE trainee.user.username = :username", Training.class)
+                        .setParameter("username", username)
+                        .list();
 
-    public Trainee select(String userId) {
-        Trainee trainee;
-        Assert.isTrue(traineeMap.containsKey(userId), "Trainee not found");
-        logger.info("Trainee found");
-        trainee = traineeMap.get(userId);
-        return trainee;
-    }
+                for (Training training : trainings) {
+                    session.remove(training);
+                }
 
-    public void update(String userId, Trainee trainee) {
-        Assert.notNull(trainee, "Trainee cannot be null");
-        Assert.notNull(userId, "UserId cannot be null");
-        Assert.notNull(trainee, "The trainee parameter cannot be null");
-        traineeMap.put(userId, trainee);
-        logger.info("Trainee updated");
-    }
-
-    public void delete(String userId) {
-        Assert.notNull(userId, "UserId cannot be null");
-        Assert.isTrue(traineeMap.containsKey(userId), "Wrong key");
-        traineeMap.remove(userId);
-        logger.info("Trainee removed successfully!");
-    }
-
-    public boolean containsKey(String key) {
-        return traineeMap.containsKey(key);
-    }
-
-    @PostConstruct
-    public void init() throws Exception {
-        try {
-            logger.info("Starting populating trainee storage");
-            Resource resource = resourceLoader.getResource(traineeFilePath);
-            br = new BufferedReader(new InputStreamReader(resource.getInputStream()));
-            String line;
-            Trainee trainee;
-
-            while ((line = br.readLine()) != null) {
-
-                String[] traineeInfo = line.split(",");
-
-                String firstName = traineeInfo[0];
-                String lastName = traineeInfo[1];
-                String username = traineeInfo[2];
-                String password = traineeInfo[3];
-                Boolean isActive = Boolean.parseBoolean(traineeInfo[4]);
-                LocalDate dob = LocalDate.parse(traineeInfo[5]);
-                String address = traineeInfo[6];
-                String userId = traineeInfo[7];
-
-                trainee = new Trainee(firstName, lastName, username, password,
-                        isActive, dob, address, userId);
-
-                traineeMap.put(userId, trainee);
+                session.remove(trainee);
+                transaction.commit();
+                logger.info("Successfully deleted trainee and their trainings with username: {}", username);
+            } else {
+                logger.warn("No trainee found with username: {}", username);
+                transaction.rollback();
             }
         } catch (Exception e) {
-            logger.error("File can not be found!");
-            throw new FileNotFoundException("Wrong file");
-        } finally {
-            if (br != null) {
-                logger.info("Closing Buffered Reader");
-                br.close();
+            if (transaction != null) {
+                transaction.rollback();
+                logger.warn("Transaction rolled back while deleting trainee with username: {}", username);
             }
+            logger.error("Error occurred while deleting trainee with username: {}", username, e);
         }
-        logger.info("Populating trainee storage ended successfully!");
     }
+
+    public List<Training> getTraineeTrainings(String username, Date fromDate, Date toDate, String trainerName, String trainingType) {
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery("SELECT t FROM Training t WHERE t.trainee.user.username = :username " +
+                            "AND t.trainingDate BETWEEN :fromDate AND :toDate " +
+                            "AND t.trainer.user.username = :trainerName" +
+                            "AND t.trainingType.trainingTypeName = :trainingType", Training.class)
+                    .setParameter("username", username)
+                    .setParameter("fromDate", fromDate)
+                    .setParameter("toDate", toDate)
+                    .setParameter("trainerName", trainerName)
+                    .setParameter("trainingType", trainingType)
+                    .getResultList();
+        }
+    }
+
 }
 
-*/
