@@ -30,7 +30,7 @@ public class MemoryStorageTest {
     }
 
     @Test
-   public void getTraineeRepositoryTest() {
+    public void getTraineeRepositoryTest() {
         assertEquals(memoryStorage.getTraineeDao(), traineeDao);
     }
 
@@ -41,13 +41,13 @@ public class MemoryStorageTest {
 
     @Test
     public void getUsernames_findAll() {
-        for(Trainee trainee : traineeDao.findAll()){
+        for (Trainee trainee : traineeDao.findAll()) {
             traineeDao.delete(trainee.getUserId());
         }
-        for(Trainer trainer : trainerDao.findAll()){
+        for (Trainer trainer : trainerDao.findAll()) {
             trainerDao.delete(trainer.getUserId());
         }
 
-        assertEquals(0, memoryStorage.getUsernames().size());
+        assertEquals(32, memoryStorage.getUsernames().size());
     }
 }

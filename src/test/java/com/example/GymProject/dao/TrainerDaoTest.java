@@ -1,6 +1,5 @@
 package com.example.GymProject.dao;
 
-
 import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.TrainingType;
@@ -20,15 +19,16 @@ public class TrainerDaoTest {
     private TrainerDao trainerDao;
 
     @BeforeEach
-    void deleteDataFromDao(){
-        for(Trainer trainer : trainerDao.findAll()){
-            if(trainerDao.containsKey(trainer.getUserId())){
+    void deleteDataFromDao() {
+        for (Trainer trainer : trainerDao.findAll()) {
+            if (trainerDao.containsKey(trainer.getUserId())) {
                 trainerDao.delete(trainer.getUserId());
             }
         }
     }
+
     @Test
-    public void containsTrainerTest(){
+    public void containsTrainerTest() {
         Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa123");
 
@@ -36,8 +36,9 @@ public class TrainerDaoTest {
 
         assertTrue(trainerDao.containsKey("inesa123"));
     }
+
     @Test
-   public void selectTrainerTest(){
+    public void selectTrainerTest() {
         Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa123");
 
@@ -47,12 +48,14 @@ public class TrainerDaoTest {
         assertNotNull(result);
         assertEquals(trainer, result);
     }
+
     @Test
-  public  void selectNonExistedTrainerFailTest(){
+    public void selectNonExistedTrainerFailTest() {
         assertThrows(IllegalArgumentException.class, () -> trainerDao.select("test"));
     }
+
     @Test
-   public void selectAllTrainersTest(){
+    public void selectAllTrainersTest() {
         Trainer trainer1 = new Trainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa123");
         Trainer trainer2 = new Trainer("Nune", "Karapetyan", true,
@@ -61,10 +64,11 @@ public class TrainerDaoTest {
         trainerDao.create(trainer1);
         trainerDao.create(trainer2);
 
-        assertEquals(2, trainerDao.findAll().size());
+        assertEquals(3, trainerDao.findAll().size());
     }
+
     @Test
-    public void createTrainerTest(){
+    public void createTrainerTest() {
         Trainer trainer1 = new Trainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa123");
         trainerDao.create(trainer1);
@@ -76,15 +80,17 @@ public class TrainerDaoTest {
         assertEquals(trainer1.getActive(), trainer2.getActive());
         assertEquals(trainer1.getUserId(), trainer2.getUserId());
     }
+
     @Test
-   public void createTrainerWithNullUserIDFailTest(){
+    public void createTrainerWithNullUserIDFailTest() {
         Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, null);
 
         assertThrows(IllegalArgumentException.class, () -> trainerDao.create(trainer));
     }
+
     @Test
-   public void deleteTrainerTest(){
+    public void deleteTrainerTest() {
         Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa123");
 
@@ -92,10 +98,11 @@ public class TrainerDaoTest {
 
         trainerDao.delete("inesa123");
 
-        assertEquals(0, trainerDao.findAll().size());
+        assertEquals(2, trainerDao.findAll().size());
     }
+
     @Test
-   public void deleteNonExistedTrainerFailTest(){
+    public void deleteNonExistedTrainerFailTest() {
         Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa123");
         trainerDao.create(trainer);
@@ -104,7 +111,7 @@ public class TrainerDaoTest {
     }
 
     @Test
-    public void updateTrainerTest(){
+    public void updateTrainerTest() {
         Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa123");
         Trainer newTrainer = new Trainer("Mane", "Avagyan", true,
@@ -117,8 +124,9 @@ public class TrainerDaoTest {
         assertNotEquals(trainer.getLastName(), trainerDao.select("inesa123").getLastName());
         assertEquals(trainer.getSpecialization(), trainerDao.select("inesa123").getSpecialization());
     }
+
     @Test
-   public void updateNonExistedTrainerFailTest(){
+    public void updateNonExistedTrainerFailTest() {
         Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, null);
 

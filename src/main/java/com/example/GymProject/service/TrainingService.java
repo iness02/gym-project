@@ -23,14 +23,15 @@ public class TrainingService {
     private TrainingDao trainingDao;
 
     public void createTraining(String traineeId, String trainerId, String trainingName,
-                               TrainingType trainingType, LocalDate trainingDate, Integer trainingDuration){
+                               TrainingType trainingType, LocalDate trainingDate, Integer trainingDuration) {
         Trainee trainee = traineeService.selectTrainee(traineeId);
         Trainer trainer = trainerService.selectTrainer(trainerId);
         Training training = new Training(trainee, trainer, trainingName,
                 trainingType, trainingDate, trainingDuration);
         trainingDao.create(training);
     }
-    public Training selectTraining(String key){
+
+    public Training selectTraining(String key) {
         return memoryStorage.getTrainingDao().select(key);
     }
 

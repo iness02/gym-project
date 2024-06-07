@@ -11,22 +11,23 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {AppConfig.class})public class GymServiceFacadeTest {
+@ContextConfiguration(classes = {AppConfig.class})
+public class GymServiceFacadeTest {
     @Autowired
     private GymServiceFacade gymServiceFacade;
 
     @Test
-   public void getTraineeService() {
+    public void getTraineeService() {
         assertNotNull(gymServiceFacade.getTraineeService());
     }
 
     @Test
-   public void getTrainerService() {
+    public void getTrainerService() {
         assertNotNull(gymServiceFacade.getTrainerService());
     }
 
     @Test
-   public void getTrainingService() {
+    public void getTrainingService() {
         assertNotNull(gymServiceFacade.getTrainingService());
     }
 }

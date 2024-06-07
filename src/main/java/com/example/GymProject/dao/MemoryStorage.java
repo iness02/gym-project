@@ -31,6 +31,7 @@ public class MemoryStorage {
     public void setTraineeDao(TraineeDao traineeRepository) {
         this.traineeRepository = traineeRepository;
     }
+
     public TrainingDao getTrainingDao() {
         return trainingRepository;
     }
@@ -39,7 +40,8 @@ public class MemoryStorage {
     public void setTrainingDao(TrainingDao trainingRepository) {
         this.trainingRepository = trainingRepository;
     }
-    public List<String> getUsernames(){
+
+    public List<String> getUsernames() {
         trainerRepository.findAll().forEach(trainer -> usernames.add(trainer.getUsername()));
         traineeRepository.findAll().forEach(trainee -> usernames.add(trainee.getUsername()));
         return usernames;
