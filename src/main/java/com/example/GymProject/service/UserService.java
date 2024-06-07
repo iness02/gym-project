@@ -1,20 +1,21 @@
 package com.example.GymProject.service;
 
 import com.example.GymProject.dao.UserDao;
-import com.example.GymProject.dto.UserDTO;
-import com.example.GymProject.model.User;
+import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.mapper.EntityMapper;
+import com.example.GymProject.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 @Service
 public class UserService {
     @Autowired
     private UserDao userDAO;
+    @Autowired
+    private EntityMapper entityMapper;
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
 
@@ -31,16 +32,16 @@ public class UserService {
         return isMatched;
     }
 
-    public UserDTO getUserByUsername(String username) {
+    public UserDto getUserByUsername(String username) {
         Assert.notNull(username, "Username cannot be null");
         User user = userDAO.findUserByUsername(username);
-        return EntityMapper.INSTANCE.userToUserDTO(user);
+        return entityMapper.toUserDto(user);
     }
 
 
-    public UserDTO updateUser(UserDTO userDto) {
+    public UserDto updateUser(UserDto userDto) {
         Assert.notNull(userDto, "UserDto cannot be null");
-        User user = EntityMapper.INSTANCE.userDTOToUser(userDto);
-        return EntityMapper.INSTANCE.userToUserDTO(userDAO.updateUser(user));
+        User user = entityMapper.toUser(userDto);
+        return entityMapper.toUserDto(userDAO.updateUser(user));
     }
 }

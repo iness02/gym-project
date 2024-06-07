@@ -2,8 +2,7 @@ package com.example.GymProject.service;
 
 import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.dao.UserDao;
-import com.example.GymProject.dto.UserDTO;
-import com.example.GymProject.mapper.EntityMapper;
+import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.model.User;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,13 +53,13 @@ public class UserServiceTest {
         String username = "testUser";
         User user = new User();
         user.setUsername(username);
-        UserDTO userDTO = new UserDTO();
+        UserDto userDTO = new UserDto();
         userDTO.setUsername(username);
 
         when(userDAO.findUserByUsername(username)).thenReturn(user);
-        when(EntityMapper.INSTANCE.userToUserDTO(user)).thenReturn(userDTO);
+//        when(EntityMapper.INSTANCE.userToUserDTO(user)).thenReturn(userDTO);
 
-        UserDTO result = userService.getUserByUsername(username);
+        UserDto result = userService.getUserByUsername(username);
         assertNotNull(result);
         assertEquals(username, result.getUsername());
 
@@ -69,16 +68,16 @@ public class UserServiceTest {
 
     @Test
    public void testUpdateUser() {
-        UserDTO userDTO = new UserDTO();
+        UserDto userDTO = new UserDto();
         userDTO.setUsername("testUser");
         User user = new User();
         user.setUsername("testUser");
 
-        when(EntityMapper.INSTANCE.userDTOToUser(userDTO)).thenReturn(user);
+//        when(EntityMapper.INSTANCE.userDTOToUser(userDTO)).thenReturn(user);
         when(userDAO.updateUser(user)).thenReturn(user);
-        when(EntityMapper.INSTANCE.userToUserDTO(user)).thenReturn(userDTO);
+//        when(EntityMapper.INSTANCE.userToUserDTO(user)).thenReturn(userDTO);
 
-        UserDTO result = userService.updateUser(userDTO);
+        UserDto result = userService.updateUser(userDTO);
         assertNotNull(result);
         assertEquals("testUser", result.getUsername());
 

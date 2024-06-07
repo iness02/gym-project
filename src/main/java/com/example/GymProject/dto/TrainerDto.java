@@ -5,17 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
-import java.util.Set;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TraineeDTO {
+public class TrainerDto {
     private Long id;
-    private Date dateOfBirth;
-    private String address;
-    private UserDTO user;
-    private Set<TrainerDTO> trainers;
+    private String specialization;
+    private UserDto user;
 }

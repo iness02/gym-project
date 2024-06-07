@@ -2,30 +2,31 @@ package com.example.GymProject.mapper;
 
 import com.example.GymProject.dto.*;
 import com.example.GymProject.model.*;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants.ComponentModel;
 
-@Mapper
+@Mapper(componentModel = ComponentModel.SPRING, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface EntityMapper {
-    EntityMapper INSTANCE = Mappers.getMapper(EntityMapper.class);
+    @Mapping(source = "user", target = "userDTO")
+    TraineeDto toTraineeDto(Trainee trainee);
+    @Mapping(source = "userDTO", target = "user")
+    Trainee toTrainee(TraineeDto traineeDTO);
 
-    TraineeDTO traineeToTraineeDTO(Trainee trainee);
+    TrainerDto toTrainerDto(Trainer trainer);
 
-    Trainee traineeDTOToTrainee(TraineeDTO traineeDTO);
+    Trainer toTrainer(TrainerDto trainerDTO);
 
-    TrainerDTO trainerToTrainerDTO(Trainer trainer);
+    TrainingDto toTrainingDto(Training training);
 
-    Trainer trainerDTOToTrainer(TrainerDTO trainerDTO);
+    Training toTraining(TrainingDto trainingDTO);
 
-    TrainingDTO trainingToTrainingDTO(Training training);
+    TrainingTypeDto toTrainingTypeDto(TrainingType trainingType);
 
-    Training trainingDTOToTraining(TrainingDTO trainingDTO);
+    TrainingType toTrainingType(TrainingTypeDto trainingTypeDTO);
 
-    TrainingTypeDTO trainingTypeToTrainingTypeDTO(TrainingType trainingType);
+    UserDto toUserDto(User user);
 
-    TrainingType trainingTypeDTOToTrainingType(TrainingTypeDTO trainingTypeDTO);
-
-    UserDTO userToUserDTO(User user);
-
-    User userDTOToUser(UserDTO userDTO);
+    User toUser(UserDto userDTO);
 }

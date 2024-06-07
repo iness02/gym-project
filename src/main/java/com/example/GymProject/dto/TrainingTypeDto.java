@@ -1,5 +1,6 @@
 package com.example.GymProject.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,8 +10,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TrainerDTO {
+public class TrainingTypeDto {
     private Long id;
-    private String specialization;
-    private UserDTO user;
+    @NotNull
+    private String trainingTypeName;
 }

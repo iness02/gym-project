@@ -1,9 +1,9 @@
 package com.example.GymProject.service;
 
 import com.example.GymProject.dao.TrainerDao;
-import com.example.GymProject.dto.TrainerDTO;
-import com.example.GymProject.dto.TrainingDTO;
-import com.example.GymProject.dto.UserDTO;
+import com.example.GymProject.dto.TrainerDto;
+import com.example.GymProject.dto.TrainingDto;
+import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.Training;
@@ -24,22 +24,26 @@ public class TrainerService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EntityMapper entityMapper;
+    
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
 
-    public TrainerDTO getTrainerByUsername(String username, String password) {
+    public TrainerDto getTrainerByUsername(String username, String password) {
         authenticate(username, password);
         Assert.notNull(username, "Username cannot be null");
         Trainer trainer = trainerDAO.getTrainerByUsername(username);
-        return EntityMapper.INSTANCE.trainerToTrainerDTO(trainer);
+        return entityMapper.toTrainerDto(trainer);
     }
 
 
-    public TrainerDTO updateTrainer(TrainerDTO trainerDTO, String password) {
+    public TrainerDto updateTrainer(TrainerDto trainerDTO, String password) {
         authenticate(trainerDTO.getUser().getUsername(), password);
         Assert.notNull(trainerDTO, "TrainerDto cannot be null");
-        Trainer trainer = EntityMapper.INSTANCE.trainerDTOToTrainer(trainerDTO);
-        return EntityMapper.INSTANCE.trainerToTrainerDTO(trainerDAO.updateTrainer(trainer));
+        Trainer trainer = entityMapper.toTrainer(trainerDTO);
+        return entityMapper.toTrainerDto(trainerDAO.updateTrainer(trainer));
     }
 
 
@@ -47,7 +51,7 @@ public class TrainerService {
         authenticate(username, password);
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(newPassword, "New password cannot be null");
-        UserDTO userDTO = userService.getUserByUsername(username);
+        UserDto userDTO = userService.getUserByUsername(username);
         if (userDTO != null) {
             userDTO.setPassword(newPassword);
             userService.updateUser(userDTO);
@@ -68,17 +72,17 @@ public class TrainerService {
         if (trainer != null) {
             logger.info("Activation/Deactivation was successfully performed for trainer {}", username);
             trainer.getUser().setIsActive(isActive);
-            userService.updateUser(EntityMapper.INSTANCE.userToUserDTO(trainer.getUser()));
+            userService.updateUser(entityMapper.toUserDto(trainer.getUser()));
         }
     }
 
-    public List<TrainingDTO> getTrainerTrainings(String username, Date fromDate, Date toDate, String traineeName, String password) {
+    public List<TrainingDto> getTrainerTrainings(String username, Date fromDate, Date toDate, String traineeName, String password) {
         authenticate(username, password);
         Assert.notNull(username, "Username cannot be null");
         List<Training> trainings = trainerDAO.getTrainerTrainings(username, fromDate, toDate, traineeName);
         logger.info("Getting trainings for trainer {}", username);
         return trainings.stream()
-                .map(EntityMapper.INSTANCE::trainingToTrainingDTO)
+                .map(entityMapper::toTrainingDto)
                 .collect(Collectors.toList());
     }
     private void authenticate(String username, String password) {

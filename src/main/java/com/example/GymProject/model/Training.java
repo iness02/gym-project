@@ -1,12 +1,9 @@
 package com.example.GymProject.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.Date;
 
@@ -14,8 +11,7 @@ import java.util.Date;
 @Table(name = "training")
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
+@Data
 public class Training{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

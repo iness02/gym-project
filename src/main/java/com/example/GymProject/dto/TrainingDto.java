@@ -12,14 +12,14 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TrainingDTO {
+public class TrainingDto {
     private Long id;
-    private TraineeDTO trainee;
-    private TrainerDTO trainer;
+    private TraineeDto trainee;
+    private TrainerDto trainer;
     @NotNull
     private String trainingName;
     @NotNull
-    private TrainingTypeDTO trainingType;
+    private TrainingTypeDto trainingType;
     @NotNull
     private Date trainingDate;
     @NotNull

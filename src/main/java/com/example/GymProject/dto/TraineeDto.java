@@ -1,17 +1,21 @@
 package com.example.GymProject.dto;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TrainingTypeDTO {
+public class TraineeDto {
     private Long id;
-    @NotNull
-    private String trainingTypeName;
+    private Date dateOfBirth;
+    private String address;
+    private UserDto user;
+    private Set<TrainerDto> trainers;
 }

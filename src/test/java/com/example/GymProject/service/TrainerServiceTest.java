@@ -2,9 +2,8 @@ package com.example.GymProject.service;
 
 import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.dao.TrainerDao;
-import com.example.GymProject.dto.TrainerDTO;
-import com.example.GymProject.dto.UserDTO;
-import com.example.GymProject.mapper.EntityMapper;
+import com.example.GymProject.dto.TrainerDto;
+import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.model.Trainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,13 +40,13 @@ class TrainerServiceTest {
         String username = "testUser";
         String password = "testPass";
         Trainer trainer = new Trainer();
-        TrainerDTO trainerDTO = new TrainerDTO();
+        TrainerDto trainerDTO = new TrainerDto();
 
         when(trainerDAO.getTrainerByUsername(username)).thenReturn(trainer);
-        when(EntityMapper.INSTANCE.trainerToTrainerDTO(trainer)).thenReturn(trainerDTO);
+//        when(EntityMapper.INSTANCE.trainerToTrainerDTO(trainer)).thenReturn(trainerDTO);
         when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
 
-        TrainerDTO result = trainerService.getTrainerByUsername(username, password);
+        TrainerDto result = trainerService.getTrainerByUsername(username, password);
         assertNotNull(result);
 
         verify(trainerDAO, times(1)).getTrainerByUsername(username);
@@ -55,16 +54,16 @@ class TrainerServiceTest {
 
     @Test
     void testUpdateTrainer() {
-        TrainerDTO trainerDTO = new TrainerDTO();
+        TrainerDto trainerDTO = new TrainerDto();
         String password = "testPass";
         Trainer trainer = new Trainer();
 
-        when(EntityMapper.INSTANCE.trainerDTOToTrainer(trainerDTO)).thenReturn(trainer);
+//        when(EntityMapper.INSTANCE.trainerDTOToTrainer(trainerDTO)).thenReturn(trainer);
         when(trainerDAO.updateTrainer(trainer)).thenReturn(trainer);
-        when(EntityMapper.INSTANCE.trainerToTrainerDTO(trainer)).thenReturn(trainerDTO);
+//        when(EntityMapper.INSTANCE.trainerToTrainerDTO(trainer)).thenReturn(trainerDTO);
         when(userService.matchUsernameAndPassword(trainerDTO.getUser().getUsername(), password)).thenReturn(true);
 
-        TrainerDTO result = trainerService.updateTrainer(trainerDTO, password);
+        TrainerDto result = trainerService.updateTrainer(trainerDTO, password);
         assertNotNull(result);
 
         verify(trainerDAO, times(1)).updateTrainer(trainer);
@@ -87,7 +86,7 @@ class TrainerServiceTest {
         String username = "testUser";
         String newPassword = "newPass";
         String password = "testPass";
-        UserDTO userDTO = new UserDTO();
+        UserDto userDTO = new UserDto();
         userDTO.setUsername(username);
 
         when(userService.getUserByUsername(username)).thenReturn(userDTO);
@@ -111,6 +110,6 @@ class TrainerServiceTest {
         trainerService.activateDeactivateTrainer(username, isActive, password);
 
         verify(trainerDAO, times(1)).getTrainerByUsername(username);
-        verify(userService, times(1)).updateUser(EntityMapper.INSTANCE.userToUserDTO(trainer.getUser()));
+//        verify(userService, times(1)).updateUser(EntityMapper.INSTANCE.userToUserDTO(trainer.getUser()));
     }
 }

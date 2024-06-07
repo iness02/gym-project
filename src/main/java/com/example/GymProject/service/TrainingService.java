@@ -1,7 +1,7 @@
 package com.example.GymProject.service;
 
 import com.example.GymProject.dao.TrainingDao;
-import com.example.GymProject.dto.TrainingDTO;
+import com.example.GymProject.dto.TrainingDto;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.Training;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,25 +17,27 @@ public class TrainingService {
     private TrainingDao trainingDAO;
     @Autowired
     private UserService userService;
+    @Autowired
+    private EntityMapper entityMapper;
 
-    public TrainingDTO addTraining(TrainingDTO trainingDTO) {
+    public TrainingDto addTraining(TrainingDto trainingDTO) {
         Assert.notNull(trainingDTO, "TrainingDto cannot be null");
-        Training training = EntityMapper.INSTANCE.trainingDTOToTraining(trainingDTO);
-        return EntityMapper.INSTANCE.trainingToTrainingDTO(trainingDAO.addTraining(training));
+        Training training = entityMapper.toTraining(trainingDTO);
+        return entityMapper.toTrainingDto(trainingDAO.addTraining(training));
     }
 
-    public List<TrainingDTO> getAllTrainings() {
+    public List<TrainingDto> getAllTrainings() {
         List<Training> trainings = trainingDAO.getAllTrainings();
         return trainings.stream()
-                .map(EntityMapper.INSTANCE::trainingToTrainingDTO)
+                .map(entityMapper::toTrainingDto)
                 .collect(Collectors.toList());
     }
 
-    public TrainingDTO updateTraining(TrainingDTO trainingDTO, String username, String password) {
+    public TrainingDto updateTraining(TrainingDto trainingDTO, String username, String password) {
         authenticate(username, password);
         Assert.notNull(trainingDTO, "TrainingDto cannot be null");
-        Training training = EntityMapper.INSTANCE.trainingDTOToTraining(trainingDTO);
-        return EntityMapper.INSTANCE.trainingToTrainingDTO(trainingDAO.updateTraining(training));
+        Training training = entityMapper.toTraining(trainingDTO);
+        return entityMapper.toTrainingDto(trainingDAO.updateTraining(training));
     }
 
     private void authenticate(String username, String password) {

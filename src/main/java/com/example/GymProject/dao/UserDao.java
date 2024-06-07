@@ -9,13 +9,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
+
 @Repository
 public class UserDao {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
     @Autowired
     private SessionFactory sessionFactory;
 
-    /*public void createUser(User user) {
+    @Autowired
+    private DataSource dataSource;
+
+    public void createUser(User user) {
         Transaction transaction = null;
         try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
@@ -30,7 +35,7 @@ public class UserDao {
             }
             logger.error("Error occurred while creating user with username: {}", user.getUsername(), e);
         }
-    }*/
+    }
 
     public User findUserByUsername(String username) {
         try (Session session = sessionFactory.openSession()) {
