@@ -1,28 +1,33 @@
 package com.example.GymProject.service;
 
 
-import org.junit.jupiter.api.Test;
+import com.example.GymProject.config.AppConfig;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {AppConfig.class})
 public class GymServiceFacadeTest {
     @Autowired
     private GymServiceFacade gymServiceFacade;
 
     @Test
-    void getTraineeService() {
+    public void getTraineeService() {
         assertNotNull(gymServiceFacade.getTraineeService());
     }
 
     @Test
-    void getTrainerService() {
+    public void getTrainerService() {
         assertNotNull(gymServiceFacade.getTrainerService());
     }
 
     @Test
-    void getTrainingService() {
+    public void getTrainingService() {
         assertNotNull(gymServiceFacade.getTrainingService());
     }
 }

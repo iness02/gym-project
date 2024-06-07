@@ -26,24 +26,12 @@ public class Training {
         return traineeId;
     }
 
-    public void setTraineeId(String traineeId) {
-        this.traineeId = traineeId;
-    }
-
     public String getTrainerId() {
         return trainerId;
     }
 
-    public void setTrainerId(String trainerId) {
-        this.trainerId = trainerId;
-    }
-
     public String getTrainingName() {
         return trainingName;
-    }
-
-    public void setTrainingName(String trainingName) {
-        this.trainingName = trainingName;
     }
 
     public TrainingType getTrainingType() {
@@ -54,31 +42,20 @@ public class Training {
         this.trainingType = trainingType;
     }
 
-    public LocalDate getTrainingDate() {
-        return trainingDate;
-    }
-
-    public void setTrainingDate(LocalDate trainingDate) {
-        this.trainingDate = trainingDate;
-    }
-
     public Integer getTrainingDuration() {
         return trainingDuration;
     }
 
-    public void setTrainingDuration(Integer trainingDuration) {
-        this.trainingDuration = trainingDuration;
-    }
-
     @Override
     public String toString() {
-        return "Training{" +
-                "traineeId='" + traineeId + '\'' +
-                ", trainerId='" + trainerId + '\'' +
-                ", trainingName='" + trainingName + '\'' +
-                ", trainingType=" + trainingType +
-                ", trainingDate=" + trainingDate +
-                ", trainingDuration=" + trainingDuration +
-                '}';
+        final StringBuilder sb = new StringBuilder("Training{");
+        sb.append("traineeId='").append(traineeId).append('\'');
+        sb.append(", trainerId='").append(trainerId).append('\'');
+        sb.append(", trainingName='").append(trainingName).append('\'');
+        sb.append(", trainingType=").append(trainingType);
+        sb.append(", trainingDate=").append(trainingDate);
+        sb.append(", trainingDuration=").append(trainingDuration);
+        sb.append('}');
+        return sb.toString();
     }
 }

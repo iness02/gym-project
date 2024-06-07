@@ -1,38 +1,44 @@
 package com.example.GymProject.service;
 
+import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.TrainingType;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.time.LocalDate;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
-@SpringBootTest
-class TrainerServiceTest {
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {AppConfig.class})
+public class TrainerServiceTest {
     @Autowired
     private TrainerService trainerService;
 
     @Test
-    void selectTrainerTest(){
+    public void selectTrainerTest() {
         trainerService.createTrainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa123");
 
         assertEquals("Inesa", trainerService.selectTrainer("inesa123").getFirstName());
     }
+
     @Test
-    void createTrainerWithSimilarUsernameTest() {
+    public void createTrainerWithSimilarUsernameTest() {
         trainerService.createTrainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa123");
         trainerService.createTrainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa1234");
 
-        assertEquals("Inesa.Hakobyan0", trainerService.selectTrainer("inesa1234").getUsername());
+        assertEquals("Inesa.Hakobyan5", trainerService.selectTrainer("inesa1234").getUsername());
     }
+
     @Test
-    void createTrainerWithDifferentUsernameTest() {
+    public void createTrainerWithDifferentUsernameTest() {
         trainerService.createTrainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa123");
         trainerService.createTrainer("Mels", "Hakobyan", true,
@@ -43,7 +49,7 @@ class TrainerServiceTest {
     }
 
     @Test
-    void updateTrainerTest() {
+    public void updateTrainerTest() {
         trainerService.createTrainer("Inesa", "Hakobyan", true,
                 TrainingType.FITNESS, "inesa123");
 
@@ -54,8 +60,9 @@ class TrainerServiceTest {
 
         assertEquals("Mels", trainerService.selectTrainer("inesa123").getFirstName());
     }
+
     @Test
-    void updateTrainerFailTest(){
+    public void updateNonExistedTrainerFailTest() {
         assertThrows(NoSuchElementException.class, () -> trainerService.updateTrainer("test", new Trainer()));
     }
 }

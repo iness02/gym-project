@@ -7,27 +7,36 @@ import com.example.GymProject.model.TrainingType;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Repository
 public class TrainingDao {
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
     private final Map<String, Training> trainingMap = new HashMap<>();
     private TraineeDao traineeDao;
     private TrainerDao trainerDao;
     @Value("${trainingFilePath}")
     private String trainingFilePath;
+    private final ResourceLoader resourceLoader;
+    private BufferedReader br;
+
+
+    public TrainingDao(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 
     @Autowired
     public void setTraineeDao(TraineeDao traineeDao) {
@@ -39,65 +48,47 @@ public class TrainingDao {
         this.trainerDao = trainerDao;
     }
 
+    public void setBufferedReader(BufferedReader br) {
+        this.br = br;
+    }
+
     public List<Training> findAll() {
         return new ArrayList<>(trainingMap.values());
     }
 
-    public boolean containsKey(String key) {
+    protected boolean containsKey(String key) {
         return trainingMap.containsKey(key);
     }
 
     public void create(Training training) {
-        try {
-            if (training.getTraineeId() == null || training.getTrainerId() == null) {
-                logger.warning("Trainee/Trainer Not Found");
-                throw new IllegalArgumentException("Trainee/Trainer Not Found");
-            }
-            trainingMap.put(training.getTrainingName(), training);
-            logger.info("Inserted New Training");
-        } catch (Exception e) {
-            logger.warning("Error While Inserting Value");
-            throw new IllegalArgumentException("Wrong Value");
-        }
+        Assert.notNull(training, "Training cannot be null");
+        Assert.notNull(training.getTraineeId(), "Trainee not found");
+        Assert.notNull(training.getTrainerId(), "Trainer not found");
+        trainingMap.put(training.getTrainingName(), training);
+        logger.info("Inserted new training");
+
     }
 
-    public Training select(String key) {
+    public Training select(String userId) {
         Training training;
-        try {
-            if (trainingMap.containsKey(key)) {
-                logger.info("Training Found");
-                training = trainingMap.get(key);
-            } else {
-                logger.warning("Wrong Key, Training Not Found");
-                throw new IllegalArgumentException("Training Not Found");
-            }
-            return training;
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+        Assert.isTrue(trainingMap.containsKey(userId), "Wrong key, Training not found");
+        logger.info("Training found");
+        training = trainingMap.get(userId);
+        return training;
     }
 
-    public void delete(String key) {
-        try {
-            if (trainingMap.containsKey(key)) {
-                trainingMap.remove(key);
-                logger.info("Training Removed Successfully!");
-            } else {
-                logger.warning("Training has not been Removed");
-                throw new IllegalArgumentException("Wrong Key");
-            }
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+    public void delete(String userId) {
+        Assert.isTrue(trainingMap.containsKey(userId), "Wrong key, Training has not been removed");
+        trainingMap.remove(userId);
+        logger.info("Training removed successfully!");
     }
 
     @PostConstruct
     public void init() throws Exception {
-        BufferedReader br = null;
         try {
-            logger.info("Starting Populating Training Storage");
-            File file = new File(trainingFilePath);
-            br = new BufferedReader(new FileReader(file));
+            logger.info("Starting populating training storage");
+            Resource resource = resourceLoader.getResource(trainingFilePath);
+            br = new BufferedReader(new InputStreamReader(resource.getInputStream()));
             String line;
             Training training;
 
@@ -121,16 +112,14 @@ public class TrainingDao {
                 trainingMap.put(trainingName, training);
             }
         } catch (Exception e) {
-            logger.warning("File can not be found!");
-            throw new FileNotFoundException("Wrong File");
+            logger.error("File can not be found!");
+            throw new FileNotFoundException("Wrong file");
         } finally {
             if (br != null) {
                 logger.info("Closing Buffered Reader");
                 br.close();
             }
         }
-        logger.info("Populating Training Storage Ended Successfully!");
+        logger.info("Populating training storage ended successfully!");
     }
-
-
 }

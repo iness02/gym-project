@@ -1,6 +1,7 @@
 package com.example.GymProject.service;
 
 import com.example.GymProject.dao.MemoryStorage;
+import com.example.GymProject.dao.TraineeDao;
 import com.example.GymProject.model.Trainee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,29 +14,28 @@ import static com.example.GymProject.util.Utils.usernameExists;
 
 @Service
 public class TraineeService {
-    private MemoryStorage memoryStorage;
-
     @Autowired
-    public void setInMemoryStorage(MemoryStorage memoryStorage) {
-        this.memoryStorage = memoryStorage;
-    }
+    private MemoryStorage memoryStorage;
+    @Autowired
+    private TraineeDao traineeDao;
+
 
     public void createTrainee(String firstName, String lastName, Boolean isActive,
                               LocalDate dob, String address, String userId) {
         Trainee trainee = new Trainee(firstName, lastName, isActive, dob, address, userId);
-        boolean contains = usernameExists(memoryStorage.getUsernames(), trainee);
-        trainee.setUsername(generateUsername(trainee.getFirstName(), trainee.getLastName(), contains));
-        memoryStorage.getTraineeRepository().create(trainee);
+        boolean exists = usernameExists(memoryStorage.getUsernames(), trainee);
+        trainee.setUsername(generateUsername(trainee.getFirstName(), trainee.getLastName(), exists));
+        traineeDao.create(trainee);
     }
 
     public Trainee selectTrainee(String key) {
-        return memoryStorage.getTraineeRepository().select(key);
+        return memoryStorage.getTraineeDao().select(key);
     }
 
     public void updateTrainee(String key, Trainee newTrainee) {
         Trainee trainee = new Trainee();
-        if (!memoryStorage.getTraineeRepository().containsKey(key)) {
-            throw new NoSuchElementException("Wrong Key, Update Failed!");
+        if (!memoryStorage.getTraineeDao().containsKey(key)) {
+            throw new NoSuchElementException("Wrong key, update failed!");
         }
         boolean contains = usernameExists(memoryStorage.getUsernames(), newTrainee);
 
@@ -47,10 +47,10 @@ public class TraineeService {
         trainee.setDob(newTrainee.getDob());
         trainee.setActive(newTrainee.getActive());
 
-        memoryStorage.getTraineeRepository().update(key, trainee);
+        memoryStorage.getTraineeDao().update(key, trainee);
     }
 
     public void deleteTrainee(String key) {
-        memoryStorage.getTraineeRepository().delete(key);
+        memoryStorage.getTraineeDao().delete(key);
     }
 }

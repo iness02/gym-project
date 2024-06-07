@@ -1,13 +1,16 @@
 package com.example.GymProject;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+import com.example.GymProject.config.AppConfig;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+
 public class GymProjectApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(GymProjectApplication.class, args);
+
+		AnnotationConfigApplicationContext context= new AnnotationConfigApplicationContext(AppConfig.class);
+		System.out.println(context.getBean("trainerDao"));
 	}
 
 }

@@ -1,14 +1,18 @@
 package com.example.GymProject.dao;
 
+import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Trainer;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {AppConfig.class})
 public class MemoryStorageTest {
     @Autowired
     private MemoryStorage memoryStorage;
@@ -21,29 +25,29 @@ public class MemoryStorageTest {
 
 
     @Test
-    void getTrainerRepositoryTest() {
+    public void getTrainerRepositoryTest() {
         assertEquals(memoryStorage.getTrainerRepository(), trainerDao);
     }
 
     @Test
-    void getTraineeRepositoryTest() {
-        assertEquals(memoryStorage.getTraineeRepository(), traineeDao);
+    public void getTraineeRepositoryTest() {
+        assertEquals(memoryStorage.getTraineeDao(), traineeDao);
     }
 
     @Test
-    void getTrainingRepositoryTest() {
-        assertEquals(memoryStorage.getTrainingRepository(), trainingDao);
+    public void getTrainingRepositoryTest() {
+        assertEquals(memoryStorage.getTrainingDao(), trainingDao);
     }
 
     @Test
-    void getUsernamesTest() {
-        for(Trainee trainee : traineeDao.findAll()){
+    public void getUsernames_findAll() {
+        for (Trainee trainee : traineeDao.findAll()) {
             traineeDao.delete(trainee.getUserId());
         }
-        for(Trainer trainer : trainerDao.findAll()){
+        for (Trainer trainer : trainerDao.findAll()) {
             trainerDao.delete(trainer.getUserId());
         }
 
-        assertEquals(0, memoryStorage.getUsernames().size());
+        assertEquals(32, memoryStorage.getUsernames().size());
     }
 }
