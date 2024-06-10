@@ -47,13 +47,14 @@ public class HibernateConfig {
     }
 
     @Bean
-    public LocalSessionFactoryBean sessionFactory() {
+    public LocalSessionFactoryBean sessionFactory(DataSource dataSource) {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-        sessionFactory.setDataSource(dataSource());
+        sessionFactory.setDataSource(dataSource);
         sessionFactory.setPackagesToScan("com.example.GymProject.model");
         sessionFactory.setHibernateProperties(hibernateProperties());
         return sessionFactory;
     }
+
     @Bean
     public HibernateTransactionManager transactionManager(SessionFactory sessionFactory) {
         HibernateTransactionManager transactionManager = new HibernateTransactionManager();

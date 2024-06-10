@@ -2,87 +2,114 @@ package com.example.GymProject.service;
 
 import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.dao.UserDao;
-import com.example.GymProject.dto.UserDTO;
+import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.User;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {AppConfig.class})
-public class UserServiceTest {
+class UserServiceTest {
 
     @Mock
-    private UserDao userDAO;
+    private UserDao userDao;
+
+    @Mock
+    private EntityMapper entityMapper;
 
     @InjectMocks
     private UserService userService;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
+
     @Test
-    public void testMatchUsernameAndPassword() {
-        String username = "testUser";
-        String password = "testPass";
+    void testMatchUsernameAndPassword() {
         User user = new User();
-        user.setUsername(username);
-        user.setPassword(password);
+        user.setUsername("test");
+        user.setPassword("password");
 
-        when(userDAO.findUserByUsername(username)).thenReturn(user);
+        when(userDao.findUserByUsername("test")).thenReturn(user);
 
-        boolean result = userService.matchUsernameAndPassword(username, password);
-        assertTrue(result);
+        assertTrue(userService.matchUsernameAndPassword("test", "password"));
+        assertFalse(userService.matchUsernameAndPassword("test", "wrongpassword"));
 
-        verify(userDAO, times(1)).findUserByUsername(username);
+        verify(userDao, times(2)).findUserByUsername("test");
     }
 
     @Test
-    public void testGetUserByUsername() {
-        String username = "testUser";
+    void testGetUserByUsername() {
         User user = new User();
-        user.setUsername(username);
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUsername(username);
+        user.setUsername("test");
 
-        when(userDAO.findUserByUsername(username)).thenReturn(user);
-        when(EntityMapper.INSTANCE.userToUserDTO(user)).thenReturn(userDTO);
+        when(userDao.findUserByUsername("test")).thenReturn(user);
+        when(entityMapper.toUserDto(user)).thenReturn(new UserDto());
 
-        UserDTO result = userService.getUserByUsername(username);
-        assertNotNull(result);
-        assertEquals(username, result.getUsername());
+        assertNotNull(userService.getUserByUsername("test"));
 
-        verify(userDAO, times(1)).findUserByUsername(username);
+        verify(userDao).findUserByUsername("test");
+        verify(entityMapper).toUserDto(user);
+    }
+
+
+    @Test
+    void testGenerateUniqueUserName_WhenUserNameExists() {
+        String firstName = "test";
+        String lastName = "user";
+        String baseUserName = firstName + "." + lastName;
+
+        when(userDao.existsByUserName(baseUserName)).thenReturn(true);
+        when(userDao.findMaxUserId()).thenReturn(1L);
+
+        assertEquals("test.user2", userService.generateUniqueUserName(firstName, lastName));
+
+        verify(userDao).existsByUserName(baseUserName);
+        verify(userDao).findMaxUserId();
     }
 
     @Test
-    public void testUpdateUser() {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUsername("testUser");
+    void testGenerateUniqueUserName_WhenUserNameDoesNotExist() {
+        String firstName = "firstname";
+        String lastName = "lastname";
+        String baseUserName = firstName + "." + lastName;
+
+        when(userDao.existsByUserName(baseUserName)).thenReturn(false);
+
+        assertEquals("firstname.lastname", userService.generateUniqueUserName(firstName, lastName));
+
+        verify(userDao).existsByUserName(baseUserName);
+    }
+
+
+    @Test
+    void testUpdateUser() {
+        UserDto userDto = new UserDto();
+        userDto.setUsername("test");
+
         User user = new User();
-        user.setUsername("testUser");
+        user.setUsername("test");
 
-        when(EntityMapper.INSTANCE.userDTOToUser(userDTO)).thenReturn(user);
-        when(userDAO.updateUser(user)).thenReturn(user);
-        when(EntityMapper.INSTANCE.userToUserDTO(user)).thenReturn(userDTO);
+        when(entityMapper.toUser(userDto)).thenReturn(user);
+        when(userDao.updateUser(user)).thenReturn(user);
+        when(entityMapper.toUserDto(user)).thenReturn(userDto);
 
-        UserDTO result = userService.updateUser(userDTO);
-        assertNotNull(result);
-        assertEquals("testUser", result.getUsername());
+        assertNotNull(userService.updateUser(userDto));
 
-        verify(userDAO, times(1)).updateUser(user);
+        verify(entityMapper).toUser(userDto);
+        verify(userDao).updateUser(user);
+        verify(entityMapper).toUserDto(user);
     }
 }

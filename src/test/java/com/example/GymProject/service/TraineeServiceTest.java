@@ -1,152 +1,214 @@
 package com.example.GymProject.service;
 
-import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.dao.TraineeDao;
-import com.example.GymProject.dto.TraineeDTO;
-import com.example.GymProject.dto.TrainerDTO;
-import com.example.GymProject.dto.UserDTO;
+import com.example.GymProject.dao.TrainerDao;
+import com.example.GymProject.dao.UserDao;
+import com.example.GymProject.dto.TraineeDto;
+import com.example.GymProject.dto.TrainerDto;
+import com.example.GymProject.dto.TrainingDto;
+import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.Trainee;
+import com.example.GymProject.model.Training;
+import com.example.GymProject.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {AppConfig.class})
-class TraineeServiceTest{
+class TraineeServiceTest {
+    @Mock
+    private TraineeDao traineeDao;
 
     @Mock
-    private TraineeDao traineeDAO;
+    private UserDao userDao;
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private EntityMapper entityMapper;
 
     @InjectMocks
     private TraineeService traineeService;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testCreateTrainee() {
-        TraineeDTO traineeDTO = new TraineeDTO();
+    public void testCreateTrainee() {
+        TraineeDto traineeDTO = new TraineeDto();
+        UserDto userDto = new UserDto();
+        userDto.setFirstName("test");
+        userDto.setLastName("user");
+        traineeDTO.setUserDto(userDto);
+
         Trainee trainee = new Trainee();
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUsername("testUser");
+        User user = new User();
+        Trainee createdTrainee = new Trainee();
+        TraineeDto createdTraineeDto = new TraineeDto();
 
-        when(EntityMapper.INSTANCE.traineeDTOToTrainee(traineeDTO)).thenReturn(trainee);
-        when(EntityMapper.INSTANCE.traineeToTraineeDTO(trainee)).thenReturn(traineeDTO);
-        when(traineeDAO.createTrainee(trainee)).thenReturn(trainee);
+        when(entityMapper.toTrainee(traineeDTO)).thenReturn(trainee);
+        when(entityMapper.toUser(userDto)).thenReturn(user);
+        when(userService.generateUniqueUserName(user.getFirstName(), user.getLastName())).thenReturn("test.user");
+        when(entityMapper.toTraineeDto(createdTrainee)).thenReturn(createdTraineeDto);
+        when(traineeDao.createTrainee(any(Trainee.class))).thenReturn(createdTrainee);
 
-        TraineeDTO result = traineeService.createTrainee(traineeDTO);
-        assertNotNull(result);
+        TraineeDto result = traineeService.createTrainee(traineeDTO);
 
-        verify(traineeDAO, times(1)).createTrainee(trainee);
+        verify(userDao, times(1)).createUser(user);
+        verify(traineeDao, times(1)).createTrainee(trainee);
+        verify(entityMapper, times(1)).toTraineeDto(createdTrainee);
+
+        assertEquals(createdTraineeDto, result);
+        assertEquals("test.user", user.getUsername());
+        assertEquals(true, user.getIsActive());
+        assertEquals(user, trainee.getUser());
     }
 
     @Test
-    void testGetTraineeByUsername() {
+    public void testGetTraineeByUsername() {
         String username = "testUser";
-        String password = "testPass";
+        String password = "testPassword";
         Trainee trainee = new Trainee();
-        TraineeDTO traineeDTO = new TraineeDTO();
-
-        when(traineeDAO.getTraineeByUsername(username)).thenReturn(trainee);
-        when(EntityMapper.INSTANCE.traineeToTraineeDTO(trainee)).thenReturn(traineeDTO);
+        TraineeDto traineeDto = new TraineeDto();
+        when(traineeDao.getTraineeByUsername(username)).thenReturn(trainee);
+        when(entityMapper.toTraineeDto(trainee)).thenReturn(traineeDto);
         when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
 
-        TraineeDTO result = traineeService.getTraineeByUsername(username, password);
-        assertNotNull(result);
+        TraineeDto result = traineeService.getTraineeByUsername(username, password);
 
-        verify(traineeDAO, times(1)).getTraineeByUsername(username);
+        assertNotNull(result);
+        assertEquals(traineeDto, result);
     }
 
     @Test
-    void testUpdateTrainee() {
-        TraineeDTO traineeDTO = new TraineeDTO();
-        String password = "testPass";
+    public void testUpdateTrainee() {
+        TraineeDto traineeDTO = new TraineeDto();
+        UserDto userDto = new UserDto();
+        userDto.setUsername("InesaHak");
+        traineeDTO.setUserDto(userDto);
+
         Trainee trainee = new Trainee();
+        User user = new User();
+        Trainee updatedTrainee = new Trainee();
+        TraineeDto updatedTraineeDto = new TraineeDto();
+        String password = "password";
 
-        when(EntityMapper.INSTANCE.traineeDTOToTrainee(traineeDTO)).thenReturn(trainee);
-        when(traineeDAO.updateTrainee(trainee)).thenReturn(trainee);
-        when(EntityMapper.INSTANCE.traineeToTraineeDTO(trainee)).thenReturn(traineeDTO);
-        when(userService.matchUsernameAndPassword(traineeDTO.getUser().getUsername(), password)).thenReturn(true);
+        when(entityMapper.toTrainee(traineeDTO)).thenReturn(trainee);
+        when(entityMapper.toUser(userDto)).thenReturn(user);
+        when(entityMapper.toTraineeDto(updatedTrainee)).thenReturn(updatedTraineeDto);
+        when(traineeDao.updateTrainee(trainee)).thenReturn(updatedTrainee);
+        when(userService.matchUsernameAndPassword(userDto.getUsername(), password)).thenReturn(true);
 
-        TraineeDTO result = traineeService.updateTrainee(traineeDTO, password);
-        assertNotNull(result);
+        TraineeDto result = traineeService.updateTrainee(traineeDTO, password);
 
-        verify(traineeDAO, times(1)).updateTrainee(trainee);
+        verify(userService, times(1)).matchUsernameAndPassword(userDto.getUsername(), password);
+        verify(traineeDao, times(1)).updateTrainee(trainee);
+        verify(entityMapper, times(1)).toTraineeDto(updatedTrainee);
+
+        assertEquals(updatedTraineeDto, result);
+        assertEquals(user, trainee.getUser());
     }
 
     @Test
-    void testDeleteTraineeByUsername() {
+    public void testDeleteTraineeByUsername() {
         String username = "testUser";
-        String password = "testPass";
-
+        String password = "testPassword";
         when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
 
         traineeService.deleteTraineeByUsername(username, password);
 
-        verify(traineeDAO, times(1)).deleteTraineeByUsername(username);
+        verify(traineeDao, times(1)).deleteTraineeByUsername(username);
     }
 
     @Test
-    void testChangeTraineePassword() {
+    public void testMatchUsernameAndPassword() {
         String username = "testUser";
-        String newPassword = "newPass";
-        String password = "testPass";
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUsername(username);
+        String password = "testPassword";
+        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
 
-        when(userService.getUserByUsername(username)).thenReturn(userDTO);
+        boolean result = traineeService.matchUsernameAndPassword(username, password);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void testChangeTraineePassword() {
+        String username = "testUser";
+        String password = "testPassword";
+        String newPassword = "newPassword";
+        UserDto userDto = new UserDto();
+        userDto.setPassword(password);
+        when(userService.getUserByUsername(username)).thenReturn(userDto);
         when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
 
         traineeService.changeTraineePassword(username, newPassword, password);
 
-        verify(userService, times(1)).updateUser(userDTO);
+        verify(userService, times(1)).updateUser(any(UserDto.class));
     }
 
     @Test
-    void testActivateDeactivateTrainee() {
-        String username = "testUser";
+    void activateDeactivateTrainer() {
+        String username = "john.doe";
+        String password = "password";
         boolean isActive = true;
-        String password = "testPass";
-        Trainee trainee = new Trainee();
 
+        Trainee trainee = new Trainee();
+        User user = new User();
+        trainee.setUser(user);
+        UserDto userDto = new UserDto();
+
+        when(traineeDao.getTraineeByUsername(username)).thenReturn(trainee);
         when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
-        when(traineeDAO.getTraineeByUsername(username)).thenReturn(trainee);
+        when(entityMapper.toUserDto(user)).thenReturn(userDto);
 
         traineeService.activateDeactivateTrainee(username, isActive, password);
 
-        verify(traineeDAO, times(1)).getTraineeByUsername(username);
-        verify(userService, times(1)).updateUser(EntityMapper.INSTANCE.userToUserDTO(trainee.getUser()));
+        verify(userService, times(1)).matchUsernameAndPassword(username, password);
+        verify(traineeDao, times(1)).getTraineeByUsername(username);
+        verify(userService, times(1)).updateUser(userDto);
     }
 
     @Test
-    void testUpdateTraineeTrainers() {
+    public void testGetTraineeTrainings() {
         String username = "testUser";
-        String password = "testPass";
-        Set<TrainerDTO> trainerDTOs = new HashSet<>();
-        Trainee trainee = new Trainee();
-
+        Date fromDate = new Date();
+        Date toDate = new Date();
+        String trainerName = "trainer";
+        String trainingType = "type";
+        String password = "password";
+        List<Training> trainings = Arrays.asList(new Training(), new Training());
+        List<TrainingDto> trainingDtos = Arrays.asList(new TrainingDto(), new TrainingDto());
+        when(traineeDao.getTraineeTrainings(username, fromDate, toDate, trainerName, trainingType)).thenReturn(trainings);
+        when(entityMapper.toTrainingDto(any(Training.class))).thenReturn(new TrainingDto());
         when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
-        when(traineeDAO.getTraineeByUsername(username)).thenReturn(trainee);
 
-        traineeService.updateTraineeTrainers(username, trainerDTOs, password);
+        List<TrainingDto> result = traineeService.getTraineeTrainings(username, fromDate, toDate, trainerName, trainingType, password);
 
-        verify(traineeDAO, times(1)).updateTrainee(trainee);
+        assertNotNull(result);
+        assertEquals(trainingDtos.size(), result.size());
+    }
+
+    @Test
+    public void testUpdateTraineeTrainers() {
+        String username = "testUser";
+        Set<TrainerDto> trainerDtos = new HashSet<>(Arrays.asList(new TrainerDto(), new TrainerDto()));
+        String password = "password";
+        Trainee trainee = new Trainee();
+        when(traineeDao.getTraineeByUsername(username)).thenReturn(trainee);
+        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
+
+        traineeService.updateTraineeTrainers(username, trainerDtos, password);
+
+        verify(traineeDao, times(1)).updateTrainee(any(Trainee.class));
     }
 }
