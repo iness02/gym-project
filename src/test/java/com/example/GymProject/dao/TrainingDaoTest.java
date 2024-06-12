@@ -1,114 +1,82 @@
 package com.example.GymProject.dao;
 
 import com.example.GymProject.config.AppConfig;
-import com.example.GymProject.model.Trainee;
-import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.Training;
-import com.example.GymProject.model.TrainingType;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {AppConfig.class})
+@EnableTransactionManagement
 public class TrainingDaoTest {
-    @Autowired
+    @Mock
+    private SessionFactory sessionFactory;
+
+    @Mock
+    private Session session;
+
+
+    @Mock
+    private Query<Training> query;
+
+    @InjectMocks
     private TrainingDao trainingDao;
 
     @BeforeEach
-    void deleteDataFromDao() {
-        for (Training training : trainingDao.findAll()) {
-            if (trainingDao.containsKey(training.getTrainingName())) {
-                trainingDao.delete(training.getTrainingName());
-            }
-        }
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        when(sessionFactory.getCurrentSession()).thenReturn(session);
     }
 
     @Test
-    public void containsTrainingTest() {
-        Trainee trainee = new Trainee();
-        trainee.setUserId("trainee");
+    public void testAddTraining() {
+        Training training = new Training();
+        training.setId(1L);
 
-        Trainer trainer = new Trainer();
-        trainer.setUserId("trainer");
-        Training training = new Training(trainee, trainer,
-                "myFirstTraining", TrainingType.FITNESS, LocalDate.now(), 5);
+        Training result = trainingDao.addTraining(training);
 
-        trainingDao.create(training);
+        verify(sessionFactory.getCurrentSession(), times(1)).persist(training);
+        assertEquals(training, result);
+    }
 
-        assertTrue(trainingDao.containsKey("myFirstTraining"));
+
+    @Test
+    public void testGetAllTrainings() {
+        List<Training> trainings = Arrays.asList(new Training(), new Training());
+        when(session.createQuery("Select t FROM Training t", Training.class)).thenReturn(query);
+        when(query.list()).thenReturn(trainings);
+
+        List<Training> result = trainingDao.getAllTrainings();
+
+        verify(sessionFactory.getCurrentSession(), times(1)).createQuery("Select t FROM Training t", Training.class);
+        verify(query, times(1)).list();
+        assertEquals(trainings, result);
     }
 
     @Test
-    public void createTrainingTest() {
-        Trainee trainee = new Trainee();
-        trainee.setUserId("trainee");
+    public void testUpdateTraining() {
+        Training training = new Training();
+        training.setTrainingName("Yoga");
 
-        Trainer trainer = new Trainer();
-        trainer.setUserId("trainer");
-        Training training = new Training(trainee, trainer,
-                "myFirstTraining", TrainingType.FITNESS, LocalDate.now(), 5);
+        Training result = trainingDao.updateTraining(training);
 
-        trainingDao.create(training);
-
-        Training newTraining = trainingDao.select(training.getTrainingName());
-
-        assertEquals(training.getTrainingName(), newTraining.getTrainingName());
-        assertEquals(training.getTrainingDuration(), newTraining.getTrainingDuration());
-        assertEquals(training.getTraineeId(), newTraining.getTraineeId());
-        assertEquals(training.getTrainerId(), newTraining.getTrainerId());
-    }
-
-    @Test
-    public void selectTrainingTest() {
-        Trainee trainee = new Trainee();
-        trainee.setUserId("trainee");
-
-        Trainer trainer = new Trainer();
-        trainer.setUserId("trainer");
-        Training training = new Training(trainee, trainer,
-                "myFirstTraining", TrainingType.FITNESS, LocalDate.now(), 5);
-
-        trainingDao.create(training);
-
-        Training expected = trainingDao.select(training.getTrainingName());
-
-        assertNotNull(expected);
-        assertEquals(expected, training);
-    }
-
-    @Test
-    public void selectNonExistedTrainingFailTest() {
-        assertThrows(IllegalArgumentException.class, () -> trainingDao.select("test"));
-    }
-
-    @Test
-    public void selectAllTraining() {
-        Trainee trainee = new Trainee();
-        trainee.setUserId("trainee");
-
-        Trainer trainer = new Trainer();
-        trainer.setUserId("trainer");
-        Training training1 = new Training(trainee, trainer,
-                "myFirstTraining", TrainingType.FITNESS, LocalDate.now(), 5);
-        Training training2 = new Training(trainee, trainer,
-                "mySecondTraining", TrainingType.FITNESS, LocalDate.now(), 5);
-
-        trainingDao.create(training1);
-        trainingDao.create(training2);
-
-        assertEquals(2, trainingDao.findAll().size());
-    }
-
-    @Test
-    public void deleteNonExistedTrainingFailTest() {
-        assertThrows(IllegalArgumentException.class, () -> trainingDao.delete("test"));
+        verify(sessionFactory.getCurrentSession(), times(1)).merge(training);
+        assertEquals(training, result);
     }
 }

@@ -2,136 +2,177 @@ package com.example.GymProject.dao;
 
 import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.model.Trainer;
-import com.example.GymProject.model.TrainingType;
+import com.example.GymProject.model.Training;
+import com.example.GymProject.model.User;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {AppConfig.class})
+@EnableTransactionManagement
 public class TrainerDaoTest {
-    @Autowired
+    @InjectMocks
     private TrainerDao trainerDao;
 
+    @Mock
+    private SessionFactory sessionFactory;
+
+    @Mock
+    private Session session;
+
+    @Mock
+    private Query<Trainer> trainerQuery;
+
+    @Mock
+    private Query<Training> trainingQuery;
+
     @BeforeEach
-    void deleteDataFromDao() {
-        for (Trainer trainer : trainerDao.findAll()) {
-            if (trainerDao.containsKey(trainer.getUserId())) {
-                trainerDao.delete(trainer.getUserId());
-            }
-        }
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        when(sessionFactory.getCurrentSession()).thenReturn(session);
     }
 
     @Test
-    public void containsTrainerTest() {
-        Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
-                TrainingType.FITNESS, "inesa123");
+    public void testCreateTrainer() {
+        Trainer trainer = new Trainer();
+        User user = new User();
+        user.setUsername("testuser");
+        trainer.setUser(user);
 
-        trainerDao.create(trainer);
+        doNothing().when(session).persist(trainer);
 
-        assertTrue(trainerDao.containsKey("inesa123"));
-    }
+        Trainer result = trainerDao.createTrainer(trainer);
 
-    @Test
-    public void selectTrainerTest() {
-        Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
-                TrainingType.FITNESS, "inesa123");
-
-        trainerDao.create(trainer);
-
-        Trainer result = trainerDao.select("inesa123");
         assertNotNull(result);
-        assertEquals(trainer, result);
+        assertEquals(trainer.getUser().getUsername(), result.getUser().getUsername());
+        verify(session, times(1)).persist(trainer);
     }
 
     @Test
-    public void selectNonExistedTrainerFailTest() {
-        assertThrows(IllegalArgumentException.class, () -> trainerDao.select("test"));
+    public void testGetTrainerByUsername() {
+        String username = "testuser";
+        Trainer trainer = new Trainer();
+        User user = new User();
+        user.setUsername(username);
+        trainer.setUser(user);
+
+        when(session.createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class)).thenReturn(trainerQuery);
+        when(trainerQuery.setParameter("username", username)).thenReturn(trainerQuery);
+        when(trainerQuery.uniqueResult()).thenReturn(trainer);
+
+        Trainer result = trainerDao.getTrainerByUsername(username);
+        assertNotNull(result);
+        assertEquals(username, result.getUser().getUsername());
+        verify(session, times(1)).createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class);
     }
 
     @Test
-    public void selectAllTrainersTest() {
-        Trainer trainer1 = new Trainer("Inesa", "Hakobyan", true,
-                TrainingType.FITNESS, "inesa123");
-        Trainer trainer2 = new Trainer("Nune", "Karapetyan", true,
-                TrainingType.FITNESS, "nune123");
+    public void testGetTrainerByUsernameNotFound() {
+        String username = "testuser";
 
-        trainerDao.create(trainer1);
-        trainerDao.create(trainer2);
+        when(session.createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class)).thenReturn(trainerQuery);
+        when(trainerQuery.setParameter("username", username)).thenReturn(trainerQuery);
+        when(trainerQuery.uniqueResult()).thenReturn(null);
 
-        assertEquals(3, trainerDao.findAll().size());
+        Trainer result = trainerDao.getTrainerByUsername(username);
+        assertNull(result);
+        verify(session, times(1)).createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class);
     }
 
     @Test
-    public void createTrainerTest() {
-        Trainer trainer1 = new Trainer("Inesa", "Hakobyan", true,
-                TrainingType.FITNESS, "inesa123");
-        trainerDao.create(trainer1);
+    public void testUpdateTrainer() {
+        Trainer trainer = new Trainer();
+        User user = new User();
+        user.setUsername("testuser");
+        trainer.setUser(user);
 
-        Trainer trainer2 = trainerDao.select("inesa123");
+        when(session.merge(trainer)).thenReturn(trainer);
 
-        assertEquals(trainer1.getFirstName(), trainer2.getFirstName());
-        assertEquals(trainer1.getLastName(), trainer2.getLastName());
-        assertEquals(trainer1.getActive(), trainer2.getActive());
-        assertEquals(trainer1.getUserId(), trainer2.getUserId());
+        Trainer result = trainerDao.updateTrainer(trainer);
+        assertNotNull(result);
+        assertEquals(trainer.getUser().getUsername(), result.getUser().getUsername());
+        verify(session, times(1)).merge(trainer);
     }
 
     @Test
-    public void createTrainerWithNullUserIDFailTest() {
-        Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
-                TrainingType.FITNESS, null);
+    public void testDeleteTrainerByUsername() {
+        String username = "testuser";
+        Trainer trainer = new Trainer();
+        User user = new User();
+        user.setUsername(username);
+        trainer.setUser(user);
 
-        assertThrows(IllegalArgumentException.class, () -> trainerDao.create(trainer));
+        when(session.createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class)).thenReturn(trainerQuery);
+        when(trainerQuery.setParameter("username", username)).thenReturn(trainerQuery);
+        when(trainerQuery.uniqueResult()).thenReturn(trainer);
+        doNothing().when(session).remove(trainer);
+        doNothing().when(session).remove(user);
+
+        trainerDao.deleteTrainerByUsername(username);
+
+        verify(session, times(1)).remove(trainer);
+        verify(session, times(1)).remove(user);
     }
 
     @Test
-    public void deleteTrainerTest() {
-        Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
-                TrainingType.FITNESS, "inesa123");
+    public void testGetTrainerTrainings() {
+        String username = "trainer";
+        Date fromDate = new Date();
+        Date toDate = new Date();
+        String traineeName = "trainee";
+        List<Training> trainings = new ArrayList<>();
+        trainings.add(new Training());
 
-        trainerDao.create(trainer);
+        when(session.createQuery("SELECT t FROM Training t WHERE t.trainer.user.username = :username " +
+                "AND t.trainingDate BETWEEN :fromDate AND :toDate " +
+                "AND t.trainee.user.username = :traineeName", Training.class)).thenReturn(trainingQuery);
+        when(trainingQuery.setParameter("username", username)).thenReturn(trainingQuery);
+        when(trainingQuery.setParameter("fromDate", fromDate)).thenReturn(trainingQuery);
+        when(trainingQuery.setParameter("toDate", toDate)).thenReturn(trainingQuery);
+        when(trainingQuery.setParameter("traineeName", traineeName)).thenReturn(trainingQuery);
+        when(trainingQuery.getResultList()).thenReturn(trainings);
 
-        trainerDao.delete("inesa123");
+        List<Training> result = trainerDao.getTrainerTrainings(username, fromDate, toDate, traineeName);
 
-        assertEquals(2, trainerDao.findAll().size());
+        assertEquals(1, result.size());
+        verify(session, times(1)).createQuery("SELECT t FROM Training t WHERE t.trainer.user.username = :username " +
+                "AND t.trainingDate BETWEEN :fromDate AND :toDate " +
+                "AND t.trainee.user.username = :traineeName", Training.class);
     }
 
     @Test
-    public void deleteNonExistedTrainerFailTest() {
-        Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
-                TrainingType.FITNESS, "inesa123");
-        trainerDao.create(trainer);
+    public void testGetAllTrainers() {
 
-        assertThrows(IllegalArgumentException.class, () -> trainerDao.delete("inesa1234"));
+        Trainer trainer1 = new Trainer();
+        trainer1.setId(1L);
+        Trainer trainer2 = new Trainer();
+        trainer2.setId(2L);
+        List<Trainer> trainers = List.of(trainer1, trainer2);
+
+        when(session.createQuery("SELECT t FROM Trainer t", Trainer.class))
+                .thenReturn(mock(org.hibernate.query.Query.class));
+        when(session.createQuery("SELECT t FROM Trainer t", Trainer.class).getResultList())
+                .thenReturn(trainers);
+
+        List<Trainer> result = trainerDao.getAllTrainers();
+
+        assertEquals(trainers, result);
     }
-
-    @Test
-    public void updateTrainerTest() {
-        Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
-                TrainingType.FITNESS, "inesa123");
-        Trainer newTrainer = new Trainer("Mane", "Avagyan", true,
-                TrainingType.FITNESS, "inesa123");
-
-        trainerDao.create(trainer);
-        trainerDao.update("inesa123", newTrainer);
-
-        assertNotEquals(trainer.getFirstName(), trainerDao.select("inesa123").getFirstName());
-        assertNotEquals(trainer.getLastName(), trainerDao.select("inesa123").getLastName());
-        assertEquals(trainer.getSpecialization(), trainerDao.select("inesa123").getSpecialization());
-    }
-
-    @Test
-    public void updateNonExistedTrainerFailTest() {
-        Trainer trainer = new Trainer("Inesa", "Hakobyan", true,
-                TrainingType.FITNESS, null);
-
-        assertThrows(IllegalArgumentException.class, () -> trainerDao.update(trainer.getUserId(), trainer));
-    }
-
-
 }

@@ -2,158 +2,143 @@ package com.example.GymProject.dao;
 
 import com.example.GymProject.config.AppConfig;
 import com.example.GymProject.model.Trainee;
+import com.example.GymProject.model.Training;
+import com.example.GymProject.model.User;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {AppConfig.class})
+@EnableTransactionManagement
 public class TraineeDaoTest {
-    @Autowired
+    @InjectMocks
     private TraineeDao traineeDao;
 
+    @Mock
+    private SessionFactory sessionFactory;
+
+    @Mock
+    private Session session;
+
+    @Mock
+    private Query<Trainee> traineeQuery;
+
+    @Mock
+    private Query<Training> trainingQuery;
+
     @BeforeEach
-    void deleteDataFromDaoTest() {
-        for (Trainee trainee : traineeDao.findAll()) {
-            if (traineeDao.containsKey(trainee.getUserId())) {
-                traineeDao.delete(trainee.getUserId());
-            }
-        }
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        when(sessionFactory.getCurrentSession()).thenReturn(session);
     }
 
-    @Test
-    public void containsTraineeTest() {
-        Trainee trainee = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002, 9, 22),
-                "Yerevan", "inesa123");
-
-        traineeDao.create(trainee);
-
-        assertTrue(traineeDao.containsKey("inesa123"));
-    }
 
     @Test
-    public void selectTraineeTest() {
-        Trainee trainee = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002, 9, 22),
-                "Yerevan", "inesa123");
+    public void testCreateTrainee() {
+        Trainee trainee = new Trainee();
+        User user = new User();
+        user.setUsername("testuser");
+        trainee.setUser(user);
 
+        doNothing().when(session).persist(trainee);
 
-        traineeDao.create(trainee);
+        Trainee result = traineeDao.createTrainee(trainee);
 
-        Trainee result = traineeDao.select("inesa123");
         assertNotNull(result);
-        assertEquals(trainee, result);
+        assertEquals(trainee.getUser().getUsername(), result.getUser().getUsername());
+        verify(session, times(1)).persist(trainee);
     }
 
     @Test
-    public void selectTraineeFailTest() {
-        assertThrows(IllegalArgumentException.class, () -> traineeDao.select("test"));
+    public void testGetTraineeByUsername() {
+        String username = "testuser";
+        Trainee trainee = new Trainee();
+        User user = new User();
+        user.setUsername(username);
+        trainee.setUser(user);
+
+        when(session.createQuery("SELECT t FROM Trainee t WHERE t.user.username = :username", Trainee.class))
+                .thenReturn(traineeQuery);
+        when(traineeQuery.setParameter("username", username)).thenReturn(traineeQuery);
+        when(traineeQuery.uniqueResult()).thenReturn(trainee);
+
+        Trainee result = traineeDao.getTraineeByUsername(username);
+
+        assertNotNull(result);
+        assertEquals(username, result.getUser().getUsername());
+        verify(session, times(1)).createQuery("SELECT t FROM Trainee t WHERE t.user.username = :username", Trainee.class);
+        verify(traineeQuery, times(1)).setParameter("username", username);
+        verify(traineeQuery, times(1)).uniqueResult();
     }
 
     @Test
-    public void selectAllTraineesTest() {
-        Trainee trainee1 = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002, 9, 22),
-                "Yerevan", "inesa123");
+    public void testUpdateTrainee() {
+        Trainee trainee = new Trainee();
+        User user = new User();
+        user.setUsername("testuser");
+        trainee.setUser(user);
 
-        Trainee trainee2 = new Trainee("Elen", "Poghosyan",
-                true, LocalDate.of(2002, 8, 8),
-                "Yerevan", "elen123");
+        when(session.merge(trainee)).thenReturn(trainee);
 
-        traineeDao.create(trainee1);
-        traineeDao.create(trainee2);
+        Trainee result = traineeDao.updateTrainee(trainee);
 
-        assertEquals(2, traineeDao.findAll().size());
+        assertNotNull(result);
+        assertEquals(trainee.getUser().getUsername(), result.getUser().getUsername());
+        verify(session, times(1)).merge(trainee);
     }
 
     @Test
-    public void createTraineeTest() {
-        Trainee trainee1 = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002, 9, 22),
-                "Yerevan", "inesa123");
+    public void testGetTraineeTrainings() {
+        String username = "testuser";
+        Date fromDate = new Date();
+        Date toDate = new Date();
+        String trainerName = "testtrainer";
+        String trainingType = "testtype";
 
+        when(session.createQuery("SELECT t FROM Training t WHERE t.trainee.user.username = :username " +
+                "AND t.trainingDate BETWEEN :fromDate AND :toDate " +
+                "AND t.trainer.user.username = :trainerName " +
+                "AND t.trainingType.trainingTypeName = :trainingType", Training.class))
+                .thenReturn(trainingQuery);
+        when(trainingQuery.setParameter("username", username)).thenReturn(trainingQuery);
+        when(trainingQuery.setParameter("fromDate", fromDate)).thenReturn(trainingQuery);
+        when(trainingQuery.setParameter("toDate", toDate)).thenReturn(trainingQuery);
+        when(trainingQuery.setParameter("trainerName", trainerName)).thenReturn(trainingQuery);
+        when(trainingQuery.setParameter("trainingType", trainingType)).thenReturn(trainingQuery);
+        when(trainingQuery.getResultList()).thenReturn(new ArrayList<>());
 
-        traineeDao.create(trainee1);
+        List<Training> result = traineeDao.getTraineeTrainings(username, fromDate, toDate, trainerName, trainingType);
 
-        Trainee trainee2 = traineeDao.select("inesa123");
-
-        assertEquals(trainee1.getAddress(), trainee2.getAddress());
-        assertEquals(trainee1.getFirstName(), trainee2.getFirstName());
-        assertEquals(trainee1.getLastName(), trainee2.getLastName());
-        assertEquals(trainee1.getActive(), trainee2.getActive());
-        assertEquals(trainee1.getDob(), trainee2.getDob());
-        assertEquals(trainee1.getUserId(), trainee2.getUserId());
-    }
-
-    @Test
-    public void createTraineeWithNullUserIdFailTest() {
-        Trainee trainee = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002, 9, 22),
-                "Yerevan", null);
-
-        assertThrows(IllegalArgumentException.class, () -> traineeDao.create(trainee));
-    }
-
-    @Test
-    public void deleteTraineeFromDaoTest() {
-        Trainee trainee = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002, 9, 22),
-                "Yerevan", "inesa123");
-
-
-        traineeDao.create(trainee);
-
-        traineeDao.delete("inesa123");
-
-        assertEquals(1, traineeDao.findAll().size());
-    }
-
-    @Test
-    public void deleteNonExistedTraineeFailTest() {
-        Trainee trainee = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002, 9, 22),
-                "Yerevan", "inesa123");
-
-
-        traineeDao.create(trainee);
-
-        assertThrows(IllegalArgumentException.class, () -> traineeDao.delete("inesa1234"));
-    }
-
-    @Test
-    public void updateTraineeTest() {
-        Trainee trainee = new Trainee("Inesa", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002, 9, 22),
-                "Yerevan", "inesa123");
-
-        Trainee newTrainee = new Trainee("Nune", "Karapetyan", "Nune.Karapetyan",
-                "password", true, LocalDate.of(2002, 9, 22),
-                "Yerevan", "inesa123");
-
-        traineeDao.create(trainee);
-        traineeDao.update("inesa123", newTrainee);
-
-        assertNotEquals(trainee.getFirstName(), traineeDao.select("inesa123").getFirstName());
-        assertNotEquals(trainee.getLastName(), traineeDao.select("inesa123").getLastName());
-        assertEquals(trainee.getDob(), traineeDao.select("inesa123").getDob());
-    }
-
-    @Test
-    public void updateNonExistedTraineeFailTest() {
-        Trainee trainee = new Trainee("Nare", "Hakobyan", "Inesa.Hakobyan",
-                "password", true, LocalDate.of(2002, 9, 22),
-                "Yerevan");
-
-
-        assertThrows(IllegalArgumentException.class, () -> traineeDao.update(trainee.getUserId(), trainee));
+        assertNotNull(result);
+        assertEquals(0, result.size());
+        verify(session, times(1)).createQuery("SELECT t FROM Training t WHERE t.trainee.user.username = :username " +
+                "AND t.trainingDate BETWEEN :fromDate AND :toDate " +
+                "AND t.trainer.user.username = :trainerName " +
+                "AND t.trainingType.trainingTypeName = :trainingType", Training.class);
+        verify(trainingQuery, times(1)).setParameter("username", username);
+        verify(trainingQuery, times(1)).setParameter("fromDate", fromDate);
+        verify(trainingQuery, times(1)).setParameter("toDate", toDate);
+        verify(trainingQuery, times(1)).setParameter("trainerName", trainerName);
+        verify(trainingQuery, times(1)).setParameter("trainingType", trainingType);
+        verify(trainingQuery, times(1)).getResultList();
     }
 
 }

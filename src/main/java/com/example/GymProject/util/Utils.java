@@ -18,41 +18,6 @@ public class Utils {
     private static StringBuilder sb;
     private static Set<String> existingUsernames = new HashSet<>();
 
-    public static String generateUsername(String firstName, String lastName, boolean exists) {
-        sb = new StringBuilder();
-        logger.info("Generating username");
-        sb.append(firstName).append(".").append(lastName);
-
-        String baseUsername = sb.toString();
-        String newUsername = baseUsername;
-
-        if (exists) {
-            logger.info("Appending serial number to the username");
-            if (!existingUsernames.contains(newUsername + "0")) {
-                newUsername += "0";
-            } else {
-                int maxSerialNumber = 0;
-                for (String username : existingUsernames) {
-                    if (username.startsWith(baseUsername) && username.length() > baseUsername.length()) {
-                        String suffix = username.substring(baseUsername.length());
-                        try {
-                            int number = Integer.parseInt(suffix);
-                            if (number > maxSerialNumber) {
-                                maxSerialNumber = number;
-                            }
-                        } catch (NumberFormatException e) {
-                            // Ignore non-numeric suffix
-                        }
-                    }
-                }
-                newUsername += (maxSerialNumber + 1);
-            }
-        }
-
-        existingUsernames.add(newUsername);
-        return newUsername;
-    }
-
     public static String generatePassword() {
         Random random = new Random();
         sb = new StringBuilder();
@@ -62,8 +27,4 @@ public class Utils {
         return sb.toString();
     }
 
-    public static boolean usernameExists(List<String> usernames, User user) {
-        String username = generateUsername(user.getFirstName(), user.getLastName(), false);
-        return usernames.contains(username);
-    }
 }
