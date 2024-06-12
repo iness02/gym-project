@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 
 @Repository
-@EnableTransactionManagement
 public class UserDao {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
     @Autowired

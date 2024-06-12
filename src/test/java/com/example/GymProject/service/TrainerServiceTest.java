@@ -7,6 +7,7 @@ import com.example.GymProject.dto.TrainerDto;
 import com.example.GymProject.dto.TrainingDto;
 import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.mapper.EntityMapper;
+import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.Training;
 import com.example.GymProject.model.User;
@@ -23,8 +24,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -142,25 +143,43 @@ class TrainerServiceTest {
     }
 
     @Test
-    void activateDeactivateTrainer() {
-        String username = "john.doe";
-        String password = "password";
-        boolean isActive = true;
-
+    public void testActivateUser() {
+        String username = "testuser";
+        String password = "testpass";
         Trainer trainer = new Trainer();
         User user = new User();
+        user.setUsername(username);
+        user.setIsActive(false);
         trainer.setUser(user);
-        UserDto userDto = new UserDto();
 
         when(trainerDao.getTrainerByUsername(username)).thenReturn(trainer);
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
-        when(entityMapper.toUserDto(user)).thenReturn(userDto);
+        when(entityMapper.toUserDto(user)).thenReturn(new UserDto());
+        when(trainerService.isAuthenticated(username,password)).thenReturn(true);
 
-        trainerService.activateDeactivateTrainer(username, isActive, password);
+        trainerService.activate(username, password);
 
-        verify(userService, times(1)).matchUsernameAndPassword(username, password);
-        verify(trainerDao, times(1)).getTrainerByUsername(username);
-        verify(userService, times(1)).updateUser(userDto);
+        verify(userService).updateUser(any(UserDto.class));
+        assertTrue(user.getIsActive());
+    }
+
+    @Test
+    public void testDeactivateUser() {
+        String username = "testuser";
+        String password = "testpass";
+        Trainer trainer = new Trainer();
+        User user = new User();
+        user.setUsername(username);
+        user.setIsActive(true);
+        trainer.setUser(user);
+
+        when(trainerDao.getTrainerByUsername(username)).thenReturn(trainer);
+        when(entityMapper.toUserDto(user)).thenReturn(new UserDto());
+        when(trainerService.isAuthenticated(username,password)).thenReturn(true);
+
+        trainerService.activate(username, password);
+
+        verify(userService).updateUser(any(UserDto.class));
+        assertTrue(user.getIsActive());
     }
 
     @Test
@@ -181,5 +200,23 @@ class TrainerServiceTest {
 
         assertEquals(1, result.size());
         verify(trainerDao, times(1)).getTrainerTrainings(username, fromDate, toDate, traineeName);
+    }
+
+    @Test
+    void testIsAuthenticated_ValidCredentials() {
+        String username = "validUser";
+        String password = "validPassword";
+
+        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
+        assertTrue(trainerService.isAuthenticated(username, password));
+    }
+
+    @Test
+    void testIsAuthenticated_InvalidCredentials() {
+        String username = "invalidUser";
+        String password = "invalidPassword";
+
+        when(userService.matchUsernameAndPassword(username, password)).thenReturn(false);
+        assertFalse(trainerService.isAuthenticated(username, password));
     }
 }

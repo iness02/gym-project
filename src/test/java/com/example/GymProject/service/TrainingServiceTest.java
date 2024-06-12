@@ -20,8 +20,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -125,5 +124,22 @@ class TrainingServiceTest {
         verify(entityMapper, never()).toTraining(trainingDto);
         verify(trainingDao, never()).updateTraining(any(Training.class));
         verify(entityMapper, never()).toTrainingDto(any(Training.class));
+    }
+    @Test
+    void testIsAuthenticated_ValidCredentials() {
+        String username = "validUser";
+        String password = "validPassword";
+
+        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
+        assertTrue(trainingService.isAuthenticated(username, password));
+    }
+
+    @Test
+    void testIsAuthenticated_InvalidCredentials() {
+        String username = "invalidUser";
+        String password = "invalidPassword";
+
+        when(userService.matchUsernameAndPassword(username, password)).thenReturn(false);
+        assertFalse(trainingService.isAuthenticated(username, password));
     }
 }

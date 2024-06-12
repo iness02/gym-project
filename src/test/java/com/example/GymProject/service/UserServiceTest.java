@@ -112,4 +112,17 @@ class UserServiceTest {
         verify(userDao).updateUser(user);
         verify(entityMapper).toUserDto(user);
     }
+
+    @Test
+    public void testGetNextAvailableUserId() {
+        long expectedMaxUserId = 100L;
+
+        when(userDao.findMaxUserId()).thenReturn(expectedMaxUserId);
+
+        long result = userService.getNextAvailableUserId();
+
+        assertEquals(expectedMaxUserId, result);
+        verify(userDao, times(1)).findMaxUserId();
+    }
+
 }

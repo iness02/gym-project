@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.List;
 
 @Repository
-@EnableTransactionManagement
 public class TrainerDao {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
     @Autowired

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.Date;
@@ -36,6 +37,7 @@ public class TrainerService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
+    @Transactional
     public TrainerDto createTrainer(TrainerDto trainerDto) {
         Assert.notNull(trainerDto, "TraineeDto cannot be null");
         Trainer trainer = entityMapper.toTrainer(trainerDto);
@@ -50,70 +52,113 @@ public class TrainerService {
     }
 
     public TrainerDto getTrainerByUsername(String username, String password) {
-        authenticate(username, password);
-        Assert.notNull(username, "Username cannot be null");
-        Trainer trainer = trainerDao.getTrainerByUsername(username);
-        UserDto userDto = entityMapper.toUserDto(trainer.getUser());
-        TrainerDto trainerDto = entityMapper.toTrainerDto(trainer);
-        trainerDto.setUserDto(userDto);
-        return trainerDto;
+        if(isAuthenticated(username, password)) {
+            Assert.notNull(username, "Username cannot be null");
+            Trainer trainer = trainerDao.getTrainerByUsername(username);
+            UserDto userDto = entityMapper.toUserDto(trainer.getUser());
+            TrainerDto trainerDto = entityMapper.toTrainerDto(trainer);
+            trainerDto.setUserDto(userDto);
+            return trainerDto;
+        }
+        logger.error("Authentication failed for trainee {}",username);
+        return null;
     }
 
 
     public TrainerDto updateTrainer(TrainerDto trainerDTO, String password) {
-        authenticate(trainerDTO.getUserDto().getUsername(), password);
-        Assert.notNull(trainerDTO, "TrainerDto cannot be null");
-        Trainer trainer = entityMapper.toTrainer(trainerDTO);
-        User user = entityMapper.toUser(trainerDTO.getUserDto());
-        trainer.setUser(user);
-        return entityMapper.toTrainerDto(trainerDao.updateTrainer(trainer));
+        if(isAuthenticated(trainerDTO.getUserDto().getUsername(), password)) {
+            Assert.notNull(trainerDTO, "TrainerDto cannot be null");
+            Trainer trainer = entityMapper.toTrainer(trainerDTO);
+            User user = entityMapper.toUser(trainerDTO.getUserDto());
+            trainer.setUser(user);
+            return entityMapper.toTrainerDto(trainerDao.updateTrainer(trainer));
+        }
+        logger.error("Authentication failed for trainee {}",trainerDTO.getUserDto().getUsername());
+        return null;
     }
 
 
     public void changeTrainerPassword(String username, String newPassword, String password) {
-        authenticate(username, password);
-        Assert.notNull(username, "Username cannot be null");
-        Assert.notNull(newPassword, "New password cannot be null");
-        UserDto userDTO = userService.getUserByUsername(username);
-        if (userDTO != null) {
-            userDTO.setPassword(newPassword);
-            userService.updateUser(userDTO);
-            logger.info("Password has successfully changed for trainer {}", username);
-        } else {
-            logger.warn("Cannot change password for trainer {} since such user was not found", username);
+        if(isAuthenticated(username, password)) {
+            Assert.notNull(username, "Username cannot be null");
+            Assert.notNull(newPassword, "New password cannot be null");
+            UserDto userDTO = userService.getUserByUsername(username);
+            if (userDTO != null) {
+                userDTO.setPassword(newPassword);
+                userService.updateUser(userDTO);
+                logger.info("Password has successfully changed for trainer {}", username);
+            } else {
+                logger.warn("Cannot change password for trainer {} since such user was not found", username);
+            }
         }
+        logger.error("Authentication failed for trainee {}",username);
     }
 
     public void deleteTrainerByUsername(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
-        authenticate(username, password);
-        trainerDao.deleteTrainerByUsername(username);
+        if(isAuthenticated(username, password)) {
+            trainerDao.deleteTrainerByUsername(username);
+        }
+        logger.error("Authentication failed for trainee {}",username);
+
     }
 
     public void activateDeactivateTrainer(String username, boolean isActive, String password) {
-        authenticate(username, password);
+        if(isAuthenticated(username, password)) {
+            Assert.notNull(username, "Username cannot be null");
+            Trainer trainer = trainerDao.getTrainerByUsername(username);
+            if (trainer != null) {
+                logger.info("Activation/Deactivation was successfully performed for trainer {}", username);
+                trainer.getUser().setIsActive(isActive);
+                userService.updateUser(entityMapper.toUserDto(trainer.getUser()));
+            }
+        }
+        logger.error("Authentication failed for trainee {}",username);
+
+    }
+
+    public void activate(String username,String password){
+        if(isAuthenticated(username, password)) {
+            Assert.notNull(username, "Username cannot be null");
+            Trainer trainer = trainerDao.getTrainerByUsername(username);
+            if (trainer != null) {
+                logger.info("Activation was successfully performed for trainer {}", username);
+                trainer.getUser().setIsActive(true);
+                userService.updateUser(entityMapper.toUserDto(trainer.getUser()));
+            }
+        }
+        logger.error("Authentication failed for trainee {}",username);
+    }
+
+    public void deactivate(String username,String password){
+        if(isAuthenticated(username, password)) {
         Assert.notNull(username, "Username cannot be null");
         Trainer trainer = trainerDao.getTrainerByUsername(username);
         if (trainer != null) {
-            logger.info("Activation/Deactivation was successfully performed for trainer {}", username);
-            trainer.getUser().setIsActive(isActive);
+            logger.info("Deactivation was successfully performed for trainer {}", username);
+            trainer.getUser().setIsActive(false);
             userService.updateUser(entityMapper.toUserDto(trainer.getUser()));
+            }
         }
+        logger.error("Authentication failed for trainee {}",username);
+
     }
+
 
     public List<TrainingDto> getTrainerTrainings(String username, Date fromDate, Date toDate, String traineeName, String password) {
-        authenticate(username, password);
-        Assert.notNull(username, "Username cannot be null");
-        List<Training> trainings = trainerDao.getTrainerTrainings(username, fromDate, toDate, traineeName);
-        logger.info("Getting trainings for trainer {}", username);
-        return trainings.stream()
-                .map(entityMapper::toTrainingDto)
-                .collect(Collectors.toList());
+        if(isAuthenticated(username, password)) {
+            Assert.notNull(username, "Username cannot be null");
+            List<Training> trainings = trainerDao.getTrainerTrainings(username, fromDate, toDate, traineeName);
+            logger.info("Getting trainings for trainer {}", username);
+            return trainings.stream()
+                    .map(entityMapper::toTrainingDto)
+                    .collect(Collectors.toList());
+        }
+        logger.error("Authentication failed for trainee {}",username);
+        return null;
     }
 
-    private void authenticate(String username, String password) {
-        if (!userService.matchUsernameAndPassword(username, password)) {
-            throw new SecurityException("Authentication failed for username: " + username);
-        }
+    public boolean isAuthenticated(String username,String password){
+        return userService.matchUsernameAndPassword(username, password);
     }
 }

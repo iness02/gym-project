@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Repository
-@EnableTransactionManagement
 public class TrainingDao {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
     @Autowired

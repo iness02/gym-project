@@ -157,25 +157,42 @@ class TraineeServiceTest {
     }
 
     @Test
-    void activateDeactivateTrainer() {
-        String username = "john.doe";
-        String password = "password";
-        boolean isActive = true;
-
+    public void testActivateUser() {
+        String username = "testuser";
+        String password = "testpass";
         Trainee trainee = new Trainee();
         User user = new User();
+        user.setUsername(username);
+        user.setIsActive(false);
         trainee.setUser(user);
-        UserDto userDto = new UserDto();
 
         when(traineeDao.getTraineeByUsername(username)).thenReturn(trainee);
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
-        when(entityMapper.toUserDto(user)).thenReturn(userDto);
+        when(entityMapper.toUserDto(user)).thenReturn(new UserDto());
+        when(traineeService.isAuthenticated(username,password)).thenReturn(true);
+        traineeService.activate(username, password);
 
-        traineeService.activateDeactivateTrainee(username, isActive, password);
+        verify(userService).updateUser(any(UserDto.class));
+        assertTrue(user.getIsActive());
+    }
 
-        verify(userService, times(1)).matchUsernameAndPassword(username, password);
-        verify(traineeDao, times(1)).getTraineeByUsername(username);
-        verify(userService, times(1)).updateUser(userDto);
+    @Test
+    public void testDeactivateUser() {
+        String username = "testuser";
+        String password = "testpass";
+        Trainee trainee = new Trainee();
+        User user = new User();
+        user.setUsername(username);
+        user.setIsActive(true);
+        trainee.setUser(user);
+
+        when(traineeDao.getTraineeByUsername(username)).thenReturn(trainee);
+        when(entityMapper.toUserDto(user)).thenReturn(new UserDto());
+        when(traineeService.isAuthenticated(username,password)).thenReturn(true);
+
+        traineeService.activate(username, password);
+
+        verify(userService).updateUser(any(UserDto.class));
+        assertTrue(user.getIsActive());
     }
 
     @Test
@@ -210,5 +227,23 @@ class TraineeServiceTest {
         traineeService.updateTraineeTrainers(username, trainerDtos, password);
 
         verify(traineeDao, times(1)).updateTrainee(any(Trainee.class));
+    }
+
+    @Test
+    void testIsAuthenticated_ValidCredentials() {
+        String username = "validUser";
+        String password = "validPassword";
+
+        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
+        assertTrue(traineeService.isAuthenticated(username, password));
+    }
+
+    @Test
+    void testIsAuthenticated_InvalidCredentials() {
+        String username = "invalidUser";
+        String password = "invalidPassword";
+
+        when(userService.matchUsernameAndPassword(username, password)).thenReturn(false);
+        assertFalse(traineeService.isAuthenticated(username, password));
     }
 }

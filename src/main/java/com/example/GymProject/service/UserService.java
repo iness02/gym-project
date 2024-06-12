@@ -43,13 +43,13 @@ public class UserService {
         Boolean userNameExist = userDao.existsByUserName(baseUserName);
         if (userNameExist) {
             long nextUserId = getNextAvailableUserId() + 1L;
-            return baseUserName + Long.toString(nextUserId);
+            return baseUserName +nextUserId;
         } else {
             return baseUserName;
         }
     }
 
-    private long getNextAvailableUserId() {
+    public long getNextAvailableUserId() {
         return userDao.findMaxUserId();
     }
 

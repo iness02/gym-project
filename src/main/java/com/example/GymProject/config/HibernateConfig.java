@@ -9,6 +9,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -16,6 +17,7 @@ import java.util.Properties;
 @Configuration
 @ComponentScan(basePackages = "com.example")
 @PropertySource("classpath:application.properties")
+@EnableTransactionManagement
 public class HibernateConfig {
     @Value("${spring.datasource.url}")
     private String dbUrl;
