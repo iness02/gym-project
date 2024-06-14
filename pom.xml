@@ -4,6 +4,7 @@
 	<groupId>didorg</groupId>
 	<artifactId>spring-core</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
 	<name>Spring Core</name>
 	<description>A Spring Core-based CRM system for managing gym operations,
 		including trainee and trainer profiles, and training sessions.
@@ -102,7 +103,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
-			<version>6.1.8</version>
+			<version>6.1.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mapstruct</groupId>
@@ -115,9 +116,15 @@
 			<version>2.17.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>6.1.8</version>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-catalina</artifactId>
+			<version>11.0.0-M20</version>
 		</dependency>
 
 	</dependencies>

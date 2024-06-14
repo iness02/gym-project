@@ -11,6 +11,7 @@ import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Training;
 import com.example.GymProject.model.User;
+import com.example.GymProject.request.UserLogin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -45,33 +46,30 @@ class TraineeServiceTest {
 
     @Test
     public void testCreateTrainee() {
-        TraineeDto traineeDTO = new TraineeDto();
+        TraineeDto traineeDto = new TraineeDto();
         UserDto userDto = new UserDto();
-        userDto.setFirstName("test");
-        userDto.setLastName("user");
-        traineeDTO.setUserDto(userDto);
+        userDto.setUsername("user.name");
+        userDto.setPassword("testPass");
+        traineeDto.setUserDto(userDto);
 
         Trainee trainee = new Trainee();
         User user = new User();
-        Trainee createdTrainee = new Trainee();
-        TraineeDto createdTraineeDto = new TraineeDto();
+        user.setFirstName("user");
+        user.setLastName("name");
+        trainee.setUser(user);
 
-        when(entityMapper.toTrainee(traineeDTO)).thenReturn(trainee);
-        when(entityMapper.toUser(userDto)).thenReturn(user);
-        when(userService.generateUniqueUserName(user.getFirstName(), user.getLastName())).thenReturn("test.user");
-        when(entityMapper.toTraineeDto(createdTrainee)).thenReturn(createdTraineeDto);
-        when(traineeDao.createTrainee(any(Trainee.class))).thenReturn(createdTrainee);
+        when(entityMapper.toTrainee(any(TraineeDto.class))).thenReturn(trainee);
+        when(entityMapper.toUser(any(UserDto.class))).thenReturn(user);
+        when(userService.generateUniqueUserName(anyString(), anyString())).thenReturn("user.name");
+        when(traineeDao.createTrainee(any(Trainee.class))).thenReturn(trainee);
 
-        TraineeDto result = traineeService.createTrainee(traineeDTO);
+        UserLogin result = traineeService.createTrainee(traineeDto);
 
-        verify(userDao, times(1)).createUser(user);
-        verify(traineeDao, times(1)).createTrainee(trainee);
-        verify(entityMapper, times(1)).toTraineeDto(createdTrainee);
+        verify(userDao).createUser(any(User.class));
+        verify(traineeDao).createTrainee(any(Trainee.class));
 
-        assertEquals(createdTraineeDto, result);
-        assertEquals("test.user", user.getUsername());
-        assertEquals(true, user.getIsActive());
-        assertEquals(user, trainee.getUser());
+        assertEquals("user.name", result.getUsername());
+        assertEquals("testPass", result.getPassword());
     }
 
     @Test
