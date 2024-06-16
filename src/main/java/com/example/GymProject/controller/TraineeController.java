@@ -2,16 +2,20 @@ package com.example.GymProject.controller;
 
 import com.example.GymProject.dto.TraineeDto;
 import com.example.GymProject.dto.UserDto;
-import com.example.GymProject.request.TraineeRequest;
-import com.example.GymProject.request.UserLogin;
+import com.example.GymProject.mapper.EntityMapper;
+import com.example.GymProject.request.*;
+import com.example.GymProject.response.GetTraineeProfileResponse;
+import com.example.GymProject.response.GetTrainingResponse;
+import com.example.GymProject.response.TrainerForTraineeResponse;
+import com.example.GymProject.response.UpdateTraineeProfileResponse;
 import com.example.GymProject.service.TraineeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/trainees")
@@ -19,12 +23,84 @@ public class TraineeController {
 
     @Autowired
     private TraineeService traineeService;
+    @Autowired
+    private EntityMapper entityMapper;
 
     @PostMapping("/register")
-    public ResponseEntity<UserLogin> createTrainee(@Valid @RequestBody TraineeRequest traineeRequest){
-        UserDto userDto = new UserDto(traineeRequest.getFirstName(),traineeRequest.getLastName());
-        TraineeDto traineeDto = new TraineeDto(null,traineeRequest.getDateOfBirth(),traineeRequest.getAddress(),userDto,null);
-        UserLogin response = traineeService.createTrainee(traineeDto);
+    public ResponseEntity<UserPass> createTrainee(@Valid @RequestBody TraineeRegistrationRequest registrationRequest) {
+        UserDto userDto = new UserDto(registrationRequest.getFirstName(), registrationRequest.getLastName());
+        TraineeDto traineeDto = new TraineeDto(null, registrationRequest.getDateOfBirth(), registrationRequest.getAddress(), userDto, null);
+        UserPass response = traineeService.createTrainee(traineeDto);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/trainee")
+    public ResponseEntity<GetTraineeProfileResponse> getTraineeByUsername(@RequestParam("username") String username) {
+        GetTraineeProfileResponse response = traineeService.getTraineeByUsername(username);
+        System.out.println(response);
+        if (response == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PutMapping("/trainee")
+    public ResponseEntity<UpdateTraineeProfileResponse> updateCustomer(
+            @Valid @RequestBody UpdateTraineeProfileRequest newData) {
+
+        TraineeDto traineeDto = entityMapper.toTraineeDao(newData);
+        System.out.println("******" + newData.getDateOfBirth() + " trainee " + traineeDto.getDateOfBirth());
+        UpdateTraineeProfileResponse response = traineeService.updateTrainee(traineeDto);
+        System.out.println(response.getDateOfBirth());
+        if (response == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/trainee")
+    public ResponseEntity<String> deleteCustomer(
+            @Valid @RequestBody DeleteRequest request) {
+        System.out.println(request);
+        boolean isDeleted = traineeService.deleteTraineeByUsername(request.getUsername(), request.getPassword());
+        return isDeleted ? new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+    }
+
+    @PutMapping("/trainersList")
+    public ResponseEntity<List<TrainerForTraineeResponse>> updateCustomerInstructors(
+            @Valid @RequestBody UpdateTraineeTrainersRequest requestDto) {
+
+        List<TrainerForTraineeResponse> response = traineeService.
+                updateTraineeTrainers(requestDto.getUsername(), requestDto.getPassword(), requestDto.getTrainerUsernames());
+        if (response == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/trainingList")
+    public ResponseEntity<List<GetTrainingResponse>> getTrainingList(
+            @Valid @RequestBody GetTraineeTrainingsRequest request) {
+        List<GetTrainingResponse> response = traineeService.getTraineeTrainings(request);
+        if (response == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PatchMapping("/activate")
+    public ResponseEntity<String> activateTrainee(@Valid @RequestBody UserPass request){
+       return traineeService.activate(request.getUsername(), request.getPassword())
+               ? new ResponseEntity<>(HttpStatus.OK):new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+    @PatchMapping("/deactivate")
+    public ResponseEntity<String> deactivateTrainee(@Valid @RequestBody UserPass request){
+       return traineeService.deactivate(request.getUsername(), request.getPassword())
+               ? new ResponseEntity<>(HttpStatus.OK):new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 }

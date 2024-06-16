@@ -115,11 +115,8 @@ class TrainingServiceTest {
 
         when(userService.matchUsernameAndPassword(username, password)).thenReturn(false);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            trainingService.updateTraining(trainingDto, username, password);
-        });
 
-        assertEquals("Authentication failed for user " + username, exception.getMessage());
+        assertEquals(null, trainingService.updateTraining(trainingDto, username, password));
         verify(userService).matchUsernameAndPassword(username, password);
         verify(entityMapper, never()).toTraining(trainingDto);
         verify(trainingDao, never()).updateTraining(any(Training.class));

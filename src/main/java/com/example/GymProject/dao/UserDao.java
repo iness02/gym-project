@@ -1,6 +1,7 @@
 package com.example.GymProject.dao;
 
 import com.example.GymProject.model.User;
+import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,19 +53,52 @@ public class UserDao {
         }
     }
 
+      /*  @Transactional
+        public User updateUser(User user) {
+            try {
+                logger.info("Updating user with username: {}", user.getUsername());
+                sessionFactory.getCurrentSession().merge(user);
+               *//* sessionFactory.getCurrentSession().createQuery("UPDATE  User u  SET u.firstName=:firstName, u.lastName =:lastName, u.isActive=:isActive, u.password=:password WHERE u.username = :username")
+                        .setParameter("firstName", user.getFirstName())
+                        .setParameter("lastName", user.getLastName())
+                        .setParameter("isActive",user.getIsActive())
+                        .setParameter("password",user.getPassword())
+                        .setParameter("username",user.getUsername()).executeUpdate();*//*
+                logger.info("Successfully updated user with username: {}", user.getUsername());
+                return user;
+            } catch (Exception e) {
+                logger.error("Error occurred while updating user with username: {}", user.getUsername(), e);
+                throw e;
+            }
+        }*/
+
     @Transactional
     public User updateUser(User user) {
         try {
             logger.info("Updating user with username: {}", user.getUsername());
-            sessionFactory.getCurrentSession().merge(user);
+            // Fetch the existing user by username
+            User existingUser = (User) sessionFactory.getCurrentSession()
+                    .createQuery("select u from User u where u.username = :username")
+                    .setParameter("username", user.getUsername())
+                    .uniqueResult();
+
+            if (existingUser != null) {
+                existingUser.setFirstName(user.getFirstName());
+                existingUser.setLastName(user.getLastName());
+                existingUser.setIsActive(user.getIsActive());
+                existingUser.setPassword(user.getPassword());
+                sessionFactory.getCurrentSession().merge(existingUser);
+            } else {
+                logger.error("User with username: {} does not exist", user.getUsername());
+                throw new EntityNotFoundException("User not found");
+            }
             logger.info("Successfully updated user with username: {}", user.getUsername());
-            return user;
+            return existingUser;
         } catch (Exception e) {
             logger.error("Error occurred while updating user with username: {}", user.getUsername(), e);
             throw e;
         }
     }
-
     @Transactional(readOnly = true)
     public boolean existsByUserName(String username) {
         try {

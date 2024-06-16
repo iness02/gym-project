@@ -11,4 +11,5 @@ public class TrainerDto {
     private Long id;
     private String specialization;
     private UserDto userDto;
+
 }

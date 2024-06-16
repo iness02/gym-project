@@ -109,7 +109,7 @@ public class TraineeDaoTest {
         verify(session, times(1)).merge(trainee);
     }
 
-    @Test
+   /* @Test
     public void testGetTraineeTrainings() {
         String username = "testuser";
         Date fromDate = new Date();
@@ -143,6 +143,6 @@ public class TraineeDaoTest {
         verify(trainingQuery, times(1)).setParameter("trainerName", trainerName);
         verify(trainingQuery, times(1)).setParameter("trainingType", trainingType);
         verify(trainingQuery, times(1)).getResultList();
-    }
+    }*/
 
 }

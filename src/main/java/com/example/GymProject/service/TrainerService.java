@@ -63,7 +63,15 @@ public class TrainerService {
         logger.error("Authentication failed for trainee {}",username);
         return null;
     }
+    public TrainerDto getTrainerByUsername(String username) {
+            Assert.notNull(username, "Username cannot be null");
+            Trainer trainer = trainerDao.getTrainerByUsername(username);
+            UserDto userDto = entityMapper.toUserDto(trainer.getUser());
+            TrainerDto trainerDto = entityMapper.toTrainerDto(trainer);
+            trainerDto.setUserDto(userDto);
+            return trainerDto;
 
+    }
 
     public TrainerDto updateTrainer(TrainerDto trainerDTO, String password) {
         if(isAuthenticated(trainerDTO.getUserDto().getUsername(), password)) {
