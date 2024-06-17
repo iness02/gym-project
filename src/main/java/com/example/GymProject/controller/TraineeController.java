@@ -4,10 +4,15 @@ import com.example.GymProject.dto.TraineeDto;
 import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.request.*;
-import com.example.GymProject.response.GetTraineeProfileResponse;
+import com.example.GymProject.request.traineerRquest.GetTraineeTrainingsRequest;
+import com.example.GymProject.request.traineerRquest.TraineeRegistrationRequest;
+import com.example.GymProject.request.traineerRquest.UpdateTraineeProfileRequest;
+import com.example.GymProject.request.traineerRquest.UpdateTraineeTrainersRequest;
+import com.example.GymProject.response.UserPassResponse;
+import com.example.GymProject.response.traineeResponse.GetTraineeProfileResponse;
 import com.example.GymProject.response.GetTrainingResponse;
-import com.example.GymProject.response.TrainerForTraineeResponse;
-import com.example.GymProject.response.UpdateTraineeProfileResponse;
+import com.example.GymProject.response.traineeResponse.TrainerForTraineeResponse;
+import com.example.GymProject.response.traineeResponse.UpdateTraineeProfileResponse;
 import com.example.GymProject.service.TraineeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +32,10 @@ public class TraineeController {
     private EntityMapper entityMapper;
 
     @PostMapping("/register")
-    public ResponseEntity<UserPass> createTrainee(@Valid @RequestBody TraineeRegistrationRequest registrationRequest) {
+    public ResponseEntity<UserPassResponse> createTrainee(@Valid @RequestBody TraineeRegistrationRequest registrationRequest) {
         UserDto userDto = new UserDto(registrationRequest.getFirstName(), registrationRequest.getLastName());
         TraineeDto traineeDto = new TraineeDto(null, registrationRequest.getDateOfBirth(), registrationRequest.getAddress(), userDto, null);
-        UserPass response = traineeService.createTrainee(traineeDto);
+        UserPassResponse response = traineeService.createTrainee(traineeDto);
         return ResponseEntity.ok(response);
     }
 
@@ -46,7 +51,7 @@ public class TraineeController {
     }
 
     @PutMapping("/trainee")
-    public ResponseEntity<UpdateTraineeProfileResponse> updateCustomer(
+    public ResponseEntity<UpdateTraineeProfileResponse> updateTrainee(
             @Valid @RequestBody UpdateTraineeProfileRequest newData) {
 
         TraineeDto traineeDto = entityMapper.toTraineeDao(newData);
@@ -60,7 +65,7 @@ public class TraineeController {
     }
 
     @DeleteMapping("/trainee")
-    public ResponseEntity<String> deleteCustomer(
+    public ResponseEntity<String> deleteTrainee(
             @Valid @RequestBody DeleteRequest request) {
         System.out.println(request);
         boolean isDeleted = traineeService.deleteTraineeByUsername(request.getUsername(), request.getPassword());
@@ -69,7 +74,7 @@ public class TraineeController {
     }
 
     @PutMapping("/trainersList")
-    public ResponseEntity<List<TrainerForTraineeResponse>> updateCustomerInstructors(
+    public ResponseEntity<List<TrainerForTraineeResponse>> updateTraineeTrainers(
             @Valid @RequestBody UpdateTraineeTrainersRequest requestDto) {
 
         List<TrainerForTraineeResponse> response = traineeService.
@@ -94,12 +99,12 @@ public class TraineeController {
     }
 
     @PatchMapping("/activate")
-    public ResponseEntity<String> activateTrainee(@Valid @RequestBody UserPass request){
+    public ResponseEntity<String> activateTrainee(@Valid @RequestBody UserPassRequest request){
        return traineeService.activate(request.getUsername(), request.getPassword())
                ? new ResponseEntity<>(HttpStatus.OK):new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
     @PatchMapping("/deactivate")
-    public ResponseEntity<String> deactivateTrainee(@Valid @RequestBody UserPass request){
+    public ResponseEntity<String> deactivateTrainee(@Valid @RequestBody UserPassRequest request){
        return traineeService.deactivate(request.getUsername(), request.getPassword())
                ? new ResponseEntity<>(HttpStatus.OK):new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }

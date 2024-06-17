@@ -9,7 +9,8 @@ import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.User;
-import com.example.GymProject.request.UserPass;
+import com.example.GymProject.request.UserPassRequest;
+import com.example.GymProject.response.UserPassResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,7 +66,7 @@ class TraineeServiceTest {
         when(userService.generateUniqueUserName(anyString(), anyString())).thenReturn("user.name");
         when(traineeDao.createTrainee(any(Trainee.class))).thenReturn(trainee);
 
-        UserPass result = traineeService.createTrainee(traineeDto);
+        UserPassResponse result = traineeService.createTrainee(traineeDto);
 
         verify(userDao).createUser(any(User.class));
         verify(traineeDao).createTrainee(any(Trainee.class));

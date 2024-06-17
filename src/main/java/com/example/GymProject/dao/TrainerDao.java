@@ -1,8 +1,10 @@
 package com.example.GymProject.dao;
 
+import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.Training;
 import com.example.GymProject.model.User;
+import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +13,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public class TrainerDao {
@@ -33,6 +37,7 @@ public class TrainerDao {
         }
     }
 
+
     @Transactional(readOnly = true)
     public Trainer getTrainerByUsername(String username) {
         System.out.println(username);
@@ -43,6 +48,7 @@ public class TrainerDao {
                     .setParameter("username", username)
                     .uniqueResult();
             if (trainer != null) {
+                Hibernate.initialize(trainer.getTrainees()); // Ensure trainees are fully initialized
                 logger.info("Successfully fetched trainer with username: {}", username);
             } else {
                 logger.warn("No trainer found with username: {}", username);
@@ -53,6 +59,7 @@ public class TrainerDao {
             throw e;
         }
     }
+
 
     @Transactional
     public Trainer updateTrainer(Trainer trainer) {
@@ -93,7 +100,7 @@ public class TrainerDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Training> getTrainerTrainings(String username, Date fromDate, Date toDate, String traineeName) {
+    public List<Training> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
         try {
             logger.info("Fetching trainings for trainer with username: {}", username);
             List<Training> trainings = sessionFactory.getCurrentSession()

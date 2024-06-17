@@ -1,4 +1,4 @@
-package com.example.GymProject.response;
+package com.example.GymProject.response.traineeResponse;
 
 import java.time.LocalDate;
 import java.util.Set;

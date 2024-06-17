@@ -12,12 +12,13 @@ import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.Training;
 import com.example.GymProject.model.User;
-import com.example.GymProject.request.GetTraineeTrainingsRequest;
-import com.example.GymProject.request.UserPass;
-import com.example.GymProject.response.GetTraineeProfileResponse;
+import com.example.GymProject.request.traineerRquest.GetTraineeTrainingsRequest;
+import com.example.GymProject.request.UserPassRequest;
+import com.example.GymProject.response.UserPassResponse;
+import com.example.GymProject.response.traineeResponse.GetTraineeProfileResponse;
 import com.example.GymProject.response.GetTrainingResponse;
-import com.example.GymProject.response.TrainerForTraineeResponse;
-import com.example.GymProject.response.UpdateTraineeProfileResponse;
+import com.example.GymProject.response.traineeResponse.TrainerForTraineeResponse;
+import com.example.GymProject.response.traineeResponse.UpdateTraineeProfileResponse;
 import com.example.GymProject.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,7 @@ public class TraineeService {
     private EntityMapper entityMapper;
 
     @Transactional
-    public UserPass createTrainee(TraineeDto traineeDto) {
+    public UserPassResponse createTrainee(TraineeDto traineeDto) {
         Assert.notNull(traineeDto, "TraineeDto cannot be null");
         Trainee trainee = entityMapper.toTrainee(traineeDto);
         User user = entityMapper.toUser(traineeDto.getUserDto());
@@ -59,7 +60,7 @@ public class TraineeService {
         trainee.setUser(user);
         Trainee trainee1 = traineeDao.createTrainee(trainee);
         entityMapper.toTraineeDto(trainee1);
-        return new UserPass(trainee1.getUser().getUsername(), trainee1.getUser().getPassword());
+        return new UserPassResponse(trainee1.getUser().getUsername(), trainee1.getUser().getPassword());
     }
 
     public TraineeDto getTraineeByUsername(String username, String password) {
@@ -87,10 +88,8 @@ public class TraineeService {
             User user = entityMapper.toUser(traineeDto.getUserDto());
             userDao.updateUser(user);
             trainee.setUser(user);
-            System.out.println("111111111 " + trainee.getDateOfBirth());
             Trainee trainee1 = traineeDao.updateTrainee(trainee);
             TraineeDto traineeDto1 = entityMapper.toTraineeDto(trainee1);
-            System.out.println("2656 " + traineeDto1);
             return entityMapper.toUpdateTraineeProfileResponse(traineeDto1);
         }
         logger.error("Authentication failed for trainee {}", traineeDto.getUserDto().getUsername());
@@ -215,7 +214,6 @@ public class TraineeService {
 
     }
 
-    //TODO check if trainer already assigned to trainee log and throw exception
     public List<TrainerForTraineeResponse> updateTraineeTrainers(String username, String password, Set<String> trainerUsernames) {
         Assert.notNull(username, "Username cannot be null");
         if (isAuthenticated(username, password)) {

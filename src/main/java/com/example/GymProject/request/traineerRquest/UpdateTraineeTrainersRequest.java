@@ -1,4 +1,4 @@
-package com.example.GymProject.request;
+package com.example.GymProject.request.traineerRquest;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

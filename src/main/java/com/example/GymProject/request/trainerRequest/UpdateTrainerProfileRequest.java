@@ -1,17 +1,18 @@
-package com.example.GymProject.request;
+package com.example.GymProject.request.trainerRequest;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.ReadOnlyProperty;
 
 import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateTraineeProfileRequest {
+public class UpdateTrainerProfileRequest {
     @NotEmpty
     private String username;
     @NotEmpty
@@ -20,8 +21,8 @@ public class UpdateTraineeProfileRequest {
     private String firstName;
     @NotEmpty
     private String lastName;
-    private LocalDate dateOfBirth;
-    private String address;
+    @ReadOnlyProperty
+    private String specialization;
     @NotNull
     private Boolean isActive;
 }

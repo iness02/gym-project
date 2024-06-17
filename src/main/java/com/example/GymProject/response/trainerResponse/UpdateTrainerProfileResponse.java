@@ -1,17 +1,19 @@
-package com.example.GymProject.response;
+package com.example.GymProject.response.trainerResponse;
 
-
-import com.example.GymProject.model.Trainings;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TrainerForTraineeResponse {
+public class UpdateTrainerProfileResponse {
     private String userName;
     private String firstName;
     private String lastName;
     private String specialization;
+    private Boolean isActive;
+    private Set<TraineeForTrainerResponse> trainees;
 }

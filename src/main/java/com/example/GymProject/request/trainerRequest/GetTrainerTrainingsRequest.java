@@ -1,4 +1,4 @@
-package com.example.GymProject.request;
+package com.example.GymProject.request.trainerRequest;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetTraineeTrainingsRequest {
+public class GetTrainerTrainingsRequest {
     @NotBlank
     private String username;
     @NotBlank
@@ -18,6 +18,4 @@ public class GetTraineeTrainingsRequest {
     private LocalDate periodFrom;
     private LocalDate periodTo;
     private String trainerName;
-    private String trainingType;
-
 }

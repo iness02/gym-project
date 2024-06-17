@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "trainer")
 @AllArgsConstructor
@@ -21,4 +24,7 @@ public class Trainer {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToMany(mappedBy = "trainers", fetch = FetchType.EAGER)
+    private Set<Trainee> trainees;
 }

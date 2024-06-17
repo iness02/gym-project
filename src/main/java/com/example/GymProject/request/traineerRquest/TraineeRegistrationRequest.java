@@ -1,4 +1,4 @@
-package com.example.GymProject.request;
+package com.example.GymProject.request.traineerRquest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.SerializableString;
@@ -17,11 +17,11 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class TraineeRegistrationRequest {
     @JsonProperty("firstName")
-    @NotBlank(message = "First Name is required")
+    @NotBlank
     private String firstName;
 
     @JsonProperty("lastName")
-    @NotBlank(message = "Last Name is required")
+    @NotBlank
     private String lastName;
 
     @JsonProperty("dateOfBirth")

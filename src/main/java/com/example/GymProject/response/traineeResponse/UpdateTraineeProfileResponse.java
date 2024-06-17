@@ -1,5 +1,6 @@
-package com.example.GymProject.response;
+package com.example.GymProject.response.traineeResponse;
 
+import com.example.GymProject.response.traineeResponse.TrainerForTraineeResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
