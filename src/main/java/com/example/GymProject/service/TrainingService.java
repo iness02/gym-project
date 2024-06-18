@@ -1,12 +1,12 @@
 package com.example.GymProject.service;
 
+import com.example.GymProject.dao.TraineeDao;
+import com.example.GymProject.dao.TrainerDao;
 import com.example.GymProject.dao.TrainingDao;
+import com.example.GymProject.dao.TrainingTypeDao;
 import com.example.GymProject.dto.TrainingDto;
 import com.example.GymProject.mapper.EntityMapper;
-import com.example.GymProject.model.Trainee;
-import com.example.GymProject.model.Trainer;
-import com.example.GymProject.model.Training;
-import com.example.GymProject.model.TrainingType;
+import com.example.GymProject.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +21,12 @@ public class TrainingService {
     @Autowired
     private TrainingDao trainingDao ;
     @Autowired
+    private TraineeDao traineeDao;
+    @Autowired
+    private TrainerDao trainerDao;
+    @Autowired
+    private TrainingTypeDao trainingTypeDao;
+    @Autowired
     private UserService userService;
     @Autowired
     private EntityMapper entityMapper;
@@ -28,15 +34,28 @@ public class TrainingService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     public TrainingDto addTraining(TrainingDto trainingDTO) {
+        System.out.println(trainingDTO.getTrainer().getUserDto().getUsername());
         Assert.notNull(trainingDTO, "TrainingDto cannot be null");
         System.out.println(trainingDTO);
         Training training = entityMapper.toTraining(trainingDTO);
         Trainee trainee = entityMapper.toTrainee(trainingDTO.getTrainee());
         Trainer trainer = entityMapper.toTrainer(trainingDTO.getTrainer());
         TrainingType trainingType = entityMapper.toTrainingType(trainingDTO.getTrainingType());
-        training.setTrainee(trainee);
-        training.setTrainer(trainer);
-        training.setTrainingType(trainingType);
+
+        if(trainingType == null){
+            TrainingType trainingType1 = new TrainingType();
+            trainingType1.setTrainingTypeName(Trainings.FITNESS);
+           if(trainingTypeDao.findTrainingByName(trainingType1.getTrainingTypeName()) == null)
+            trainingTypeDao.addTrainingType(trainingType1);
+           else
+               trainingType1 =trainingTypeDao.findTrainingByName(trainingType1.getTrainingTypeName());
+            training.setTrainingType(trainingType1);
+        }else{
+            training.setTrainingType(trainingType);
+
+        }
+        training.setTrainee(traineeDao.getTraineeByUsername(trainee.getUser().getUsername()));
+        training.setTrainer(trainerDao.getTrainerByUsername(trainer.getUser().getUsername()));
         return entityMapper.toTrainingDto(trainingDao.addTraining(training));
     }
 

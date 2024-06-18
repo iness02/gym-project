@@ -4,6 +4,7 @@ import com.example.GymProject.dto.*;
 import com.example.GymProject.model.*;
 import com.example.GymProject.request.traineerRquest.UpdateTraineeProfileRequest;
 import com.example.GymProject.request.trainerRequest.UpdateTrainerProfileRequest;
+import com.example.GymProject.request.trainingRequest.AddTrainingRequest;
 import com.example.GymProject.response.traineeResponse.GetTraineeProfileResponse;
 import com.example.GymProject.response.GetTrainingResponse;
 import com.example.GymProject.response.traineeResponse.TrainerForTraineeResponse;
@@ -29,7 +30,25 @@ public interface EntityMapper {
 
     TrainerDto toTrainerDto(Trainer trainer);
 
-    Trainer toTrainer(TrainerDto trainerDTO);
+    default Trainer toTrainer(TrainerDto trainerDto){
+        if(trainerDto == null){
+            return  null;
+        }
+        Trainer trainer = new Trainer();
+        User user = new User();
+        user.setId(trainerDto.getUserDto().getId());
+        user.setPassword(trainerDto.getUserDto().getPassword());
+        user.setUsername(trainerDto.getUserDto().getUsername());
+        user.setIsActive(trainerDto.getUserDto().getIsActive());
+        user.setFirstName(trainerDto.getUserDto().getFirstName());
+        user.setLastName(trainerDto.getUserDto().getLastName());
+        trainer.setId(trainerDto.getId());
+        trainer.setUser(user);
+        trainer.setSpecialization(trainerDto.getSpecialization());
+
+        return trainer;
+    }
+
 
     TrainingDto toTrainingDto(Training training);
 
@@ -189,4 +208,27 @@ public interface EntityMapper {
 
         return set1;
     }
+     default TrainingDto toTrainingDto(AddTrainingRequest request){
+         if ( request == null ) {
+             return null;
+         }
+
+         TrainingDto trainingDto = new TrainingDto();
+         UserDto userForTrainee = new UserDto();
+         UserDto userForTrainer = new UserDto();
+         TraineeDto traineeDto = new TraineeDto();
+         TrainerDto trainerDto = new TrainerDto();
+
+         userForTrainee.setUsername(request.getTraineeUsername());
+         userForTrainer.setUsername(request.getTrainerUsername());
+         traineeDto.setUserDto(userForTrainee);
+         trainerDto.setUserDto(userForTrainer);
+         trainingDto.setTrainee(traineeDto);
+         trainingDto.setTrainer(trainerDto);
+         trainingDto.setTrainingName(request.getName());
+         trainingDto.setTrainingDate(request.getDate());
+         trainingDto.setTrainingDuration(request.getDuration());
+
+         return trainingDto;
+     }
 }

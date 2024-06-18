@@ -58,4 +58,31 @@ public class UserService {
         User user = entityMapper.toUser(userDto);
         return entityMapper.toUserDto(userDao.updateUser(user));
     }
+
+    public boolean changePassword(String username, String newPassword, String password) {
+        Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(newPassword, "New password cannot be null");
+        if (isAuthenticated(username, password)) {
+            UserDto userDto = getUserByUsername(username);
+            if (userDto != null) {
+                if (!password.equals(newPassword)) {
+                    userDto.setPassword(newPassword);
+                    updateUser(userDto);
+                    logger.info("Password has successfully changed for trainee {}", username);
+                } else {
+                    logger.warn("Cannot change password for user {} since new password is equal to old password", username);
+
+                }
+            } else {
+                logger.warn("Cannot change password for user {} since such user was not found", username);
+            }
+            return true;
+        }
+        logger.error("Authentication failed for trainee {}", username);
+        return false;
+    }
+
+    public boolean isAuthenticated(String username, String password) {
+        return matchUsernameAndPassword(username, password);
+    }
 }

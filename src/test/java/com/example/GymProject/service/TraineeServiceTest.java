@@ -145,20 +145,6 @@ class TraineeServiceTest {
         assertTrue(result);
     }
 
-    @Test
-    public void testChangeTraineePassword() {
-        String username = "testUser";
-        String password = "testPassword";
-        String newPassword = "newPassword";
-        UserDto userDto = new UserDto();
-        userDto.setPassword(password);
-        when(userService.getUserByUsername(username)).thenReturn(userDto);
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
-
-        traineeService.changeTraineePassword(username, newPassword, password);
-
-        verify(userService, times(1)).updateUser(any(UserDto.class));
-    }
 
     @Test
     public void testActivateUser() {

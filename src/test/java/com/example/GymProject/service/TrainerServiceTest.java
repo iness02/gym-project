@@ -112,24 +112,6 @@ class TrainerServiceTest {
         verify(trainerDao, times(1)).updateTrainer(any(Trainer.class));
     }*/
 
-    @Test
-    void changeTrainerPassword() {
-        String username = "John.Doe";
-        String newPassword = "newPassword";
-        String password = "password";
-
-        UserDto userDto = new UserDto();
-        userDto.setUsername(username);
-        userDto.setPassword(password);
-
-        when(userService.getUserByUsername(username)).thenReturn(userDto);
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
-
-        trainerService.changeTrainerPassword(username, newPassword, password);
-
-        assertEquals(newPassword, userDto.getPassword());
-        verify(userService, times(1)).updateUser(userDto);
-    }
 
     @Test
     void deleteTrainerByUsername() {

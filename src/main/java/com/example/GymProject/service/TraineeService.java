@@ -115,29 +115,6 @@ public class TraineeService {
     }
 
 
-    public void changeTraineePassword(String username, String newPassword, String password) {
-        Assert.notNull(username, "Username cannot be null");
-        Assert.notNull(newPassword, "New password cannot be null");
-        if (isAuthenticated(username, password)) {
-            UserDto userDTO = userService.getUserByUsername(username);
-            if (userDTO != null) {
-                if (!password.equals(newPassword)) {
-                    userDTO.setPassword(newPassword);
-                    userService.updateUser(userDTO);
-                    logger.info("Password has successfully changed for trainee {}", username);
-                } else {
-                    logger.warn("Cannot change password for user {} since new password is equal to old password", username);
-
-                }
-            } else {
-                logger.warn("Cannot change password for user {} since such user was not found", username);
-            }
-        }
-        logger.error("Authentication failed for trainee {}", username);
-
-    }
-
-
     public boolean activate(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         if (isAuthenticated(username, password)) {
