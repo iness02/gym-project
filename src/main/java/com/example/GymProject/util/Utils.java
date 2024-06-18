@@ -16,7 +16,7 @@ public class Utils {
     private final static String ALLOWED_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final Logger logger = LoggerFactory.getLogger(Utils.class.getName());
     private static StringBuilder sb;
-    private static Set<String> existingUsernames = new HashSet<>();
+    private static final Set<String> existingUsernames = new HashSet<>();
 
     public static String generatePassword() {
         Random random = new Random();

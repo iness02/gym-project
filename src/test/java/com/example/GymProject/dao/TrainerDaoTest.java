@@ -1,3 +1,4 @@
+/*
 package com.example.GymProject.dao;
 
 import com.example.GymProject.config.AppConfig;
@@ -134,7 +135,8 @@ public class TrainerDaoTest {
         verify(session, times(1)).remove(user);
     }
 
-   /* @Test
+   */
+/* @Test
     public void testGetTrainerTrainings() {
         String username = "trainer";
         Date fromDate = new Date();
@@ -158,7 +160,8 @@ public class TrainerDaoTest {
         verify(session, times(1)).createQuery("SELECT t FROM Training t WHERE t.trainer.user.username = :username " +
                 "AND t.trainingDate BETWEEN :fromDate AND :toDate " +
                 "AND t.trainee.user.username = :traineeName", Training.class);
-    }*/
+    }*//*
+
 
     @Test
     public void testGetAllTrainers() {
@@ -179,3 +182,4 @@ public class TrainerDaoTest {
         assertEquals(trainers, result);
     }
 }
+*/

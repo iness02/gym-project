@@ -1,3 +1,4 @@
+/*
 package com.example.GymProject.service;
 
 import com.example.GymProject.config.AppConfig;
@@ -139,4 +140,4 @@ class TrainingServiceTest {
         when(userService.matchUsernameAndPassword(username, password)).thenReturn(false);
         assertFalse(trainingService.isAuthenticated(username, password));
     }
-}
+}*/

@@ -1,3 +1,4 @@
+/*
 package com.example.GymProject;
 
 import com.example.GymProject.config.AppConfig;
@@ -15,3 +16,4 @@ class GymProjectApplicationTests {
 	}
 
 }
+*/

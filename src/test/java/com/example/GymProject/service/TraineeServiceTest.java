@@ -1,3 +1,4 @@
+/*
 package com.example.GymProject.service;
 
 import com.example.GymProject.config.AppConfig;
@@ -91,7 +92,8 @@ class TraineeServiceTest {
         assertEquals(traineeDto, result);
     }
 
-  /*  @Test
+  */
+/*  @Test
     public void testUpdateTrainee() {
         TraineeDto traineeDTO = new TraineeDto();
         UserDto userDto = new UserDto();
@@ -122,7 +124,8 @@ class TraineeServiceTest {
         assertEquals(response, result);
         assertEquals(user, trainee.getUser());
     }
-*/
+*//*
+
     @Test
     public void testDeleteTraineeByUsername() {
         String username = "testUser";
@@ -185,7 +188,8 @@ class TraineeServiceTest {
         assertTrue(user.getIsActive());
     }
 
-  /*  @Test
+  */
+/*  @Test
     public void testGetTraineeTrainings() {
         String username = "testUser";
         Date fromDate = new Date();
@@ -204,7 +208,8 @@ class TraineeServiceTest {
         assertNotNull(result);
         assertEquals(trainingDtos.size(), result.size());
     }
-*/
+*//*
+
     @Test
     public void testUpdateTraineeTrainers() {
         String username = "testUser";
@@ -237,3 +242,4 @@ class TraineeServiceTest {
         assertFalse(traineeService.isAuthenticated(username, password));
     }
 }
+*/

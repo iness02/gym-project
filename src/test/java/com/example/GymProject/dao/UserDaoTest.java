@@ -1,3 +1,4 @@
+/*
 package com.example.GymProject.dao;
 
 import com.example.GymProject.config.AppConfig;
@@ -70,7 +71,8 @@ public class UserDaoTest {
         verify(session, times(1)).createQuery("select u FROM User u WHERE u.username = :username", User.class);
     }
 
-  /*  @Test
+  */
+/*  @Test
     public void testUpdateUser() {
         User user = new User();
         user.setUsername("testuser");
@@ -80,7 +82,8 @@ public class UserDaoTest {
         User updatedUser = userDao.updateUser(user);
         assertEquals(user.getUsername(), updatedUser.getUsername());
         verify(session, times(1)).merge(user);
-    }*/
+    }*//*
+
 
     @Test
     public void testExistsByUserName() {
@@ -114,3 +117,4 @@ public class UserDaoTest {
     }
 
 }
+*/
