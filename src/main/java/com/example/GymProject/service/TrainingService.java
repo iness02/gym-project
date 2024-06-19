@@ -5,13 +5,13 @@ import com.example.GymProject.dao.TrainerDao;
 import com.example.GymProject.dao.TrainingDao;
 import com.example.GymProject.dao.TrainingTypeDao;
 import com.example.GymProject.dto.TrainingDto;
+import com.example.GymProject.exception.InvalidCredentialsException;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class TrainingService {
     @Autowired
-    private TrainingDao trainingDao ;
+    private TrainingDao trainingDao;
     @Autowired
     private TraineeDao traineeDao;
     @Autowired
@@ -33,24 +33,24 @@ public class TrainingService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    public TrainingDto addTraining(TrainingDto trainingDTO) {
-        System.out.println(trainingDTO.getTrainer().getUserDto().getUsername());
-        Assert.notNull(trainingDTO, "TrainingDto cannot be null");
-        System.out.println(trainingDTO);
-        Training training = entityMapper.toTraining(trainingDTO);
-        Trainee trainee = entityMapper.toTrainee(trainingDTO.getTrainee());
-        Trainer trainer = entityMapper.toTrainer(trainingDTO.getTrainer());
-        TrainingType trainingType = entityMapper.toTrainingType(trainingDTO.getTrainingType());
+    public TrainingDto addTraining(TrainingDto trainingDto) {
+        if (trainingDto == null) {
+            throw new InvalidCredentialsException("TrainingDto cannot be null");
+        }
+        Training training = entityMapper.toTraining(trainingDto);
+        Trainee trainee = entityMapper.toTrainee(trainingDto.getTrainee());
+        Trainer trainer = entityMapper.toTrainer(trainingDto.getTrainer());
+        TrainingType trainingType = entityMapper.toTrainingType(trainingDto.getTrainingType());
 
-        if(trainingType == null){
+        if (trainingType == null) {
             TrainingType trainingType1 = new TrainingType();
             trainingType1.setTrainingTypeName(Trainings.FITNESS);
-           if(trainingTypeDao.findTrainingByName(trainingType1.getTrainingTypeName()) == null)
-            trainingTypeDao.addTrainingType(trainingType1);
-           else
-               trainingType1 =trainingTypeDao.findTrainingByName(trainingType1.getTrainingTypeName());
+            if (trainingTypeDao.findTrainingByName(trainingType1.getTrainingTypeName()) == null)
+                trainingTypeDao.addTrainingType(trainingType1);
+            else
+                trainingType1 = trainingTypeDao.findTrainingByName(trainingType1.getTrainingTypeName());
             training.setTrainingType(trainingType1);
-        }else{
+        } else {
             training.setTrainingType(trainingType);
 
         }
@@ -67,16 +67,18 @@ public class TrainingService {
     }
 
     public TrainingDto updateTraining(TrainingDto trainingDTO, String username, String password) {
-        if(isAuthenticated(username, password)) {
-            Assert.notNull(trainingDTO, "TrainingDto cannot be null");
+        if (username == null || password == null) {
+            throw new InvalidCredentialsException("Username or password is invalid");
+        }
+        if (isAuthenticated(username, password)) {
             Training training = entityMapper.toTraining(trainingDTO);
             return entityMapper.toTrainingDto(trainingDao.updateTraining(training));
         }
-        logger.error("Authentication failed for trainee {}",username);
+        logger.error("Authentication failed for trainee {}", username);
         return null;
     }
 
-    public boolean isAuthenticated(String username,String password){
+    public boolean isAuthenticated(String username, String password) {
         return userService.matchUsernameAndPassword(username, password);
     }
 }

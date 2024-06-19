@@ -1,7 +1,7 @@
 package com.example.GymProject.dao;
 
-import com.example.GymProject.model.*;
-import org.hibernate.Hibernate;
+import com.example.GymProject.model.TrainingType;
+import com.example.GymProject.model.Trainings;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 
 @Repository
 public class TrainingTypeDao {
@@ -86,7 +85,7 @@ public class TrainingTypeDao {
                     .createQuery("Select t FROM TrainingType t", TrainingType.class)
                     .list();
             logger.info("Successfully fetched {} training types", trainingTypes.size());
-            return trainingTypes ;
+            return trainingTypes;
         } catch (Exception e) {
             logger.error("Error occurred while fetching all training types", e);
             throw e;

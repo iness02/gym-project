@@ -21,7 +21,7 @@ import java.util.List;
 @ComponentScan(basePackages = "com.example")
 @PropertySource("classpath:application.properties")
 @EnableWebMvc
-public class AppConfig implements WebMvcConfigurer  {
+public class AppConfig implements WebMvcConfigurer {
 
     @Bean
     public ObjectMapper objectMapper() {

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -56,51 +55,51 @@ public class TraineeDao {
         }
     }
 
-  /*  @Transactional
+    /*  @Transactional
+      public Trainee updateTrainee(Trainee trainee) {
+          try {
+              logger.info("Updating trainee with username: {}", trainee.getUser().getUsername());
+              sessionFactory.getCurrentSession().merge(trainee);
+              logger.info("Successfully updated trainee with username: {}", trainee.getUser().getUsername());
+              return trainee;
+          } catch (Exception e) {
+              logger.error("Error occurred while updating trainee with username: {}", trainee.getUser().getUsername(), e);
+              throw e;
+          }
+      }*/
+    @Transactional
     public Trainee updateTrainee(Trainee trainee) {
         try {
             logger.info("Updating trainee with username: {}", trainee.getUser().getUsername());
-            sessionFactory.getCurrentSession().merge(trainee);
-            logger.info("Successfully updated trainee with username: {}", trainee.getUser().getUsername());
-            return trainee;
-        } catch (Exception e) {
-            logger.error("Error occurred while updating trainee with username: {}", trainee.getUser().getUsername(), e);
-            throw e;
-        }
-    }*/
-  @Transactional
-  public Trainee updateTrainee(Trainee trainee) {
-      try {
-          logger.info("Updating trainee with username: {}", trainee.getUser().getUsername());
-          Session session = sessionFactory.getCurrentSession();
-          Trainee existingTrainee = (Trainee) sessionFactory.getCurrentSession()
-                  .createQuery("select t from Trainee t  where t.user.username = :username")
-                  .setParameter("username", trainee.getUser().getUsername())
-                  .uniqueResult();
-          if (existingTrainee != null) {
-              existingTrainee.setUser(trainee.getUser());
-              existingTrainee.setAddress(trainee.getAddress());
-              existingTrainee.setDateOfBirth(trainee.getDateOfBirth());
-              existingTrainee.setTrainers(trainee.getTrainers());
-              session.update(existingTrainee);
+            Session session = sessionFactory.getCurrentSession();
+            Trainee existingTrainee = (Trainee) sessionFactory.getCurrentSession()
+                    .createQuery("select t from Trainee t  where t.user.username = :username")
+                    .setParameter("username", trainee.getUser().getUsername())
+                    .uniqueResult();
+            if (existingTrainee != null) {
+                existingTrainee.setUser(trainee.getUser());
+                existingTrainee.setAddress(trainee.getAddress());
+                existingTrainee.setDateOfBirth(trainee.getDateOfBirth());
+                existingTrainee.setTrainers(trainee.getTrainers());
+                session.update(existingTrainee);
              /* sessionFactory.getCurrentSession().createQuery("update Trainee set user =:user, address = :address, dateOfBirth =:dateOfBirth, trainers = :trainers where user.username =:username" )
                       .setParameter("user",existingTrainee.getUser()).
                       setParameter("address",existingTrainee.getAddress()).
                       setParameter("dateOfBirth",existingTrainee.getDateOfBirth()).
                       setParameter("trainers",existingTrainee.getTrainers()).
                       setParameter("username",existingTrainee.getUser().getUsername()).executeUpdate();*/
-             // sessionFactory.getCurrentSession().merge(existingTrainee);
-          } else {
-              logger.error("Trainee with username: {} does not exist", trainee.getUser().getUsername());
-              throw new EntityNotFoundException("Trainee not found");
-          }
-          logger.info("Successfully updated trainee with username: {}", trainee.getUser().getUsername());
-          return existingTrainee;
-      } catch (Exception e) {
-          logger.error("Error occurred while updating trainee with username: {}", trainee.getUser().getUsername(), e);
-          throw e;
-      }
-  }
+                // sessionFactory.getCurrentSession().merge(existingTrainee);
+            } else {
+                logger.error("Trainee with username: {} does not exist", trainee.getUser().getUsername());
+                throw new EntityNotFoundException("Trainee not found");
+            }
+            logger.info("Successfully updated trainee with username: {}", trainee.getUser().getUsername());
+            return existingTrainee;
+        } catch (Exception e) {
+            logger.error("Error occurred while updating trainee with username: {}", trainee.getUser().getUsername(), e);
+            throw e;
+        }
+    }
 
 
     @Transactional

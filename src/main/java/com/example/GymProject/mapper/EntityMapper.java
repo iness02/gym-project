@@ -5,8 +5,8 @@ import com.example.GymProject.model.*;
 import com.example.GymProject.request.traineerRquest.UpdateTraineeProfileRequest;
 import com.example.GymProject.request.trainerRequest.UpdateTrainerProfileRequest;
 import com.example.GymProject.request.trainingRequest.AddTrainingRequest;
-import com.example.GymProject.response.traineeResponse.GetTraineeProfileResponse;
 import com.example.GymProject.response.GetTrainingResponse;
+import com.example.GymProject.response.traineeResponse.GetTraineeProfileResponse;
 import com.example.GymProject.response.traineeResponse.TrainerForTraineeResponse;
 import com.example.GymProject.response.traineeResponse.UpdateTraineeProfileResponse;
 import com.example.GymProject.response.trainerResponse.GetTrainerProfileResponse;
@@ -30,9 +30,9 @@ public interface EntityMapper {
 
     TrainerDto toTrainerDto(Trainer trainer);
 
-    default Trainer toTrainer(TrainerDto trainerDto){
-        if(trainerDto == null){
-            return  null;
+    default Trainer toTrainer(TrainerDto trainerDto) {
+        if (trainerDto == null) {
+            return null;
         }
         Trainer trainer = new Trainer();
         User user = new User();
@@ -62,7 +62,7 @@ public interface EntityMapper {
 
     User toUser(UserDto userDTO);
 
-    default GetTraineeProfileResponse toGetTraineeProfileResponse(TraineeDto traineeDto){
+    default GetTraineeProfileResponse toGetTraineeProfileResponse(TraineeDto traineeDto) {
         if (traineeDto == null) {
             return null;
         }
@@ -79,7 +79,7 @@ public interface EntityMapper {
         return getTraineeProfileResponse;
     }
 
-    default TrainerForTraineeResponse toTrainerForTraineeResponse(TrainerDto trainerDto){
+    default TrainerForTraineeResponse toTrainerForTraineeResponse(TrainerDto trainerDto) {
         if (trainerDto == null) {
             return null;
         }
@@ -106,30 +106,32 @@ public interface EntityMapper {
         return set1;
     }
 
-    default TraineeDto toTraineeDao(UpdateTraineeProfileRequest request){
-        if (request == null){
-            return  null;
+    default TraineeDto toTraineeDao(UpdateTraineeProfileRequest request) {
+        if (request == null) {
+            return null;
         }
-        UserDto userDto = new UserDto(null, request.getFirstName(),request.getLastName(),
-                request.getUsername(), request.getPassword(),request.getIsActive());
-        TraineeDto traineeDto = new TraineeDto(null,request.getDateOfBirth(),request.getAddress(),userDto,null);
+        UserDto userDto = new UserDto(null, request.getFirstName(), request.getLastName(),
+                request.getUsername(), request.getPassword(), request.getIsActive());
+        TraineeDto traineeDto = new TraineeDto(null, request.getDateOfBirth(), request.getAddress(), userDto, null);
 
         return traineeDto;
 
     }
-    default TrainerDto toTrainerDao(UpdateTrainerProfileRequest request){
-        if (request == null){
-            return  null;
+
+    default TrainerDto toTrainerDao(UpdateTrainerProfileRequest request) {
+        if (request == null) {
+            return null;
         }
-        UserDto userDto = new UserDto(null, request.getFirstName(),request.getLastName(),
-                request.getUsername(), request.getPassword(),request.getIsActive());
-        TrainerDto trainerDto = new TrainerDto(null,request.getSpecialization(),userDto,null);
+        UserDto userDto = new UserDto(null, request.getFirstName(), request.getLastName(),
+                request.getUsername(), request.getPassword(), request.getIsActive());
+        TrainerDto trainerDto = new TrainerDto(null, request.getSpecialization(), userDto, null);
 
         return trainerDto;
 
     }
-    default UpdateTraineeProfileResponse toUpdateTraineeProfileResponse(TraineeDto traineeDto){
-        if (traineeDto == null){
+
+    default UpdateTraineeProfileResponse toUpdateTraineeProfileResponse(TraineeDto traineeDto) {
+        if (traineeDto == null) {
             return null;
         }
 
@@ -144,8 +146,8 @@ public interface EntityMapper {
         return response;
     }
 
-    default UpdateTrainerProfileResponse toUpdateTrainerProfileResponse(TrainerDto trainerDto){
-        if (trainerDto == null){
+    default UpdateTrainerProfileResponse toUpdateTrainerProfileResponse(TrainerDto trainerDto) {
+        if (trainerDto == null) {
             return null;
         }
 
@@ -165,11 +167,11 @@ public interface EntityMapper {
                 trainingDto.getTrainingDate(),
                 trainingDto.getTrainingType().toString(),
                 trainingDto.getTrainingDuration(),
-                trainingDto.getTrainer().getUserDto().getFirstName() +trainingDto.getTrainer().getUserDto().getLastName()
+                trainingDto.getTrainer().getUserDto().getFirstName() + trainingDto.getTrainer().getUserDto().getLastName()
         );
     }
 
-    default GetTrainerProfileResponse toGetTrainerProfileResponse(TrainerDto trainerDto){
+    default GetTrainerProfileResponse toGetTrainerProfileResponse(TrainerDto trainerDto) {
         if (trainerDto == null) {
             return null;
         }
@@ -184,7 +186,7 @@ public interface EntityMapper {
         return getTrainerProfileResponse;
     }
 
-    default TraineeForTrainerResponse toTraineeForTrainerResponse(TraineeDto traineeDto){
+    default TraineeForTrainerResponse toTraineeForTrainerResponse(TraineeDto traineeDto) {
         if (traineeDto == null) {
             return null;
         }
@@ -196,6 +198,7 @@ public interface EntityMapper {
 
         return traineeForTrainerResponse;
     }
+
     default Set<TraineeForTrainerResponse> trainerDtoSetToTraineeForTrainerResponseSet(Set<TraineeDto> set) {
         if (set == null) {
             return null;
@@ -208,27 +211,28 @@ public interface EntityMapper {
 
         return set1;
     }
-     default TrainingDto toTrainingDto(AddTrainingRequest request){
-         if ( request == null ) {
-             return null;
-         }
 
-         TrainingDto trainingDto = new TrainingDto();
-         UserDto userForTrainee = new UserDto();
-         UserDto userForTrainer = new UserDto();
-         TraineeDto traineeDto = new TraineeDto();
-         TrainerDto trainerDto = new TrainerDto();
+    default TrainingDto toTrainingDto(AddTrainingRequest request) {
+        if (request == null) {
+            return null;
+        }
 
-         userForTrainee.setUsername(request.getTraineeUsername());
-         userForTrainer.setUsername(request.getTrainerUsername());
-         traineeDto.setUserDto(userForTrainee);
-         trainerDto.setUserDto(userForTrainer);
-         trainingDto.setTrainee(traineeDto);
-         trainingDto.setTrainer(trainerDto);
-         trainingDto.setTrainingName(request.getName());
-         trainingDto.setTrainingDate(request.getDate());
-         trainingDto.setTrainingDuration(request.getDuration());
+        TrainingDto trainingDto = new TrainingDto();
+        UserDto userForTrainee = new UserDto();
+        UserDto userForTrainer = new UserDto();
+        TraineeDto traineeDto = new TraineeDto();
+        TrainerDto trainerDto = new TrainerDto();
 
-         return trainingDto;
-     }
+        userForTrainee.setUsername(request.getTraineeUsername());
+        userForTrainer.setUsername(request.getTrainerUsername());
+        traineeDto.setUserDto(userForTrainee);
+        trainerDto.setUserDto(userForTrainer);
+        trainingDto.setTrainee(traineeDto);
+        trainingDto.setTrainer(trainerDto);
+        trainingDto.setTrainingName(request.getName());
+        trainingDto.setTrainingDate(request.getDate());
+        trainingDto.setTrainingDuration(request.getDuration());
+
+        return trainingDto;
+    }
 }

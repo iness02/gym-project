@@ -1,10 +1,8 @@
 package com.example.GymProject.service;
 
 import com.example.GymProject.dao.TrainingTypeDao;
-import com.example.GymProject.dto.TrainingDto;
 import com.example.GymProject.dto.TrainingTypeDto;
 import com.example.GymProject.mapper.EntityMapper;
-import com.example.GymProject.model.Training;
 import com.example.GymProject.model.TrainingType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

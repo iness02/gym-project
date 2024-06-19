@@ -3,14 +3,15 @@ package com.example.GymProject.controller;
 import com.example.GymProject.dto.TraineeDto;
 import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.mapper.EntityMapper;
-import com.example.GymProject.request.*;
+import com.example.GymProject.request.DeleteRequest;
+import com.example.GymProject.request.UserPassRequest;
 import com.example.GymProject.request.traineerRquest.GetTraineeTrainingsRequest;
 import com.example.GymProject.request.traineerRquest.TraineeRegistrationRequest;
 import com.example.GymProject.request.traineerRquest.UpdateTraineeProfileRequest;
 import com.example.GymProject.request.traineerRquest.UpdateTraineeTrainersRequest;
+import com.example.GymProject.response.GetTrainingResponse;
 import com.example.GymProject.response.UserPassResponse;
 import com.example.GymProject.response.traineeResponse.GetTraineeProfileResponse;
-import com.example.GymProject.response.GetTrainingResponse;
 import com.example.GymProject.response.traineeResponse.TrainerForTraineeResponse;
 import com.example.GymProject.response.traineeResponse.UpdateTraineeProfileResponse;
 import com.example.GymProject.service.TraineeService;
@@ -42,34 +43,24 @@ public class TraineeController {
     @GetMapping("/trainee")
     public ResponseEntity<GetTraineeProfileResponse> getTraineeByUsername(@RequestParam("username") String username) {
         GetTraineeProfileResponse response = traineeService.getTraineeByUsername(username);
-        System.out.println(response);
-        if (response == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/trainee")
     public ResponseEntity<UpdateTraineeProfileResponse> updateTrainee(
             @Valid @RequestBody UpdateTraineeProfileRequest newData) {
 
-        TraineeDto traineeDto = entityMapper.toTraineeDao(newData);
-        System.out.println("******" + newData.getDateOfBirth() + " trainee " + traineeDto.getDateOfBirth());
-        UpdateTraineeProfileResponse response = traineeService.updateTrainee(traineeDto);
-        System.out.println(response.getDateOfBirth());
-        if (response == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        UpdateTraineeProfileResponse response = traineeService.updateTrainee(entityMapper.toTraineeDao(newData));
+        return ResponseEntity.ok(response);
+
     }
 
     @DeleteMapping("/trainee")
     public ResponseEntity<String> deleteTrainee(
             @Valid @RequestBody DeleteRequest request) {
-        System.out.println(request);
+
         boolean isDeleted = traineeService.deleteTraineeByUsername(request.getUsername(), request.getPassword());
-        return isDeleted ? new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        return isDeleted ? ResponseEntity.ok("Trainee deleted successfully") : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
 
     }
 
@@ -79,11 +70,7 @@ public class TraineeController {
 
         List<TrainerForTraineeResponse> response = traineeService.
                 updateTraineeTrainers(requestDto.getUsername(), requestDto.getPassword(), requestDto.getTrainerUsernames());
-        if (response == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
 
@@ -91,21 +78,19 @@ public class TraineeController {
     public ResponseEntity<List<GetTrainingResponse>> getTrainingList(
             @Valid @RequestBody GetTraineeTrainingsRequest request) {
         List<GetTrainingResponse> response = traineeService.getTraineeTrainings(request);
-        if (response == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/activate")
-    public ResponseEntity<String> activateTrainee(@Valid @RequestBody UserPassRequest request){
-       return traineeService.activate(request.getUsername(), request.getPassword())
-               ? new ResponseEntity<>(HttpStatus.OK):new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<String> activateTrainee(@Valid @RequestBody UserPassRequest request) {
+
+        return traineeService.activate(request.getUsername(), request.getPassword())
+                ? ResponseEntity.ok("Trainee activated successfully") : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
     }
+
     @PatchMapping("/deactivate")
-    public ResponseEntity<String> deactivateTrainee(@Valid @RequestBody UserPassRequest request){
-       return traineeService.deactivate(request.getUsername(), request.getPassword())
-               ? new ResponseEntity<>(HttpStatus.OK):new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<String> deactivateTrainee(@Valid @RequestBody UserPassRequest request) {
+        return traineeService.deactivate(request.getUsername(), request.getPassword())
+                ? ResponseEntity.ok("Trainee deactivated successfully") : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
     }
 }

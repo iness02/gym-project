@@ -20,7 +20,7 @@ public class TrainingTypeController {
     TrainingTypeService trainingTypeService;
 
     @GetMapping("/trainingType")
-    public ResponseEntity<List<TrainingTypeDto>> getAllTrainingTypes(){
+    public ResponseEntity<List<TrainingTypeDto>> getAllTrainingTypes() {
 
         return new ResponseEntity<>(trainingTypeService.getAllTrainingTypes(), HttpStatus.OK);
     }

@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrainingTypeDto {
-        private Long id;
-        @NotNull
-        private Trainings trainingTypeName;
+    private Long id;
+    @NotNull
+    private Trainings trainingTypeName;
 }

@@ -20,14 +20,14 @@ public class LoginController {
     UserService userService;
 
     @GetMapping
-    public ResponseEntity<String> login(@Valid @RequestBody UserPassRequest request){
-        return userService.matchUsernameAndPassword(request.getUsername(),request.getPassword()) ?
+    public ResponseEntity<String> login(@Valid @RequestBody UserPassRequest request) {
+        return userService.matchUsernameAndPassword(request.getUsername(), request.getPassword()) ?
                 new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/changePassword")
-    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest request){
-        return userService.changePassword(request.getUsername(),request.getNewPassword(),request.getOldPassword()) ?
+    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        return userService.changePassword(request.getUsername(), request.getNewPassword(), request.getOldPassword()) ?
                 new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 }

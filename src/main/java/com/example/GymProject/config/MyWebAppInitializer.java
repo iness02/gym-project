@@ -6,12 +6,12 @@ public class MyWebAppInitializer extends AbstractAnnotationConfigDispatcherServl
 
     @Override
     protected Class<?>[] getRootConfigClasses() {
-        return new Class[] {AppConfig.class,HibernateConfig.class};// No root configuration for this example
+        return new Class[]{AppConfig.class, HibernateConfig.class};
     }
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[]{AppConfig.class}; // Specify your configuration class
+        return new Class[]{AppConfig.class};
     }
 
     @Override
