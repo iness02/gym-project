@@ -1,7 +1,6 @@
-/*
 package com.example.GymProject.dao;
 
-import com.example.GymProject.config.AppConfig;
+import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -15,16 +14,14 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {AppConfig.class})
+@ContextConfiguration(classes = {TestConfig.class})
 @EnableTransactionManagement
-@EnableWebMvc
 public class UserDaoTest {
     @InjectMocks
     private UserDao userDao;
@@ -71,8 +68,7 @@ public class UserDaoTest {
         verify(session, times(1)).createQuery("select u FROM User u WHERE u.username = :username", User.class);
     }
 
-  */
-/*  @Test
+  @Test
     public void testUpdateUser() {
         User user = new User();
         user.setUsername("testuser");
@@ -82,7 +78,7 @@ public class UserDaoTest {
         User updatedUser = userDao.updateUser(user);
         assertEquals(user.getUsername(), updatedUser.getUsername());
         verify(session, times(1)).merge(user);
-    }*//*
+    }
 
 
     @Test
@@ -117,4 +113,3 @@ public class UserDaoTest {
     }
 
 }
-*/

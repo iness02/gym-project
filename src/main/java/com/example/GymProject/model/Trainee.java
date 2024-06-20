@@ -1,11 +1,12 @@
 package com.example.GymProject.model;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.Set;
 
 @Entity
@@ -20,7 +21,7 @@ public class Trainee {
 
     @Temporal(TemporalType.DATE)
     @Column(name = "date_of_birth")
-    private LocalDate dateOfBirth;
+    private Date dateOfBirth;
 
     @Column(name = "address")
     private String address;

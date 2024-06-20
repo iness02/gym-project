@@ -1,7 +1,6 @@
-/*
 package com.example.GymProject.dao;
 
-import com.example.GymProject.config.AppConfig;
+import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.Training;
 import com.example.GymProject.model.User;
@@ -17,7 +16,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,10 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {AppConfig.class})
+@ContextConfiguration(classes = {TestConfig.class})
 @EnableTransactionManagement
-@EnableWebMvc
-
 public class TrainerDaoTest {
     @InjectMocks
     private TrainerDao trainerDao;
@@ -135,8 +131,7 @@ public class TrainerDaoTest {
         verify(session, times(1)).remove(user);
     }
 
-   */
-/* @Test
+ @Test
     public void testGetTrainerTrainings() {
         String username = "trainer";
         Date fromDate = new Date();
@@ -160,7 +155,7 @@ public class TrainerDaoTest {
         verify(session, times(1)).createQuery("SELECT t FROM Training t WHERE t.trainer.user.username = :username " +
                 "AND t.trainingDate BETWEEN :fromDate AND :toDate " +
                 "AND t.trainee.user.username = :traineeName", Training.class);
-    }*//*
+    }
 
 
     @Test
@@ -182,4 +177,3 @@ public class TrainerDaoTest {
         assertEquals(trainers, result);
     }
 }
-*/

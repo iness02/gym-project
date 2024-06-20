@@ -1,7 +1,6 @@
-/*
 package com.example.GymProject.service;
 
-import com.example.GymProject.config.AppConfig;
+import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.dao.TraineeDao;
 import com.example.GymProject.dao.UserDao;
 import com.example.GymProject.dto.TraineeDto;
@@ -10,8 +9,8 @@ import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.User;
-import com.example.GymProject.request.UserPassRequest;
 import com.example.GymProject.response.UserPassResponse;
+import com.example.GymProject.response.traineeResponse.UpdateTraineeProfileResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,12 +20,16 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {AppConfig.class})
+@ContextConfiguration(classes = {TestConfig.class})
+
 class TraineeServiceTest {
     @Mock
     private TraineeDao traineeDao;
@@ -92,8 +95,7 @@ class TraineeServiceTest {
         assertEquals(traineeDto, result);
     }
 
-  */
-/*  @Test
+  @Test
     public void testUpdateTrainee() {
         TraineeDto traineeDTO = new TraineeDto();
         UserDto userDto = new UserDto();
@@ -124,7 +126,7 @@ class TraineeServiceTest {
         assertEquals(response, result);
         assertEquals(user, trainee.getUser());
     }
-*//*
+
 
     @Test
     public void testDeleteTraineeByUsername() {
@@ -188,8 +190,8 @@ class TraineeServiceTest {
         assertTrue(user.getIsActive());
     }
 
-  */
-/*  @Test
+/*
+  @Test
     public void testGetTraineeTrainings() {
         String username = "testUser";
         Date fromDate = new Date();
@@ -208,7 +210,8 @@ class TraineeServiceTest {
         assertNotNull(result);
         assertEquals(trainingDtos.size(), result.size());
     }
-*//*
+*/
+
 
     @Test
     public void testUpdateTraineeTrainers() {
@@ -242,4 +245,3 @@ class TraineeServiceTest {
         assertFalse(traineeService.isAuthenticated(username, password));
     }
 }
-*/

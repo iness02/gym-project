@@ -1,7 +1,6 @@
-/*
 package com.example.GymProject.dao;
 
-import com.example.GymProject.config.AppConfig;
+import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.model.Training;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -15,7 +14,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,10 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {AppConfig.class})
+@ContextConfiguration(classes = {TestConfig.class})
 @EnableTransactionManagement
-@EnableWebMvc
-
 public class TrainingDaoTest {
     @Mock
     private SessionFactory sessionFactory;
@@ -84,4 +80,3 @@ public class TrainingDaoTest {
         assertEquals(training, result);
     }
 }
-*/

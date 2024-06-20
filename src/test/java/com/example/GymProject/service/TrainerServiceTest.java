@@ -1,16 +1,12 @@
-/*
 package com.example.GymProject.service;
 
-import com.example.GymProject.config.AppConfig;
+import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.dao.TrainerDao;
 import com.example.GymProject.dao.UserDao;
 import com.example.GymProject.dto.TrainerDto;
-import com.example.GymProject.dto.TrainingDto;
 import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.mapper.EntityMapper;
-import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Trainer;
-import com.example.GymProject.model.Training;
 import com.example.GymProject.model.User;
 import com.example.GymProject.response.UserPassResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,16 +18,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {AppConfig.class})
+@ContextConfiguration(classes = {TestConfig.class})
 class TrainerServiceTest {
     @Mock
     private TrainerDao trainerDao;
@@ -95,8 +86,7 @@ class TrainerServiceTest {
         verify(trainerDao, times(1)).getTrainerByUsername(username);
     }
 
-   */
-/* @Test
+ @Test
     void updateTrainer() {
         TrainerDto trainerDto = new TrainerDto();
         UserDto userDto = new UserDto();
@@ -109,10 +99,10 @@ class TrainerServiceTest {
         when(entityMapper.toTrainerDto(any(Trainer.class))).thenReturn(trainerDto);
         when(userService.matchUsernameAndPassword(userDto.getUsername(), "password")).thenReturn(true);
 
-        assertNotNull(trainerService.updateTrainer(trainerDto, "password"));
+        assertNotNull(trainerService.updateTrainer(trainerDto));
 
         verify(trainerDao, times(1)).updateTrainer(any(Trainer.class));
-    }*//*
+    }
 
 
 
@@ -168,8 +158,8 @@ class TrainerServiceTest {
         assertTrue(user.getIsActive());
     }
 
-   */
-/* @Test
+/*
+ @Test
     void getTrainerTrainings() {
         String username = "John.Doe";
         Date fromDate = new Date();
@@ -188,7 +178,8 @@ class TrainerServiceTest {
         assertEquals(1, result.size());
         verify(trainerDao, times(1)).getTrainerTrainings(username, fromDate, toDate, traineeName);
     }
-*//*
+*/
+
 
     @Test
     void testIsAuthenticated_ValidCredentials() {
@@ -207,4 +198,4 @@ class TrainerServiceTest {
         when(userService.matchUsernameAndPassword(username, password)).thenReturn(false);
         assertFalse(trainerService.isAuthenticated(username, password));
     }
-}*/
+}

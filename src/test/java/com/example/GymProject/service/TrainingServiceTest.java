@@ -1,7 +1,6 @@
-/*
 package com.example.GymProject.service;
 
-import com.example.GymProject.config.AppConfig;
+import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.dao.TrainingDao;
 import com.example.GymProject.dto.TrainingDto;
 import com.example.GymProject.mapper.EntityMapper;
@@ -25,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {AppConfig.class})
+@ContextConfiguration(classes = {TestConfig.class})
 class TrainingServiceTest {
     @Mock
     private TrainingDao trainingDao;
@@ -140,4 +139,4 @@ class TrainingServiceTest {
         when(userService.matchUsernameAndPassword(username, password)).thenReturn(false);
         assertFalse(trainingService.isAuthenticated(username, password));
     }
-}*/
+}

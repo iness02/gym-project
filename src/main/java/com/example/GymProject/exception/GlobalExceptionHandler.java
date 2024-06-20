@@ -1,5 +1,6 @@
 package com.example.GymProject.exception;
 
+import lombok.Setter;
 import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
+@Setter
 public class GlobalExceptionHandler {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());

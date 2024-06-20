@@ -1,7 +1,8 @@
 package com.example.GymProject.dto;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
+
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter

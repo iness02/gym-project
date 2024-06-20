@@ -3,7 +3,6 @@ package com.example.GymProject.dao;
 import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Training;
 import com.example.GymProject.model.User;
-import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -12,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -55,18 +56,6 @@ public class TraineeDao {
         }
     }
 
-    /*  @Transactional
-      public Trainee updateTrainee(Trainee trainee) {
-          try {
-              logger.info("Updating trainee with username: {}", trainee.getUser().getUsername());
-              sessionFactory.getCurrentSession().merge(trainee);
-              logger.info("Successfully updated trainee with username: {}", trainee.getUser().getUsername());
-              return trainee;
-          } catch (Exception e) {
-              logger.error("Error occurred while updating trainee with username: {}", trainee.getUser().getUsername(), e);
-              throw e;
-          }
-      }*/
     @Transactional
     public Trainee updateTrainee(Trainee trainee) {
         try {
@@ -132,7 +121,7 @@ public class TraineeDao {
 
 
     @Transactional(readOnly = true)
-    public List<Training> getTraineeTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingType) {
+    public List<Training> getTraineeTrainings(String username, Date fromDate, Date toDate, String trainerName, String trainingType) {
         try {
             logger.info("Fetching trainings for trainee with username: {}", username);
             List<Training> trainings = sessionFactory.getCurrentSession()

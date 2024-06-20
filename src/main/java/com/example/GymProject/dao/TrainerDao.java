@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -96,7 +97,7 @@ public class TrainerDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Training> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
+    public List<Training> getTrainerTrainings(String username, Date fromDate, Date toDate, String traineeName) {
         try {
             logger.info("Fetching trainings for trainer with username: {}", username);
             List<Training> trainings = sessionFactory.getCurrentSession()

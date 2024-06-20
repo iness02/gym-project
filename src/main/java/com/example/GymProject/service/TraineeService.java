@@ -198,7 +198,6 @@ public class TraineeService {
         return null;
     }
 
-
     public void updateTraineeTrainers(String username, Set<TrainerDto> trainerDtos, String password) {
         if (username == null || password == null) {
             throw new InvalidCredentialsException("Username or password is invalid");

@@ -1,7 +1,6 @@
-/*
 package com.example.GymProject.dao;
 
-import com.example.GymProject.config.AppConfig;
+import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Training;
 import com.example.GymProject.model.User;
@@ -14,12 +13,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,10 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {AppConfig.class})
+@ContextConfiguration(classes = {TestConfig.class})
 @EnableTransactionManagement
-@EnableWebMvc
-public class TraineeDaoTest {
+class TraineeDaoTest {
     @InjectMocks
     private TraineeDao traineeDao;
 
@@ -70,6 +65,45 @@ public class TraineeDaoTest {
         assertNotNull(result);
         assertEquals(trainee.getUser().getUsername(), result.getUser().getUsername());
         verify(session, times(1)).persist(trainee);
+    }
+    @Test
+    public void testDeleteTraineeByUsername() {
+        String username = "testuser";
+
+        Trainee trainee = new Trainee();
+        User user = new User();
+        user.setUsername(username);
+        trainee.setUser(user);
+
+        List<Training> trainings = new ArrayList<>();
+
+        when(session.createQuery("SELECT t FROM Trainee t WHERE t.user.username = :username", Trainee.class))
+                .thenReturn(traineeQuery);
+        when(traineeQuery.setParameter("username", username)).thenReturn(traineeQuery);
+        when(traineeQuery.uniqueResult()).thenReturn(trainee);
+
+        when(session.createQuery("Select t FROM Training t WHERE t.trainee.user.username = :username", Training.class))
+                .thenReturn(trainingQuery);
+        when(trainingQuery.setParameter("username", username)).thenReturn(trainingQuery);
+        when(trainingQuery.list()).thenReturn(trainings);
+
+        doNothing().when(session).remove(any(Training.class));
+        doNothing().when(session).remove(trainee);
+        doNothing().when(session).remove(user);
+
+        traineeDao.deleteTraineeByUsername(username);
+
+        verify(session, times(1)).createQuery("SELECT t FROM Trainee t WHERE t.user.username = :username", Trainee.class);
+        verify(traineeQuery, times(1)).setParameter("username", username);
+        verify(traineeQuery, times(1)).uniqueResult();
+
+        verify(session, times(1)).createQuery("Select t FROM Training t WHERE t.trainee.user.username = :username", Training.class);
+        verify(trainingQuery, times(1)).setParameter("username", username);
+        verify(trainingQuery, times(1)).list();
+
+        verify(session, times(trainings.size())).remove(any(Training.class));
+        verify(session, times(1)).remove(trainee);
+        verify(session, times(1)).remove(user);
     }
 
     @Test
@@ -109,9 +143,7 @@ public class TraineeDaoTest {
         assertEquals(trainee.getUser().getUsername(), result.getUser().getUsername());
         verify(session, times(1)).merge(trainee);
     }
-
-   */
-/* @Test
+ @Test
     public void testGetTraineeTrainings() {
         String username = "testuser";
         Date fromDate = new Date();
@@ -145,8 +177,7 @@ public class TraineeDaoTest {
         verify(trainingQuery, times(1)).setParameter("trainerName", trainerName);
         verify(trainingQuery, times(1)).setParameter("trainingType", trainingType);
         verify(trainingQuery, times(1)).getResultList();
-    }*//*
+    }
 
 
 }
-*/
