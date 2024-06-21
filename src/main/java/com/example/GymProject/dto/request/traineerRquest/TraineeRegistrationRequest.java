@@ -1,4 +1,4 @@
-package com.example.GymProject.request.traineerRquest;
+package com.example.GymProject.dto.request.traineerRquest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDate;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -23,7 +23,7 @@ public class TraineeRegistrationRequest {
     private String lastName;
 
     @JsonProperty("dateOfBirth")
-    private LocalDate dateOfBirth;
+    private Date dateOfBirth;
     @JsonProperty("address")
     private String address;
 }

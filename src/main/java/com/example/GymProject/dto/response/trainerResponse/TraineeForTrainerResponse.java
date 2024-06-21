@@ -1,5 +1,4 @@
-package com.example.GymProject.response.traineeResponse;
-
+package com.example.GymProject.dto.response.trainerResponse;
 
 import lombok.*;
 
@@ -8,9 +7,8 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class TrainerForTraineeResponse {
+public class TraineeForTrainerResponse {
     private String userName;
     private String firstName;
     private String lastName;
-    private String specialization;
 }

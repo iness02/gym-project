@@ -75,7 +75,6 @@ public class UserDao {
     public User updateUser(User user) {
         try {
             logger.info("Updating user with username: {}", user.getUsername());
-            // Fetch the existing user by username
             User existingUser = (User) sessionFactory.getCurrentSession()
                     .createQuery("select u from User u where u.username = :username")
                     .setParameter("username", user.getUsername())
@@ -86,7 +85,13 @@ public class UserDao {
                 existingUser.setLastName(user.getLastName());
                 existingUser.setIsActive(user.getIsActive());
                 existingUser.setPassword(user.getPassword());
-                sessionFactory.getCurrentSession().merge(existingUser);
+                sessionFactory.getCurrentSession().createQuery("Update User u set u.firstName =:firstName," +
+                        "u.lastName = :lastName,u.isActive= :isActive ,u.password=:password").
+                        setParameter("firstName",user.getFirstName()).
+                        setParameter("lastName",user.getLastName()).
+                        setParameter("isActive",user.getIsActive()).
+                        setParameter("password",user.getPassword()).executeUpdate();
+              //  sessionFactory.getCurrentSession().merge(existingUser);
             } else {
                 logger.error("User with username: {} does not exist", user.getUsername());
                 throw new EntityNotFoundException("User not found");

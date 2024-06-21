@@ -24,7 +24,7 @@ public class TrainingTypeController {
     private static final Logger logger = LoggerFactory.getLogger(TrainingTypeController.class);
 
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<TrainingTypeDto>> getAllTrainingTypes() {
         logger.info("Received request to get all training types");
 

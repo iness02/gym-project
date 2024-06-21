@@ -1,8 +1,8 @@
 package com.example.GymProject.controller;
 
 import com.example.GymProject.config.TestConfig;
-import com.example.GymProject.request.ChangePasswordRequest;
-import com.example.GymProject.request.UserPassRequest;
+import com.example.GymProject.dto.request.ChangePasswordRequest;
+import com.example.GymProject.dto.request.UserPassRequest;
 import com.example.GymProject.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

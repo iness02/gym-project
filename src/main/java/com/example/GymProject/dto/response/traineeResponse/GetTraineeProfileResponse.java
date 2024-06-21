@@ -1,13 +1,13 @@
-package com.example.GymProject.response.traineeResponse;
+package com.example.GymProject.dto.response.traineeResponse;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.Set;
 
 
 public class GetTraineeProfileResponse {
     private String firstName;
     private String lastName;
-    private LocalDate dateOfBirth;
+    private Date dateOfBirth;
     private String address;
     private Boolean isActive;
     private Set<TrainerForTraineeResponse> trainers;
@@ -25,7 +25,7 @@ public class GetTraineeProfileResponse {
         return sb.toString();
     }
 
-    public GetTraineeProfileResponse(String firstName, String lastName, LocalDate dateOfBirth, String address, Boolean isActive, Set<TrainerForTraineeResponse> trainers) {
+    public GetTraineeProfileResponse(String firstName, String lastName, Date dateOfBirth, String address, Boolean isActive, Set<TrainerForTraineeResponse> trainers) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
@@ -53,11 +53,11 @@ public class GetTraineeProfileResponse {
         this.lastName = lastName;
     }
 
-    public LocalDate getDateOfBirth() {
+    public Date getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(LocalDate dateOfBirth) {
+    public void setDateOfBirth(Date dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 

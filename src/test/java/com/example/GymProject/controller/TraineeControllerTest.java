@@ -4,17 +4,17 @@ import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.dto.TraineeDto;
 import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.mapper.EntityMapper;
-import com.example.GymProject.request.DeleteRequest;
-import com.example.GymProject.request.UserPassRequest;
-import com.example.GymProject.request.traineerRquest.GetTraineeTrainingsRequest;
-import com.example.GymProject.request.traineerRquest.TraineeRegistrationRequest;
-import com.example.GymProject.request.traineerRquest.UpdateTraineeProfileRequest;
-import com.example.GymProject.request.traineerRquest.UpdateTraineeTrainersRequest;
-import com.example.GymProject.response.GetTrainingResponse;
-import com.example.GymProject.response.UserPassResponse;
-import com.example.GymProject.response.traineeResponse.GetTraineeProfileResponse;
-import com.example.GymProject.response.traineeResponse.TrainerForTraineeResponse;
-import com.example.GymProject.response.traineeResponse.UpdateTraineeProfileResponse;
+import com.example.GymProject.dto.request.DeleteRequest;
+import com.example.GymProject.dto.request.UserPassRequest;
+import com.example.GymProject.dto.request.traineerRquest.GetTraineeTrainingsRequest;
+import com.example.GymProject.dto.request.traineerRquest.TraineeRegistrationRequest;
+import com.example.GymProject.dto.request.traineerRquest.UpdateTraineeProfileRequest;
+import com.example.GymProject.dto.request.traineerRquest.UpdateTraineeTrainersRequest;
+import com.example.GymProject.dto.response.GetTrainingResponse;
+import com.example.GymProject.dto.response.UserPassResponse;
+import com.example.GymProject.dto.response.traineeResponse.GetTraineeProfileResponse;
+import com.example.GymProject.dto.response.traineeResponse.TrainerForTraineeResponse;
+import com.example.GymProject.dto.response.traineeResponse.UpdateTraineeProfileResponse;
 import com.example.GymProject.service.TraineeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,10 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -60,11 +57,11 @@ public class TraineeControllerTest {
         TraineeRegistrationRequest registrationRequest = new TraineeRegistrationRequest();
         registrationRequest.setFirstName("John");
         registrationRequest.setLastName("Doe");
-        registrationRequest.setDateOfBirth(LocalDate.parse("2000-01-01"));
+        registrationRequest.setDateOfBirth(new Date(2002, Calendar.OCTOBER,22));
         registrationRequest.setAddress("123 Main St");
 
         UserDto userDto = new UserDto("John", "Doe");
-        TraineeDto traineeDto = new TraineeDto(null, LocalDate.parse("2000-01-01"), "123 Main St", userDto, null);
+        TraineeDto traineeDto = new TraineeDto(null, new Date(2002, Calendar.OCTOBER,22), "123 Main St", userDto, null);
 
         UserPassResponse userPassResponse = new UserPassResponse(1L,"John.Doe", "password123");
 

@@ -1,8 +1,8 @@
-package com.example.GymProject.response.traineeResponse;
+package com.example.GymProject.dto.response.traineeResponse;
 
 import lombok.*;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.Set;
 
 @Getter
@@ -14,7 +14,7 @@ public class UpdateTraineeProfileResponse {
     private String userName;
     private String firstName;
     private String lastName;
-    private LocalDate dateOfBirth;
+    private Date dateOfBirth;
     private String address;
     private Boolean isActive;
     private Set<TrainerForTraineeResponse> trainers;

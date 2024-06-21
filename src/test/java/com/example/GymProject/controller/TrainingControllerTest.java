@@ -3,7 +3,7 @@ package com.example.GymProject.controller;
 import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.dto.TrainingDto;
 import com.example.GymProject.mapper.EntityMapper;
-import com.example.GymProject.request.trainingRequest.AddTrainingRequest;
+import com.example.GymProject.dto.request.trainingRequest.AddTrainingRequest;
 import com.example.GymProject.service.TrainingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

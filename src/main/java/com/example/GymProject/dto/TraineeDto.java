@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.Set;
 
 @Getter
@@ -14,7 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class TraineeDto {
     private Long id;
-    private LocalDate dateOfBirth;
+    private Date dateOfBirth;
     private String address;
     private UserDto userDto;
     private Set<TrainerDto> trainers;

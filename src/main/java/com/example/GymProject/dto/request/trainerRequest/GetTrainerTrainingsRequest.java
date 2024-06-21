@@ -1,9 +1,8 @@
-package com.example.GymProject.request.traineerRquest;
+package com.example.GymProject.dto.request.trainerRequest;
 
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDate;
 import java.util.Date;
 
 @Getter
@@ -11,7 +10,7 @@ import java.util.Date;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetTraineeTrainingsRequest {
+public class GetTrainerTrainingsRequest {
     @NotBlank
     private String username;
     @NotBlank
@@ -19,6 +18,4 @@ public class GetTraineeTrainingsRequest {
     private Date periodFrom;
     private Date periodTo;
     private String trainerName;
-    private String trainingType;
-
 }

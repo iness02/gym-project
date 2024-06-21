@@ -8,7 +8,7 @@ import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.User;
-import com.example.GymProject.response.UserPassResponse;
+import com.example.GymProject.dto.response.UserPassResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

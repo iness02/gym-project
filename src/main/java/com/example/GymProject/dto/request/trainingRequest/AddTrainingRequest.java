@@ -1,4 +1,4 @@
-package com.example.GymProject.request.trainingRequest;
+package com.example.GymProject.dto.request.trainingRequest;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

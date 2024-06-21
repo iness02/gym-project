@@ -1,11 +1,11 @@
-package com.example.GymProject.request.traineerRquest;
+package com.example.GymProject.dto.request.traineerRquest;
 
 
 import lombok.*;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -21,7 +21,7 @@ public class UpdateTraineeProfileRequest {
     private String firstName;
     @NotEmpty
     private String lastName;
-    private LocalDate dateOfBirth;
+    private Date dateOfBirth;
     private String address;
     @NotNull
     private Boolean isActive;

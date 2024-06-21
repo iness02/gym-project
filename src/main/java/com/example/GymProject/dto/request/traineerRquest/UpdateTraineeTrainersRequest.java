@@ -1,4 +1,4 @@
-package com.example.GymProject.request.traineerRquest;
+package com.example.GymProject.dto.request.traineerRquest;
 
 import lombok.*;
 

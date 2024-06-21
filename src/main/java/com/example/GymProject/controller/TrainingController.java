@@ -2,7 +2,7 @@ package com.example.GymProject.controller;
 
 import com.example.GymProject.dto.TrainingDto;
 import com.example.GymProject.mapper.EntityMapper;
-import com.example.GymProject.request.trainingRequest.AddTrainingRequest;
+import com.example.GymProject.dto.request.trainingRequest.AddTrainingRequest;
 import com.example.GymProject.service.TrainingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class TrainingController {
     private static final Logger logger = LoggerFactory.getLogger(TrainingController.class);
 
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<String> addTraining(@Valid @RequestBody AddTrainingRequest request) {
         logger.info("Received request to add training: {}", request);
         TrainingDto trainingDto = entityMapper.toTrainingDto(request);

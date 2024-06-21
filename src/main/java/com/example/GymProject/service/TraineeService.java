@@ -13,12 +13,12 @@ import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.Training;
 import com.example.GymProject.model.User;
-import com.example.GymProject.request.traineerRquest.GetTraineeTrainingsRequest;
-import com.example.GymProject.response.GetTrainingResponse;
-import com.example.GymProject.response.UserPassResponse;
-import com.example.GymProject.response.traineeResponse.GetTraineeProfileResponse;
-import com.example.GymProject.response.traineeResponse.TrainerForTraineeResponse;
-import com.example.GymProject.response.traineeResponse.UpdateTraineeProfileResponse;
+import com.example.GymProject.dto.request.traineerRquest.GetTraineeTrainingsRequest;
+import com.example.GymProject.dto.response.GetTrainingResponse;
+import com.example.GymProject.dto.response.UserPassResponse;
+import com.example.GymProject.dto.response.traineeResponse.GetTraineeProfileResponse;
+import com.example.GymProject.dto.response.traineeResponse.TrainerForTraineeResponse;
+import com.example.GymProject.dto.response.traineeResponse.UpdateTraineeProfileResponse;
 import com.example.GymProject.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,14 +81,11 @@ public class TraineeService {
     }
 
     public GetTraineeProfileResponse getTraineeByUsername(String username) {
-        System.out.println("mmm");
         Trainee trainee = traineeDao.getTraineeByUsername(username);
-
         if (trainee == null) {
             throw new ResourceNotFoundException("Trainee not found with username: " + username);
         }
         TraineeDto traineeDto = entityMapper.toTraineeDto(trainee);
-        System.out.println("ines: "+ entityMapper.toGetTraineeProfileResponse(traineeDto));
         return entityMapper.toGetTraineeProfileResponse(traineeDto);
 
     }
@@ -183,7 +180,7 @@ public class TraineeService {
     }*/
 
     public List<GetTrainingResponse> getTraineeTrainings(GetTraineeTrainingsRequest request) {
-        if (request == null ) {
+        if (request == null) {
             throw new InvalidCredentialsException("Request or id cannot be null");
         }
         if (isAuthenticated(request.getUsername(), request.getPassword())) {
