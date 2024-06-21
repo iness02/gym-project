@@ -79,8 +79,9 @@ public class TraineeController {
 
     }
 
-    @PutMapping("/trainersList")
+    @PutMapping("/{traineeId}/trainers")
     public ResponseEntity<List<TrainerForTraineeResponse>> updateTraineeTrainers(
+            @PathVariable Long traineeId,
             @Valid @RequestBody UpdateTraineeTrainersRequest requestDto) {
         logger.info("Received request to update trainee trainers list: {}", requestDto);
         List<TrainerForTraineeResponse> response = traineeService.
@@ -90,8 +91,9 @@ public class TraineeController {
     }
 
 
-    @GetMapping("/trainingList")
+    @GetMapping("/{traineeId}/trainings")
     public ResponseEntity<List<GetTrainingResponse>> getTrainingList(
+            @PathVariable Long traineeId,
             @Valid @RequestBody GetTraineeTrainingsRequest request) {
         logger.info("Received request to get training list for trainee: {}", request);
         List<GetTrainingResponse> response = traineeService.getTraineeTrainings(request);

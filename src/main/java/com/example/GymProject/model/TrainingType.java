@@ -1,8 +1,6 @@
 package com.example.GymProject.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -10,7 +8,9 @@ import javax.persistence.*;
 @Table(name = "training_type")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
+@ToString
 public class TrainingType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

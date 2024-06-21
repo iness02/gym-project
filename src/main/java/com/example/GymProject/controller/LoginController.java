@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api/login")
+@RequestMapping("/api")
 public class LoginController {
 
     @Autowired
@@ -24,7 +24,7 @@ public class LoginController {
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
 
-    @GetMapping
+    @GetMapping("/login")
     public ResponseEntity<String> login(@Valid @RequestBody UserPassRequest request) {
         logger.info("Login attempt for username: {}", request.getUsername());
         return userService.matchUsernameAndPassword(request.getUsername(), request.getPassword()) ?

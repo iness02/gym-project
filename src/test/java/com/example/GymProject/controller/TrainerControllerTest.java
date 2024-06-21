@@ -24,6 +24,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,7 +61,7 @@ public class TrainerControllerTest {
         UserDto userDto = new UserDto("John", "Doe");
         TrainerDto trainerDto = new TrainerDto(null, "Fitness", userDto, null);
 
-        UserPassResponse userPassResponse = new UserPassResponse("John.Doe", "password123");
+        UserPassResponse userPassResponse = new UserPassResponse(1L,"John.Doe", "password123");
 
         when(trainerService.createTrainer(any(TrainerDto.class))).thenReturn(userPassResponse);
 
@@ -101,16 +104,19 @@ public class TrainerControllerTest {
 
     @Test
     public void testGetTrainingList() {
-        GetTrainerTrainingsRequest request = new GetTrainerTrainingsRequest();
-        List<GetTrainingResponse> response = List.of(new GetTrainingResponse());
+        Long trainerId = 1L;
+        GetTrainerTrainingsRequest request = new GetTrainerTrainingsRequest("username", "password", new Date(), new Date(), "trainerName");
+        List<GetTrainingResponse> expectedResponse = new ArrayList<>();
+        expectedResponse.add(new GetTrainingResponse("Training1", LocalDate.now(), "Type1", 60, "trainerName"));
+        expectedResponse.add(new GetTrainingResponse("Training2", LocalDate.now().plusDays(1), "Type2", 45, "trainerName"));
 
-        when(trainerService.getTrainerTrainings(request)).thenReturn(response);
+        when(trainerService.getTrainerTrainings(any(GetTrainerTrainingsRequest.class))).thenReturn(expectedResponse);
 
-        ResponseEntity<List<GetTrainingResponse>> responseEntity = trainerController.getTrainingList(request);
+        ResponseEntity<List<GetTrainingResponse>> responseEntity = trainerController.getTrainingList(trainerId, request);
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(response, responseEntity.getBody());
         verify(trainerService, times(1)).getTrainerTrainings(request);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(expectedResponse, responseEntity.getBody());
     }
 
     @Test

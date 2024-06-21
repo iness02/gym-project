@@ -57,7 +57,7 @@ public class TrainerService {
         trainer.setUser(user);
         Trainer trainer1 = trainerDao.createTrainer(trainer);
         entityMapper.toTrainerDto(trainer1);
-        return new UserPassResponse(trainer1.getUser().getUsername(), trainer1.getUser().getPassword());
+        return new UserPassResponse(trainer1.getId(),trainer1.getUser().getUsername(), trainer1.getUser().getPassword());
     }
 
     public TrainerDto getTrainerByUsername(String username, String password) {

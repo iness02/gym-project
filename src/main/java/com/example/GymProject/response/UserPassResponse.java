@@ -10,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserPassResponse {
+    private Long id;
     private String username;
     private String password;
 }

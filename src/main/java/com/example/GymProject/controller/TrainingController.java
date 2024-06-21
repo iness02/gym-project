@@ -28,7 +28,7 @@ public class TrainingController {
     private static final Logger logger = LoggerFactory.getLogger(TrainingController.class);
 
 
-    @PostMapping("/training")
+    @PostMapping()
     public ResponseEntity<String> addTraining(@Valid @RequestBody AddTrainingRequest request) {
         logger.info("Received request to add training: {}", request);
         TrainingDto trainingDto = entityMapper.toTrainingDto(request);

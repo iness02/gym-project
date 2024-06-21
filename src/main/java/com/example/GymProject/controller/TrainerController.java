@@ -61,8 +61,9 @@ public class TrainerController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/trainingList")
+    @GetMapping("/{trainerId}/trainings")
     public ResponseEntity<List<GetTrainingResponse>> getTrainingList(
+            @PathVariable Long trainerId,
             @Valid @RequestBody GetTrainerTrainingsRequest request) {
         logger.info("Received request to get training list for trainer: {}", request);
         List<GetTrainingResponse> response = trainerService.getTrainerTrainings(request);

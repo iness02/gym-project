@@ -61,7 +61,7 @@ public class TraineeService {
         trainee.setUser(user);
         Trainee trainee1 = traineeDao.createTrainee(trainee);
         entityMapper.toTraineeDto(trainee1);
-        return new UserPassResponse(trainee1.getUser().getUsername(), trainee1.getUser().getPassword());
+        return new UserPassResponse(trainee1.getId(), trainee1.getUser().getUsername(), trainee1.getUser().getPassword());
     }
 
     public TraineeDto getTraineeByUsername(String username, String password) {
@@ -81,11 +81,14 @@ public class TraineeService {
     }
 
     public GetTraineeProfileResponse getTraineeByUsername(String username) {
+        System.out.println("mmm");
         Trainee trainee = traineeDao.getTraineeByUsername(username);
+
         if (trainee == null) {
             throw new ResourceNotFoundException("Trainee not found with username: " + username);
         }
         TraineeDto traineeDto = entityMapper.toTraineeDto(trainee);
+        System.out.println("ines: "+ entityMapper.toGetTraineeProfileResponse(traineeDto));
         return entityMapper.toGetTraineeProfileResponse(traineeDto);
 
     }
@@ -180,8 +183,8 @@ public class TraineeService {
     }*/
 
     public List<GetTrainingResponse> getTraineeTrainings(GetTraineeTrainingsRequest request) {
-        if (request == null) {
-            throw new InvalidCredentialsException("Request cannot be null");
+        if (request == null ) {
+            throw new InvalidCredentialsException("Request or id cannot be null");
         }
         if (isAuthenticated(request.getUsername(), request.getPassword())) {
             List<Training> trainings = traineeDao.getTraineeTrainings(

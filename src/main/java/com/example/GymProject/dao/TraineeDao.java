@@ -45,10 +45,12 @@ public class TraineeDao {
                     .setParameter("username", username)
                     .uniqueResult();
             if (trainee != null) {
+                System.out.println("kiki "+ trainee);
                 logger.info("Successfully fetched trainee with username: {}", username);
             } else {
                 logger.warn("No trainee found with username: {}", username);
             }
+            System.out.println("hiii");
             return trainee;
         } catch (Exception e) {
             logger.error("Error occurred while fetching trainee with username: {}", username, e);

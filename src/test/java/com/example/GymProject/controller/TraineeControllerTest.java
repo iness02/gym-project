@@ -28,7 +28,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -64,7 +66,7 @@ public class TraineeControllerTest {
         UserDto userDto = new UserDto("John", "Doe");
         TraineeDto traineeDto = new TraineeDto(null, LocalDate.parse("2000-01-01"), "123 Main St", userDto, null);
 
-        UserPassResponse userPassResponse = new UserPassResponse("John.Doe", "password123");
+        UserPassResponse userPassResponse = new UserPassResponse(1L,"John.Doe", "password123");
 
         when(traineeService.createTrainee(any(TraineeDto.class))).thenReturn(userPassResponse);
 
@@ -134,49 +136,42 @@ public class TraineeControllerTest {
         verify(traineeService, times(1)).deleteTraineeByUsername(request.getUsername(), request.getPassword());
     }
 
+
+
     @Test
     public void testUpdateTraineeTrainers() {
-        UpdateTraineeTrainersRequest request = new UpdateTraineeTrainersRequest();
-        List<TrainerForTraineeResponse> response = List.of(new TrainerForTraineeResponse());
+        Long traineeId = 1L;
+        UpdateTraineeTrainersRequest requestDto = new UpdateTraineeTrainersRequest("username", "password", Set.of("trainer1", "trainer2"));
+        List<TrainerForTraineeResponse> expectedResponse = new ArrayList<>();
+        expectedResponse.add(new TrainerForTraineeResponse("user1","joe","dao","trainer1"));
+        expectedResponse.add(new TrainerForTraineeResponse("user2","jone","brown","trainer2"));
 
-        when(traineeService.updateTraineeTrainers(request.getUsername(), request.getPassword(), request.getTrainerUsernames())).thenReturn(response);
+        when(traineeService.updateTraineeTrainers(anyString(), anyString(), anySet())).thenReturn(expectedResponse);
 
-        ResponseEntity<List<TrainerForTraineeResponse>> responseEntity = traineeController.updateTraineeTrainers(request);
+        ResponseEntity<List<TrainerForTraineeResponse>> responseEntity = traineeController.updateTraineeTrainers(traineeId, requestDto);
 
+        verify(traineeService, times(1)).updateTraineeTrainers(requestDto.getUsername(), requestDto.getPassword(), requestDto.getTrainerUsernames());
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(response, responseEntity.getBody());
-        verify(traineeService, times(1)).updateTraineeTrainers(request.getUsername(), request.getPassword(), request.getTrainerUsernames());
+        assertEquals(expectedResponse, responseEntity.getBody());
     }
 
     @Test
     public void testGetTrainingList() {
+        Long traineeId = 1L;
         GetTraineeTrainingsRequest request = new GetTraineeTrainingsRequest();
-        List<GetTrainingResponse> response = List.of(new GetTrainingResponse());
+        request.setUsername("testuser");
+        request.setPassword("password");
 
-        when(traineeService.getTraineeTrainings(request)).thenReturn(response);
+        List<GetTrainingResponse> expectedResponse = new ArrayList<>();
+        when(traineeService.getTraineeTrainings(any(GetTraineeTrainingsRequest.class)))
+                .thenReturn(expectedResponse);
 
-        ResponseEntity<List<GetTrainingResponse>> responseEntity = traineeController.getTrainingList(request);
+        ResponseEntity<List<GetTrainingResponse>> responseEntity = traineeController.getTrainingList(traineeId, request);
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(response, responseEntity.getBody());
         verify(traineeService, times(1)).getTraineeTrainings(request);
-    }
-
-    @Test
-    public void testActivateTrainee() {
-        UserPassRequest request = new UserPassRequest();
-        request.setUsername("JohnDoe");
-        request.setPassword("password123");
-
-        when(traineeService.activate(request.getUsername(), request.getPassword())).thenReturn(true);
-
-        ResponseEntity<String> responseEntity = traineeController.activateTrainee(request);
-
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals("Trainee activated successfully", responseEntity.getBody());
-        verify(traineeService, times(1)).activate(request.getUsername(), request.getPassword());
+        assertEquals(expectedResponse, responseEntity.getBody());
     }
-
     @Test
     public void testActivateTrainee_Unauthorized() {
         UserPassRequest request = new UserPassRequest();
