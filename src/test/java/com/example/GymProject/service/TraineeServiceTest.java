@@ -2,23 +2,31 @@ package com.example.GymProject.service;
 
 import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.dao.TraineeDao;
+import com.example.GymProject.dao.TrainerDao;
 import com.example.GymProject.dao.UserDao;
 import com.example.GymProject.dto.TraineeDto;
 import com.example.GymProject.dto.TrainerDto;
 import com.example.GymProject.dto.UserDto;
+import com.example.GymProject.exception.InvalidCredentialsException;
+import com.example.GymProject.exception.UserAlreadyRegisteredException;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.User;
 import com.example.GymProject.dto.response.UserPassResponse;
 import com.example.GymProject.dto.response.traineeResponse.UpdateTraineeProfileResponse;
+import com.example.GymProject.util.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -43,8 +51,13 @@ class TraineeServiceTest {
     @Mock
     private EntityMapper entityMapper;
 
+    @Mock
+    private TrainerDao trainerDao;
+
     @InjectMocks
     private TraineeService traineeService;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+
 
     @BeforeEach
     public void setUp() {
@@ -55,30 +68,67 @@ class TraineeServiceTest {
     public void testCreateTrainee() {
         TraineeDto traineeDto = new TraineeDto();
         UserDto userDto = new UserDto();
-        userDto.setUsername("user.name");
-        userDto.setPassword("testPass");
+        userDto.setFirstName("John");
+        userDto.setLastName("Doe");
         traineeDto.setUserDto(userDto);
 
         Trainee trainee = new Trainee();
         User user = new User();
-        user.setFirstName("user");
-        user.setLastName("name");
-        trainee.setUser(user);
+        Trainee savedTrainee = new Trainee();
+        savedTrainee.setId(1L);
+        user.setUsername("John.Doe0");
+        user.setPassword(Utils.generatePassword());
+        savedTrainee.setUser(user);
 
-        when(entityMapper.toTrainee(any(TraineeDto.class))).thenReturn(trainee);
-        when(entityMapper.toUser(any(UserDto.class))).thenReturn(user);
-        when(userService.generateUniqueUserName(anyString(), anyString())).thenReturn("user.name");
-        when(traineeDao.createTrainee(any(Trainee.class))).thenReturn(trainee);
+        when(userService.generateUniqueUserName("John", "Doe")).thenReturn("John.Doe0");
+        when(traineeDao.existsByUsername("John.Doe0")).thenReturn(false);
+        when(trainerDao.existsByUsername("John.Doe0")).thenReturn(false);
+        when(entityMapper.toTrainee(traineeDto)).thenReturn(trainee);
+        when(entityMapper.toUser(traineeDto.getUserDto())).thenReturn(user);
+        doNothing().when(userDao).createUser(user);
+        when(traineeDao.createTrainee(trainee)).thenReturn(savedTrainee);
 
-        UserPassResponse result = traineeService.createTrainee(traineeDto);
+        UserPassResponse response = traineeService.createTrainee(traineeDto);
 
-        verify(userDao).createUser(any(User.class));
-        verify(traineeDao).createTrainee(any(Trainee.class));
+        verify(userService, times(1)).generateUniqueUserName("John", "Doe");
+        verify(traineeDao, times(1)).existsByUsername("John.Doe0");
+        verify(trainerDao, times(1)).existsByUsername("John.Doe0");
+        verify(entityMapper, times(1)).toTrainee(traineeDto);
+        verify(entityMapper, times(1)).toUser(traineeDto.getUserDto());
+        verify(userDao, times(1)).createUser(user);
+        verify(traineeDao, times(1)).createTrainee(trainee);
 
-        assertEquals("user.name", result.getUsername());
-        assertEquals("testPass", result.getPassword());
+        assertNotNull(response);
+        assertEquals(savedTrainee.getId(), response.getId());
+        assertEquals(savedTrainee.getUser().getUsername(), response.getUsername());
+        assertEquals(savedTrainee.getUser().getPassword(), response.getPassword());
     }
 
+    @Test
+    public void testCreateTraineeThrowsExceptionWhenTraineeDtoIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            traineeService.createTrainee(null);
+        });
+    }
+
+    @Test
+    public void testCreateTraineeThrowsExceptionWhenUserAlreadyExists() {
+        TraineeDto traineeDto = new TraineeDto();
+        UserDto userDto = new UserDto();
+        userDto.setFirstName("John");
+        userDto.setLastName("Doe");
+        traineeDto.setUserDto(userDto);
+
+        when(userService.generateUniqueUserName("John", "Doe")).thenReturn("John.Doe0");
+        when(traineeDao.existsByUsername("John.Doe0")).thenReturn(true);
+
+        assertThrows(UserAlreadyRegisteredException.class, () -> {
+            traineeService.createTrainee(traineeDto);
+        });
+
+        verify(userService, times(1)).generateUniqueUserName("John", "Doe");
+        verify(traineeDao, times(1)).existsByUsername("John.Doe0");
+    }
     @Test
     public void testGetTraineeByUsername() {
         String username = "testUser";

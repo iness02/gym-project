@@ -22,7 +22,7 @@ public class UserService {
 
     public boolean matchUsernameAndPassword(String username, String password) {
         if (username == null || password == null) {
-            throw new InvalidCredentialsException("Username or password is invalid");
+            throw new IllegalArgumentException("Username or password is invalid");
         }
         User user = userDao.findUserByUsername(username);
         if (user == null || !user.getPassword().equals(password)) {
@@ -37,7 +37,7 @@ public class UserService {
 
     public UserDto getUserByUsername(String username) {
         if (username == null) {
-            throw new InvalidCredentialsException("Username is invalid");
+            throw new IllegalArgumentException("Username is invalid");
         }
         User user = userDao.findUserByUsername(username);
         return entityMapper.toUserDto(user);
@@ -60,7 +60,7 @@ public class UserService {
 
     public UserDto updateUser(UserDto userDto) {
         if (userDto == null) {
-            throw new InvalidCredentialsException("UserDto cannot be null");
+            throw new IllegalArgumentException("UserDto cannot be null");
         }
 
         User user = entityMapper.toUser(userDto);
@@ -69,7 +69,7 @@ public class UserService {
 
     public boolean changePassword(String username, String newPassword, String password) {
         if (username == null || password == null || newPassword == null) {
-            throw new InvalidCredentialsException("Username or password is invalid");
+            throw new IllegalArgumentException("Username or password is invalid");
         }
         if (isAuthenticated(username, password)) {
             UserDto userDto = getUserByUsername(username);

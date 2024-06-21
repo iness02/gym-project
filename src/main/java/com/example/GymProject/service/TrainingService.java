@@ -5,7 +5,6 @@ import com.example.GymProject.dao.TrainerDao;
 import com.example.GymProject.dao.TrainingDao;
 import com.example.GymProject.dao.TrainingTypeDao;
 import com.example.GymProject.dto.TrainingDto;
-import com.example.GymProject.exception.InvalidCredentialsException;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.*;
 import org.slf4j.Logger;
@@ -35,7 +34,7 @@ public class TrainingService {
 
     public TrainingDto addTraining(TrainingDto trainingDto) {
         if (trainingDto == null) {
-            throw new InvalidCredentialsException("TrainingDto cannot be null");
+            throw new IllegalArgumentException("TrainingDto cannot be null");
         }
         Training training = entityMapper.toTraining(trainingDto);
         Trainee trainee = entityMapper.toTrainee(trainingDto.getTrainee());
@@ -68,7 +67,7 @@ public class TrainingService {
 
     public TrainingDto updateTraining(TrainingDto trainingDTO, String username, String password) {
         if (username == null || password == null) {
-            throw new InvalidCredentialsException("Username or password is invalid");
+            throw new IllegalArgumentException("Username or password is invalid");
         }
         if (isAuthenticated(username, password)) {
             Training training = entityMapper.toTraining(trainingDTO);

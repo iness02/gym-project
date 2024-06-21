@@ -18,18 +18,37 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public void handleResourceNotFoundException(ResourceNotFoundException ex) {
-        logger.error(ex.getMessage());
+        logger.error("Resource not found: " + ex.getMessage(), ex);
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void handleInvalidCredentialsException(InvalidCredentialsException ex) {
-        logger.error(ex.getMessage());
+        logger.error("Invalid credentials: " + ex.getMessage(), ex);
     }
 
     @ExceptionHandler(HibernateException.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR, reason = "An error occurred in the Hibernate layer")
     public void handleHibernateException(HibernateException ex) {
-        logger.error(ex.getMessage());
+        logger.error("Hibernate exception: " + ex.getMessage(), ex);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public void handleUserAlreadyRegistered(UserAlreadyRegisteredException ex) {
+        logger.error("User has already registered: " + ex.getMessage(), ex);
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public void handleException(Exception ex) {
+        logger.error("Exception occurs:" + ex.getMessage(), ex);
+    }
+
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public void handleIllegalArgumentException(IllegalArgumentException ex) {
+        logger.error("Illegal arguments: " + ex.getMessage(), ex);
     }
 }

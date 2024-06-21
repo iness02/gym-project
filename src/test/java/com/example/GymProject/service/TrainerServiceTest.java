@@ -1,14 +1,18 @@
 package com.example.GymProject.service;
 
 import com.example.GymProject.config.TestConfig;
+import com.example.GymProject.dao.TraineeDao;
 import com.example.GymProject.dao.TrainerDao;
 import com.example.GymProject.dao.UserDao;
 import com.example.GymProject.dto.TrainerDto;
 import com.example.GymProject.dto.UserDto;
+import com.example.GymProject.exception.InvalidCredentialsException;
+import com.example.GymProject.exception.UserAlreadyRegisteredException;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.User;
 import com.example.GymProject.dto.response.UserPassResponse;
+import com.example.GymProject.util.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +40,9 @@ class TrainerServiceTest {
     @Mock
     private EntityMapper entityMapper;
 
+    @Mock
+    private TraineeDao traineeDao;
+
     @InjectMocks
     private TrainerService trainerService;
 
@@ -45,32 +52,70 @@ class TrainerServiceTest {
     }
 
     @Test
-    void createTrainer() {
+    public void testCreateTrainer() {
         TrainerDto trainerDto = new TrainerDto();
         UserDto userDto = new UserDto();
-        userDto.setFirstName("John");
-        userDto.setLastName("Doe");
+        userDto.setFirstName("Jane");
+        userDto.setLastName("Smith");
         trainerDto.setUserDto(userDto);
 
         Trainer trainer = new Trainer();
         User user = new User();
-        user.setFirstName("John");
-        user.setLastName("Doe");
+        Trainer savedTrainer = new Trainer();
+        savedTrainer.setId(1L);
+        user.setUsername("Jane.Smith0");
+        user.setPassword(Utils.generatePassword());
+        savedTrainer.setUser(user);
 
+        when(userService.generateUniqueUserName("Jane", "Smith")).thenReturn("Jane.Smith0");
+        when(trainerDao.existsByUsername("Jane.Smith0")).thenReturn(false);
+        when(traineeDao.existsByUsername("Jane.Smith0")).thenReturn(false);
         when(entityMapper.toTrainer(trainerDto)).thenReturn(trainer);
         when(entityMapper.toUser(trainerDto.getUserDto())).thenReturn(user);
-        when(userService.generateUniqueUserName("John", "Doe")).thenReturn("John.Doe");
-        doNothing().when(userDao).createUser(any(User.class));
-        when(trainerDao.createTrainer(any(Trainer.class))).thenReturn(trainer);
-        when(entityMapper.toTrainerDto(any(Trainer.class))).thenReturn(trainerDto);
+        doNothing().when(userDao).createUser(user);
+        when(trainerDao.createTrainer(trainer)).thenReturn(savedTrainer);
 
-       UserPassResponse result = trainerService.createTrainer(trainerDto);
+        UserPassResponse response = trainerService.createTrainer(trainerDto);
 
-        assertNotNull(result);
-        verify(userDao, times(1)).createUser(any(User.class));
-        verify(trainerDao, times(1)).createTrainer(any(Trainer.class));
+        verify(userService, times(1)).generateUniqueUserName("Jane", "Smith");
+        verify(trainerDao, times(1)).existsByUsername("Jane.Smith0");
+        verify(traineeDao, times(1)).existsByUsername("Jane.Smith0");
+        verify(entityMapper, times(1)).toTrainer(trainerDto);
+        verify(entityMapper, times(1)).toUser(trainerDto.getUserDto());
+        verify(userDao, times(1)).createUser(user);
+        verify(trainerDao, times(1)).createTrainer(trainer);
+
+        assertNotNull(response);
+        assertEquals(savedTrainer.getId(), response.getId());
+        assertEquals(savedTrainer.getUser().getUsername(), response.getUsername());
+        assertEquals(savedTrainer.getUser().getPassword(), response.getPassword());
     }
 
+    @Test
+    public void testCreateTrainerThrowsExceptionWhenTrainerDtoIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            trainerService.createTrainer(null);
+        });
+    }
+
+    @Test
+    public void testCreateTrainerThrowsExceptionWhenUserAlreadyExists() {
+        TrainerDto trainerDto = new TrainerDto();
+        UserDto userDto = new UserDto();
+        userDto.setFirstName("Jane");
+        userDto.setLastName("Smith");
+        trainerDto.setUserDto(userDto);
+
+        when(userService.generateUniqueUserName("Jane", "Smith")).thenReturn("Jane.Smith0");
+        when(trainerDao.existsByUsername("Jane.Smith0")).thenReturn(true);
+
+        assertThrows(UserAlreadyRegisteredException.class, () -> {
+            trainerService.createTrainer(trainerDto);
+        });
+
+        verify(userService, times(1)).generateUniqueUserName("Jane", "Smith");
+        verify(trainerDao, times(1)).existsByUsername("Jane.Smith0");
+    }
     @Test
     void getTrainerByUsername() {
         String username = "John.Doe";

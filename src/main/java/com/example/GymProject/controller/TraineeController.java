@@ -46,6 +46,7 @@ public class TraineeController {
         return ResponseEntity.ok(response);
     }
 
+
     @GetMapping("/trainee")
     public ResponseEntity<GetTraineeProfileResponse> getTraineeByUsername(@RequestParam("username") String username) {
         logger.info("Received request to get trainee by username: {}", username);

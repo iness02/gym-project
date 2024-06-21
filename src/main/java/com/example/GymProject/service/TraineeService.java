@@ -6,25 +6,26 @@ import com.example.GymProject.dao.UserDao;
 import com.example.GymProject.dto.TraineeDto;
 import com.example.GymProject.dto.TrainerDto;
 import com.example.GymProject.dto.TrainingDto;
-import com.example.GymProject.exception.InvalidCredentialsException;
-import com.example.GymProject.exception.ResourceNotFoundException;
-import com.example.GymProject.mapper.EntityMapper;
-import com.example.GymProject.model.Trainee;
-import com.example.GymProject.model.Trainer;
-import com.example.GymProject.model.Training;
-import com.example.GymProject.model.User;
 import com.example.GymProject.dto.request.traineerRquest.GetTraineeTrainingsRequest;
 import com.example.GymProject.dto.response.GetTrainingResponse;
 import com.example.GymProject.dto.response.UserPassResponse;
 import com.example.GymProject.dto.response.traineeResponse.GetTraineeProfileResponse;
 import com.example.GymProject.dto.response.traineeResponse.TrainerForTraineeResponse;
 import com.example.GymProject.dto.response.traineeResponse.UpdateTraineeProfileResponse;
+import com.example.GymProject.exception.ResourceNotFoundException;
+import com.example.GymProject.exception.UserAlreadyRegisteredException;
+import com.example.GymProject.mapper.EntityMapper;
+import com.example.GymProject.model.Trainee;
+import com.example.GymProject.model.Trainer;
+import com.example.GymProject.model.Training;
+import com.example.GymProject.model.User;
 import com.example.GymProject.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,14 +49,20 @@ public class TraineeService {
 
     @Transactional
     public UserPassResponse createTrainee(TraineeDto traineeDto) {
-        if (traineeDto == null) {
-            throw new InvalidCredentialsException("TraineeDto cannot be null");
+
+        Assert.notNull(traineeDto, "TraineeDto cannot be null");
+        String username = userService.generateUniqueUserName(traineeDto.getUserDto().getFirstName(), traineeDto.getUserDto().getLastName());
+
+        if (traineeDao.existsByUsername(username) || trainerDao.existsByUsername(username)) {
+            throw new UserAlreadyRegisteredException("User is already registered as a trainer or trainee");
         }
+
         Trainee trainee = entityMapper.toTrainee(traineeDto);
         User user = entityMapper.toUser(traineeDto.getUserDto());
-        user.setUsername(userService.generateUniqueUserName(user.getFirstName(), user.getLastName()));
+        user.setUsername(username);
         user.setPassword(Utils.generatePassword());
         user.setIsActive(true);
+
         logger.info("Creating username for trainee with id {}", traineeDto.getId());
         userDao.createUser(user);
         trainee.setUser(user);
@@ -64,10 +71,10 @@ public class TraineeService {
         return new UserPassResponse(trainee1.getId(), trainee1.getUser().getUsername(), trainee1.getUser().getPassword());
     }
 
+
     public TraineeDto getTraineeByUsername(String username, String password) {
-        if (username == null || password == null) {
-            throw new InvalidCredentialsException("Username or password is invalid");
-        }
+        Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
         if (isAuthenticated(username, password)) {
             Trainee trainee = traineeDao.getTraineeByUsername(username);
             if (trainee == null) {
@@ -81,6 +88,7 @@ public class TraineeService {
     }
 
     public GetTraineeProfileResponse getTraineeByUsername(String username) {
+        Assert.notNull(username, "Username cannot be null");
         Trainee trainee = traineeDao.getTraineeByUsername(username);
         if (trainee == null) {
             throw new ResourceNotFoundException("Trainee not found with username: " + username);
@@ -91,9 +99,7 @@ public class TraineeService {
     }
 
     public UpdateTraineeProfileResponse updateTrainee(TraineeDto traineeDto) {
-        if (traineeDto == null) {
-            throw new InvalidCredentialsException("TraineeDto cannot be null");
-        }
+        Assert.notNull(traineeDto, "TraineeDto cannot be null");
         if (isAuthenticated(traineeDto.getUserDto().getUsername(), traineeDto.getUserDto().getPassword())) {
             Trainee trainee = entityMapper.toTrainee(traineeDto);
             User user = entityMapper.toUser(traineeDto.getUserDto());
@@ -109,9 +115,8 @@ public class TraineeService {
 
 
     public boolean deleteTraineeByUsername(String username, String password) {
-        if (username == null || password == null) {
-            throw new InvalidCredentialsException("Username or password is invalid");
-        }
+        Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
         if (isAuthenticated(username, password)) {
             traineeDao.deleteTraineeByUsername(username);
             return true;
@@ -122,17 +127,15 @@ public class TraineeService {
     }
 
     public boolean matchUsernameAndPassword(String username, String password) {
-        if (username == null || password == null) {
-            throw new InvalidCredentialsException("Username or password is invalid");
-        }
+        Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
         return userService.matchUsernameAndPassword(username, password);
     }
 
 
     public boolean activate(String username, String password) {
-        if (username == null || password == null) {
-            throw new InvalidCredentialsException("Username or password is invalid");
-        }
+        Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
         if (isAuthenticated(username, password)) {
             Trainee trainee = traineeDao.getTraineeByUsername(username);
             if (trainee == null) {
@@ -148,9 +151,8 @@ public class TraineeService {
     }
 
     public boolean deactivate(String username, String password) {
-        if (username == null || password == null) {
-            throw new InvalidCredentialsException("Username or password is invalid");
-        }
+        Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
         if (isAuthenticated(username, password)) {
             Trainee trainee = traineeDao.getTraineeByUsername(username);
             if (trainee == null) {
@@ -180,9 +182,7 @@ public class TraineeService {
     }*/
 
     public List<GetTrainingResponse> getTraineeTrainings(GetTraineeTrainingsRequest request) {
-        if (request == null) {
-            throw new InvalidCredentialsException("Request or id cannot be null");
-        }
+        Assert.notNull(request, "Request cannot be null");
         if (isAuthenticated(request.getUsername(), request.getPassword())) {
             List<Training> trainings = traineeDao.getTraineeTrainings(
                     request.getUsername(), request.getPeriodFrom(), request.getPeriodTo(), request.getTrainerName(), request.getTrainingType());
@@ -199,9 +199,8 @@ public class TraineeService {
     }
 
     public void updateTraineeTrainers(String username, Set<TrainerDto> trainerDtos, String password) {
-        if (username == null || password == null) {
-            throw new InvalidCredentialsException("Username or password is invalid");
-        }
+        Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
         if (isAuthenticated(username, password)) {
             Trainee trainee = traineeDao.getTraineeByUsername(username);
             logger.info("Updating trainers for trainee {}", username);
@@ -216,9 +215,8 @@ public class TraineeService {
     }
 
     public List<TrainerForTraineeResponse> updateTraineeTrainers(String username, String password, Set<String> trainerUsernames) {
-        if (username == null || password == null) {
-            throw new InvalidCredentialsException("Username or password is invalid");
-        }
+        Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
         if (isAuthenticated(username, password)) {
             Set<TrainerDto> assignTrainers = new HashSet<>();
             TrainerDto trainerDto;
@@ -253,9 +251,8 @@ public class TraineeService {
 
     @Transactional(readOnly = true)
     public List<TrainerDto> getUnassignedTrainers(String traineeUsername, String password) {
-        if (traineeUsername == null || password == null) {
-            throw new InvalidCredentialsException("Username or password is invalid");
-        }
+        Assert.notNull(traineeUsername, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
         if (isAuthenticated(traineeUsername, password)) {
             Trainee trainee = traineeDao.getTraineeByUsername(traineeUsername);
             List<Trainer> allTrainers = trainerDao.getAllTrainers();

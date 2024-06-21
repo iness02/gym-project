@@ -142,5 +142,14 @@ public class TraineeDao {
             throw e;
         }
     }
+
+    public boolean existsByUsername(String username) {
+        String hql = "SELECT COUNT(t) FROM Trainee t WHERE t.user.username = :username";
+        Long count = (Long) sessionFactory.getCurrentSession()
+                .createQuery(hql)
+                .setParameter("username", username)
+                .uniqueResult();
+        return count > 0;
+    }
 }
 
