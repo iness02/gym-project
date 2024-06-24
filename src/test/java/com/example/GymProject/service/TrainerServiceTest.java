@@ -164,14 +164,20 @@ class TrainerServiceTest {
     }
 
     @Test
-    void deleteTrainerByUsername() {
+    void testDeleteTrainerByUsername() {
         String username = "John.Doe";
         String password = "password";
 
+        Trainer trainer = new Trainer();
+        User user = new User();
+        trainer.setUser(user);
+
+        when(trainerDao.getTrainerByUsername(username)).thenReturn(trainer);
         when(userService.checkUsernameAndPassword(username, password)).thenReturn(true);
 
         trainerService.deleteTrainerByUsername(username, password);
 
+        verify(trainerDao, times(1)).getTrainerByUsername(username);
         verify(trainerDao, times(1)).deleteTrainerByUsername(username);
     }
 

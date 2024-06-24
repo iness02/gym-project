@@ -113,10 +113,14 @@ public class TrainerDaoTest {
         when(trainerQuery.setParameter("username", username)).thenReturn(trainerQuery);
         when(trainerQuery.uniqueResult()).thenReturn(trainer);
 
+        doNothing().when(session).remove(trainer);
+
         trainerDao.deleteTrainerByUsername(username);
 
         verify(session).remove(trainer);
-        verify(session).remove(user);
+        verify(session).createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class);
+        verify(trainerQuery).setParameter("username", username);
+        verify(trainerQuery).uniqueResult();
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.example.GymProject.service;
 import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.dao.TraineeDao;
 import com.example.GymProject.dao.TrainerDao;
+import com.example.GymProject.dao.TrainingDao;
 import com.example.GymProject.dao.UserDao;
 import com.example.GymProject.dto.TraineeDto;
 import com.example.GymProject.dto.UserDto;
@@ -56,6 +57,8 @@ class TraineeServiceTest {
 
     @InjectMocks
     private TraineeService traineeService;
+    @Mock
+    private TrainingDao trainingDao;
 
     @BeforeEach
     void setUp() {
@@ -186,17 +189,26 @@ class TraineeServiceTest {
         verify(entityMapper).toTraineeDto(trainee);
         verify(entityMapper).toUpdateTraineeProfileResponse(traineeDto);
     }
-/*
     @Test
-    void testDeleteTraineeByUsername() {
-        String username = "John.Doe";
-        String password = "password";
+    public void testDeleteTraineeByUsername() {
+        String username = "testUser";
+        String password = "testPassword";
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(password);
+        Trainee trainee = new Trainee();
+        trainee.setUser(user);
+        when(traineeDao.getTraineeByUsername(username)).thenReturn(trainee);
+        when(traineeDao.getTraineeTrainings(username, null, null, null, null)).thenReturn(Collections.emptyList());
 
         boolean result = traineeService.deleteTraineeByUsername(username, password);
 
         assertTrue(result);
-        verify(traineeDao).deleteTraineeByUsername(username);
-    }*/
+        verify(traineeDao, times(1)).getTraineeByUsername(username);
+        verify(traineeDao, times(1)).getTraineeTrainings(username, null, null, null, null);
+        verify(traineeDao, times(1)).deleteTraineeByUsername(username, trainee);
+    }
+
 
     @Test
     void testActivate() {

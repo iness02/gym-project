@@ -43,6 +43,8 @@ public class TraineeControllerTest {
     private TraineeService traineeService;
 
     @Mock
+    private EntityMapper entityMapper;
+    @Mock
     private UserService userService;
 
     @InjectMocks

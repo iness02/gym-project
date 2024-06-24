@@ -29,6 +29,8 @@ public class TrainingControllerTest {
     private TrainingService trainingService;
 
     @Mock
+    private EntityMapper entityMapper;
+    @Mock
     private UserService userService;
     @InjectMocks
     private TrainingController trainingController;

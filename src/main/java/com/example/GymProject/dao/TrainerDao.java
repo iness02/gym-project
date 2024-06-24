@@ -71,7 +71,6 @@ public class TrainerDao {
                 existingUser.setLastName(trainer.getUser().getLastName());
                 existingUser.setFirstName(trainer.getUser().getFirstName());
                 existingUser.setIsActive(trainer.getUser().getIsActive());
-                // Update other fields of the User entity if needed
 
                 existingTrainer.setUser(existingUser);
                 existingTrainer.setSpecialization(trainer.getSpecialization());
@@ -102,13 +101,8 @@ public class TrainerDao {
             logger.info("Deleting trainer with username: {}", username);
             Trainer trainer = getTrainerByUsername(username);
             User user = trainer.getUser();
-            if (trainer != null && user != null) {
-                sessionFactory.getCurrentSession().remove(trainer);
-                sessionFactory.getCurrentSession().remove(user);
-                logger.info("Successfully deleted trainer with username: {}", username);
-            } else {
-                logger.warn("No trainer found with username: {}", username);
-            }
+            sessionFactory.getCurrentSession().remove(trainer);
+            logger.info("Successfully deleted trainer with username: {}", username);
         } catch (Exception e) {
             logger.error("Error occurred while deleting trainer with username: {}", username, e);
             throw e;

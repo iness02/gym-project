@@ -107,12 +107,20 @@ public class TrainerService {
     }
 
 
+    @Transactional
     public void deleteTrainerByUsername(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");
-        trainerDao.deleteTrainerByUsername(username);
+        Trainer trainer = trainerDao.getTrainerByUsername(username);
+        User user = trainer.getUser();
+        if (trainer != null && user != null) {
+            trainerDao.deleteTrainerByUsername(username);
+        } else {
+            logger.warn("No trainer found with username: {}", username);
+        }
     }
 
+    @Transactional
     public boolean activate(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");
@@ -128,6 +136,7 @@ public class TrainerService {
         return true;
     }
 
+    @Transactional
     public boolean deactivate(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");

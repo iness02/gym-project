@@ -130,25 +130,17 @@ class TraineeDaoTest {
         assertThrows(EntityNotFoundException.class, () -> traineeDao.updateTrainee(updatedTrainee));
     }
 
-  /*  @Test
+    @Test
     void testDeleteTraineeByUsername() {
-        when(session.createQuery("SELECT t FROM Trainee t WHERE t.user.username = :username", Trainee.class))
-                .thenReturn(traineeQuery);
-        when(traineeQuery.setParameter("username", "testuser")).thenReturn(traineeQuery);
-        when(traineeQuery.uniqueResult()).thenReturn(trainee);
 
-        doNothing().when(session).remove(any(Trainee.class));
-        doNothing().when(session).remove(any(User.class));
-        when(session.createQuery("Select t FROM Training t WHERE t.trainee.user.username = :username", Training.class))
-                .thenReturn(trainingQuery);
-        when(trainingQuery.setParameter("username", "testuser")).thenReturn(trainingQuery);
-        when(trainingQuery.list()).thenReturn(List.of());
+        String username = "testuser";
+        Trainee trainee = new Trainee();
+        trainee.setId(1L);
 
-        traineeDao.deleteTraineeByUsername("testuser");
-
+        when(sessionFactory.getCurrentSession()).thenReturn(session);
+        traineeDao.deleteTraineeByUsername(username, trainee);
         verify(session, times(1)).remove(trainee);
-        verify(session, times(1)).remove(user);
-    }*/
+    }
 
     @Test
     void testGetTraineeTrainings() {

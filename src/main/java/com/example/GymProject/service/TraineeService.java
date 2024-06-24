@@ -99,24 +99,24 @@ public class TraineeService {
         return entityMapper.toUpdateTraineeProfileResponse(traineeDto1);
     }
 
-
+    @Transactional
     public boolean deleteTraineeByUsername(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");
         Trainee trainee = traineeDao.getTraineeByUsername(username);
         User user = trainee.getUser();
         if (trainee != null && user != null) {
-            List<Training> trainings = traineeDao.getTraineeTrainings(username,null,null,null,null);
+            List<Training> trainings = traineeDao.getTraineeTrainings(username, null, null, null, null);
             List<Long> trainingIds = trainings.stream().map(Training::getId).collect(Collectors.toList());
             trainingDao.removeTrainings(trainingIds);
-            traineeDao.deleteTraineeByUsername(username,trainee);
+            traineeDao.deleteTraineeByUsername(username, trainee);
         } else {
             logger.warn("No trainee found with username: {}", username);
         }
         return true;
     }
 
-
+    @Transactional
     public boolean activate(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");
@@ -130,6 +130,7 @@ public class TraineeService {
         return true;
     }
 
+    @Transactional
     public boolean deactivate(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");

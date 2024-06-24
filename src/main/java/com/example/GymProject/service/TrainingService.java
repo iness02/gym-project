@@ -34,6 +34,7 @@ public class TrainingService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
+    @Transactional
     public TrainingDto addTraining(TrainingDto trainingDto) {
         Assert.notNull(trainingDto, "TrainingDto cannot be null");
         Training training = entityMapper.toTraining(trainingDto);
