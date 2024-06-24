@@ -5,7 +5,6 @@ import lombok.*;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -23,6 +22,6 @@ public class UpdateTrainerProfileRequest {
     private String lastName;
     @ReadOnlyProperty
     private String specialization;
-    @NotNull
+    @NotEmpty
     private Boolean isActive;
 }

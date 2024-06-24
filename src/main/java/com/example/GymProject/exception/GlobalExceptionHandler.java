@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Setter
 public class GlobalExceptionHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+    private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
         logger.error("Hibernate exception: " + ex.getMessage(), ex);
     }
 
-    @ExceptionHandler(ResourceNotFoundException.class)
+    @ExceptionHandler(UserAlreadyRegisteredException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public void handleUserAlreadyRegistered(UserAlreadyRegisteredException ex) {
         logger.error("User has already registered: " + ex.getMessage(), ex);

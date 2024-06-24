@@ -31,7 +31,6 @@ public class TrainingDaoTest {
     @Mock
     private Session session;
 
-
     @Mock
     private Query<Training> query;
 

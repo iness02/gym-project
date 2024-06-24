@@ -1,10 +1,7 @@
 package com.example.GymProject.dto;
 
 import com.example.GymProject.model.Trainings;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.validation.constraints.NotNull;
 
@@ -12,6 +9,7 @@ import javax.validation.constraints.NotNull;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class TrainingTypeDto {
     private Long id;
     @NotNull

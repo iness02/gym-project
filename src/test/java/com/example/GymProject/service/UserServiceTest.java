@@ -3,6 +3,7 @@ package com.example.GymProject.service;
 import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.dao.UserDao;
 import com.example.GymProject.dto.UserDto;
+import com.example.GymProject.exception.ResourceNotFoundException;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,8 +45,8 @@ class UserServiceTest {
 
         when(userDao.findUserByUsername("test")).thenReturn(user);
 
-        assertTrue(userService.matchUsernameAndPassword("test", "password"));
-        assertFalse(userService.matchUsernameAndPassword("test", "wrongpassword"));
+        assertTrue(userService.checkUsernameAndPassword("test", "password"));
+        assertFalse(userService.checkUsernameAndPassword("test", "wrongpassword"));
 
         verify(userDao, times(2)).findUserByUsername("test");
     }
@@ -125,4 +126,19 @@ class UserServiceTest {
         verify(userDao, times(1)).findMaxUserId();
     }
 
+    @Test
+    public void testChangePassword() {
+        User user = new User();
+        user.setUsername("username");
+        user.setPassword("password");
+        when(userDao.findUserByUsername(anyString())).thenReturn(user);
+        when(entityMapper.toUserDto(any())).thenReturn(new UserDto("username", "password"));
+        assertTrue(userService.changePassword("username", "newpassword", "password"));
+    }
+
+    @Test
+    public void testChangePasswordUserNotFound() {
+        when(userDao.findUserByUsername(anyString())).thenReturn(null);
+        assertThrows(ResourceNotFoundException.class, () -> userService.changePassword("username", "newpassword", "password"));
+    }
 }

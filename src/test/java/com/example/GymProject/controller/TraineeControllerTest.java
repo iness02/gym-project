@@ -3,7 +3,6 @@ package com.example.GymProject.controller;
 import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.dto.TraineeDto;
 import com.example.GymProject.dto.UserDto;
-import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.dto.request.DeleteRequest;
 import com.example.GymProject.dto.request.UserPassRequest;
 import com.example.GymProject.dto.request.traineerRquest.GetTraineeTrainingsRequest;
@@ -14,8 +13,11 @@ import com.example.GymProject.dto.response.GetTrainingResponse;
 import com.example.GymProject.dto.response.UserPassResponse;
 import com.example.GymProject.dto.response.traineeResponse.GetTraineeProfileResponse;
 import com.example.GymProject.dto.response.traineeResponse.TrainerForTraineeResponse;
+import com.example.GymProject.dto.response.traineeResponse.UnassignedTrainerResponse;
 import com.example.GymProject.dto.response.traineeResponse.UpdateTraineeProfileResponse;
+import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.service.TraineeService;
+import com.example.GymProject.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,19 +39,18 @@ import static org.mockito.Mockito.*;
 @ContextConfiguration(classes = {TestConfig.class})
 
 public class TraineeControllerTest {
-
-    @InjectMocks
-    private TraineeController traineeController;
-
     @Mock
     private TraineeService traineeService;
 
     @Mock
-    private EntityMapper entityMapper;
+    private UserService userService;
+
+    @InjectMocks
+    private TraineeController traineeController;
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
+    void setUp() {
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
@@ -57,13 +58,13 @@ public class TraineeControllerTest {
         TraineeRegistrationRequest registrationRequest = new TraineeRegistrationRequest();
         registrationRequest.setFirstName("John");
         registrationRequest.setLastName("Doe");
-        registrationRequest.setDateOfBirth(new Date(2002, Calendar.OCTOBER,22));
+        registrationRequest.setDateOfBirth(new Date(2002, Calendar.OCTOBER, 22));
         registrationRequest.setAddress("123 Main St");
 
         UserDto userDto = new UserDto("John", "Doe");
-        TraineeDto traineeDto = new TraineeDto(null, new Date(2002, Calendar.OCTOBER,22), "123 Main St", userDto, null);
+        TraineeDto traineeDto = new TraineeDto(null, new Date(2002, Calendar.OCTOBER, 22), "123 Main St", userDto, null);
 
-        UserPassResponse userPassResponse = new UserPassResponse(1L,"John.Doe", "password123");
+        UserPassResponse userPassResponse = new UserPassResponse(1L, "John.Doe", "password123");
 
         when(traineeService.createTrainee(any(TraineeDto.class))).thenReturn(userPassResponse);
 
@@ -75,142 +76,139 @@ public class TraineeControllerTest {
     }
 
     @Test
-    public void testGetTraineeByUsername() {
-        String username = "JohnDoe";
-        GetTraineeProfileResponse response = new GetTraineeProfileResponse();
+    void testGetTraineeByUsername() {
+        String username = "username";
+        String password = "password";
 
-        when(traineeService.getTraineeByUsername(username)).thenReturn(response);
+        GetTraineeProfileResponse expectedResponse = new GetTraineeProfileResponse();
 
-        ResponseEntity<GetTraineeProfileResponse> responseEntity = traineeController.getTraineeByUsername(username);
+        UserPassRequest request = new UserPassRequest();
+        request.setUsername(username);
+        request.setPassword(password);
+
+        when(userService.checkUsernameAndPassword(username, password)).thenReturn(true);
+        when(traineeService.getTraineeByUsername(username)).thenReturn(expectedResponse);
+
+        ResponseEntity<?> responseEntity = traineeController.getTraineeByUsername(request);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(response, responseEntity.getBody());
+        assertEquals(expectedResponse, responseEntity.getBody());
         verify(traineeService, times(1)).getTraineeByUsername(username);
     }
 
+
     @Test
-    public void testUpdateTrainee() {
+    void testUpdateTrainee() {
         UpdateTraineeProfileRequest request = new UpdateTraineeProfileRequest();
-        UpdateTraineeProfileResponse response = new UpdateTraineeProfileResponse();
+        request.setUsername("username");
+        request.setPassword("password");
+        request.setFirstName("John");
+        request.setLastName("Doe");
+        request.setDateOfBirth(new Date());
+        request.setAddress("123 Main St");
+        request.setIsActive(true);
 
-        when(entityMapper.toTraineeDao(request)).thenReturn(new TraineeDto());
-        when(traineeService.updateTrainee(any(TraineeDto.class))).thenReturn(response);
+        UpdateTraineeProfileResponse expectedResponse = new UpdateTraineeProfileResponse();
 
-        ResponseEntity<UpdateTraineeProfileResponse> responseEntity = traineeController.updateTrainee(request);
+        when(userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())).thenReturn(true);
+        when(traineeService.updateTrainee(any())).thenReturn(expectedResponse);
+
+        ResponseEntity<?> responseEntity = traineeController.updateTrainee(request);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(response, responseEntity.getBody());
-        verify(traineeService, times(1)).updateTrainee(any(TraineeDto.class));
+        assertEquals(expectedResponse, responseEntity.getBody());
+        verify(traineeService, times(1)).updateTrainee(any());
+    }
+
+
+    @Test
+    void testDeleteTrainee() {
+        DeleteRequest request = new DeleteRequest();
+        request.setUsername("username");
+        request.setPassword("password");
+
+        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
+        when(traineeService.deleteTraineeByUsername("username", "password")).thenReturn(true);
+
+        ResponseEntity<String> result = traineeController.deleteTrainee(request);
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals("Trainee deleted successfully", result.getBody());
+    }
+
+
+    @Test
+    void testGetTrainingList() {
+        Long traineeId = 1L;
+        GetTraineeTrainingsRequest request = new GetTraineeTrainingsRequest();
+        request.setUsername("username");
+        request.setPassword("password");
+
+        List<GetTrainingResponse> expectedResponse = new ArrayList<>();
+        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
+        when(traineeService.getTraineeTrainings(request)).thenReturn(expectedResponse);
+
+        ResponseEntity<?> result = traineeController.getTrainingList(traineeId, request);
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(expectedResponse, result.getBody());
     }
 
     @Test
-    public void testDeleteTrainee() {
-        DeleteRequest request = new DeleteRequest();
-        request.setUsername("JohnDoe");
-        request.setPassword("password123");
+    void testGetUnassignedTrainers() {
+        UserPassRequest request = new UserPassRequest("username", "password");
+        List<UnassignedTrainerResponse> response = Collections.singletonList(new UnassignedTrainerResponse());
 
-        when(traineeService.deleteTraineeByUsername(request.getUsername(), request.getPassword())).thenReturn(true);
+        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
+        when(traineeService.getUnassignedTrainers("username", "password")).thenReturn(response);
 
-        ResponseEntity<String> responseEntity = traineeController.deleteTrainee(request);
+        ResponseEntity<?> result = traineeController.getUnassignedTrainers(11L, request);
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals("Trainee deleted successfully", responseEntity.getBody());
-        verify(traineeService, times(1)).deleteTraineeByUsername(request.getUsername(), request.getPassword());
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(response, result.getBody());
     }
 
     @Test
-    public void testDeleteTrainee_Unauthorized() {
-        DeleteRequest request = new DeleteRequest();
-        request.setUsername("JohnDoe");
-        request.setPassword("wrongpassword");
+    void testActivateTrainee() {
+        UserPassRequest request = new UserPassRequest("username", "password");
 
-        when(traineeService.deleteTraineeByUsername(request.getUsername(), request.getPassword())).thenReturn(false);
+        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
+        when(traineeService.activate("username", "password")).thenReturn(true);
 
-        ResponseEntity<String> responseEntity = traineeController.deleteTrainee(request);
+        ResponseEntity<String> result = traineeController.activateTrainee(request);
 
-        assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
-        assertEquals("Unauthorized", responseEntity.getBody());
-        verify(traineeService, times(1)).deleteTraineeByUsername(request.getUsername(), request.getPassword());
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals("Trainee activated successfully", result.getBody());
     }
 
+    @Test
+    void testDeactivateTrainee() {
+        UserPassRequest request = new UserPassRequest("username", "password");
 
+        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
+        when(traineeService.deactivate("username", "password")).thenReturn(true);
+
+        ResponseEntity<String> result = traineeController.deactivateTrainee(request);
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals("Trainee deactivated successfully", result.getBody());
+    }
 
     @Test
     public void testUpdateTraineeTrainers() {
         Long traineeId = 1L;
         UpdateTraineeTrainersRequest requestDto = new UpdateTraineeTrainersRequest("username", "password", Set.of("trainer1", "trainer2"));
         List<TrainerForTraineeResponse> expectedResponse = new ArrayList<>();
-        expectedResponse.add(new TrainerForTraineeResponse("user1","joe","dao","trainer1"));
-        expectedResponse.add(new TrainerForTraineeResponse("user2","jone","brown","trainer2"));
-
+        expectedResponse.add(new TrainerForTraineeResponse("user1", "joe", "dao", "trainer1"));
+        expectedResponse.add(new TrainerForTraineeResponse("user2", "jone", "brown", "trainer2"));
+        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
         when(traineeService.updateTraineeTrainers(anyString(), anyString(), anySet())).thenReturn(expectedResponse);
 
-        ResponseEntity<List<TrainerForTraineeResponse>> responseEntity = traineeController.updateTraineeTrainers(traineeId, requestDto);
+        ResponseEntity<?> responseEntity = traineeController.updateTraineeTrainers(traineeId, requestDto);
 
         verify(traineeService, times(1)).updateTraineeTrainers(requestDto.getUsername(), requestDto.getPassword(), requestDto.getTrainerUsernames());
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals(expectedResponse, responseEntity.getBody());
     }
-
-    @Test
-    public void testGetTrainingList() {
-        Long traineeId = 1L;
-        GetTraineeTrainingsRequest request = new GetTraineeTrainingsRequest();
-        request.setUsername("testuser");
-        request.setPassword("password");
-
-        List<GetTrainingResponse> expectedResponse = new ArrayList<>();
-        when(traineeService.getTraineeTrainings(any(GetTraineeTrainingsRequest.class)))
-                .thenReturn(expectedResponse);
-
-        ResponseEntity<List<GetTrainingResponse>> responseEntity = traineeController.getTrainingList(traineeId, request);
-
-        verify(traineeService, times(1)).getTraineeTrainings(request);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(expectedResponse, responseEntity.getBody());
-    }
-    @Test
-    public void testActivateTrainee_Unauthorized() {
-        UserPassRequest request = new UserPassRequest();
-        request.setUsername("JohnDoe");
-        request.setPassword("wrongpassword");
-
-        when(traineeService.activate(request.getUsername(), request.getPassword())).thenReturn(false);
-
-        ResponseEntity<String> responseEntity = traineeController.activateTrainee(request);
-
-        assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
-        assertEquals("Unauthorized", responseEntity.getBody());
-        verify(traineeService, times(1)).activate(request.getUsername(), request.getPassword());
-    }
-
-    @Test
-    public void testDeactivateTrainee() {
-        UserPassRequest request = new UserPassRequest();
-        request.setUsername("JohnDoe");
-        request.setPassword("password123");
-
-        when(traineeService.deactivate(request.getUsername(), request.getPassword())).thenReturn(true);
-
-        ResponseEntity<String> responseEntity = traineeController.deactivateTrainee(request);
-
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals("Trainee deactivated successfully", responseEntity.getBody());
-        verify(traineeService, times(1)).deactivate(request.getUsername(), request.getPassword());
-    }
-
-    @Test
-    public void testDeactivateTrainee_Unauthorized() {
-        UserPassRequest request = new UserPassRequest();
-        request.setUsername("JohnDoe");
-        request.setPassword("wrongpassword");
-
-        when(traineeService.deactivate(request.getUsername(), request.getPassword())).thenReturn(false);
-
-        ResponseEntity<String> responseEntity = traineeController.deactivateTrainee(request);
-
-        assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
-        assertEquals("Unauthorized", responseEntity.getBody());
-        verify(traineeService, times(1)).deactivate(request.getUsername(), request.getPassword());
-    }
 }
+

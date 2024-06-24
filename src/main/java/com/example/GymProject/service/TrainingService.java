@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,9 +35,7 @@ public class TrainingService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     public TrainingDto addTraining(TrainingDto trainingDto) {
-        if (trainingDto == null) {
-            throw new IllegalArgumentException("TrainingDto cannot be null");
-        }
+        Assert.notNull(trainingDto, "TrainingDto cannot be null");
         Training training = entityMapper.toTraining(trainingDto);
         Trainee trainee = entityMapper.toTrainee(trainingDto.getTrainee());
         Trainer trainer = entityMapper.toTrainer(trainingDto.getTrainer());
@@ -65,10 +65,10 @@ public class TrainingService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public TrainingDto updateTraining(TrainingDto trainingDTO, String username, String password) {
-        if (username == null || password == null) {
-            throw new IllegalArgumentException("Username or password is invalid");
-        }
+        Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
         if (isAuthenticated(username, password)) {
             Training training = entityMapper.toTraining(trainingDTO);
             return entityMapper.toTrainingDto(trainingDao.updateTraining(training));
@@ -78,6 +78,6 @@ public class TrainingService {
     }
 
     public boolean isAuthenticated(String username, String password) {
-        return userService.matchUsernameAndPassword(username, password);
+        return userService.checkUsernameAndPassword(username, password);
     }
 }

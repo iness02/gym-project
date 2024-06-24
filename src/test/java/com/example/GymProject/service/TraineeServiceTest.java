@@ -5,15 +5,19 @@ import com.example.GymProject.dao.TraineeDao;
 import com.example.GymProject.dao.TrainerDao;
 import com.example.GymProject.dao.UserDao;
 import com.example.GymProject.dto.TraineeDto;
-import com.example.GymProject.dto.TrainerDto;
 import com.example.GymProject.dto.UserDto;
-import com.example.GymProject.exception.InvalidCredentialsException;
+import com.example.GymProject.dto.request.traineerRquest.GetTraineeTrainingsRequest;
+import com.example.GymProject.dto.response.GetTrainingResponse;
+import com.example.GymProject.dto.response.UserPassResponse;
+import com.example.GymProject.dto.response.traineeResponse.GetTraineeProfileResponse;
+import com.example.GymProject.dto.response.traineeResponse.UpdateTraineeProfileResponse;
+import com.example.GymProject.exception.ResourceNotFoundException;
 import com.example.GymProject.exception.UserAlreadyRegisteredException;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.Trainee;
+import com.example.GymProject.model.Trainer;
+import com.example.GymProject.model.Training;
 import com.example.GymProject.model.User;
-import com.example.GymProject.dto.response.UserPassResponse;
-import com.example.GymProject.dto.response.traineeResponse.UpdateTraineeProfileResponse;
 import com.example.GymProject.util.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,26 +25,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestConfig.class})
-
 class TraineeServiceTest {
     @Mock
     private TraineeDao traineeDao;
+
+    @Mock
+    private TrainerDao trainerDao;
 
     @Mock
     private UserDao userDao;
@@ -49,18 +49,16 @@ class TraineeServiceTest {
     private UserService userService;
 
     @Mock
-    private EntityMapper entityMapper;
+    private TrainerService trainerService;
 
     @Mock
-    private TrainerDao trainerDao;
+    private EntityMapper entityMapper;
 
     @InjectMocks
     private TraineeService traineeService;
-    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
-
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
@@ -105,193 +103,185 @@ class TraineeServiceTest {
     }
 
     @Test
-    public void testCreateTraineeThrowsExceptionWhenTraineeDtoIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            traineeService.createTrainee(null);
-        });
-    }
-
-    @Test
-    public void testCreateTraineeThrowsExceptionWhenUserAlreadyExists() {
+    void testCreateTrainee_UserAlreadyRegistered() {
         TraineeDto traineeDto = new TraineeDto();
         UserDto userDto = new UserDto();
         userDto.setFirstName("John");
         userDto.setLastName("Doe");
         traineeDto.setUserDto(userDto);
 
-        when(userService.generateUniqueUserName("John", "Doe")).thenReturn("John.Doe0");
-        when(traineeDao.existsByUsername("John.Doe0")).thenReturn(true);
+        String username = "John.Doe";
+
+        when(userService.generateUniqueUserName(userDto.getFirstName(), userDto.getLastName())).thenReturn(username);
+        when(traineeDao.existsByUsername(username)).thenReturn(true);
 
         assertThrows(UserAlreadyRegisteredException.class, () -> {
             traineeService.createTrainee(traineeDto);
         });
 
-        verify(userService, times(1)).generateUniqueUserName("John", "Doe");
-        verify(traineeDao, times(1)).existsByUsername("John.Doe0");
+        verify(userService).generateUniqueUserName(userDto.getFirstName(), userDto.getLastName());
+        verify(traineeDao).existsByUsername(username);
+        verify(trainerDao, never()).existsByUsername(username);
+        verify(userDao, never()).createUser(any(User.class));
+        verify(traineeDao, never()).createTrainee(any(Trainee.class));
     }
+
     @Test
-    public void testGetTraineeByUsername() {
-        String username = "testUser";
-        String password = "testPassword";
+    void testGetTraineeByUsername() {
+        String username = "John.Doe";
         Trainee trainee = new Trainee();
+        trainee.setUser(new User());
         TraineeDto traineeDto = new TraineeDto();
+
         when(traineeDao.getTraineeByUsername(username)).thenReturn(trainee);
         when(entityMapper.toTraineeDto(trainee)).thenReturn(traineeDto);
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
+        when(entityMapper.toGetTraineeProfileResponse(traineeDto)).thenReturn(new GetTraineeProfileResponse());
 
-        TraineeDto result = traineeService.getTraineeByUsername(username, password);
+        GetTraineeProfileResponse response = traineeService.getTraineeByUsername(username);
 
-        assertNotNull(result);
-        assertEquals(traineeDto, result);
+        assertNotNull(response);
+        verify(traineeDao).getTraineeByUsername(username);
+        verify(entityMapper).toTraineeDto(trainee);
+        verify(entityMapper).toGetTraineeProfileResponse(traineeDto);
     }
 
-  @Test
-    public void testUpdateTrainee() {
-        TraineeDto traineeDTO = new TraineeDto();
+    @Test
+    void testGetTraineeByUsername_NotFound() {
+        String username = "John.Doe";
+
+        when(traineeDao.getTraineeByUsername(username)).thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            traineeService.getTraineeByUsername(username);
+        });
+
+        verify(traineeDao).getTraineeByUsername(username);
+        verify(entityMapper, never()).toTraineeDto(any(Trainee.class));
+        verify(entityMapper, never()).toGetTraineeProfileResponse(any(TraineeDto.class));
+    }
+
+    @Test
+    void testUpdateTrainee() {
+        TraineeDto traineeDto = new TraineeDto();
         UserDto userDto = new UserDto();
-        userDto.setUsername("InesaHak");
-        traineeDTO.setUserDto(userDto);
+        traineeDto.setUserDto(userDto);
 
         Trainee trainee = new Trainee();
         User user = new User();
-        Trainee updatedTrainee = new Trainee();
-        TraineeDto updatedTraineeDto = new TraineeDto();
-        UpdateTraineeProfileResponse response = new UpdateTraineeProfileResponse();
 
+        when(entityMapper.toTrainee(traineeDto)).thenReturn(trainee);
+        when(entityMapper.toUser(userDto)).thenReturn(user);
+        when(userDao.updateUser(user)).thenReturn(user);
+        when(traineeDao.updateTrainee(trainee)).thenReturn(trainee);
+        when(entityMapper.toTraineeDto(trainee)).thenReturn(traineeDto);
+        when(entityMapper.toUpdateTraineeProfileResponse(traineeDto)).thenReturn(new UpdateTraineeProfileResponse());
+
+        UpdateTraineeProfileResponse response = traineeService.updateTrainee(traineeDto);
+
+        assertNotNull(response);
+        verify(entityMapper).toTrainee(traineeDto);
+        verify(entityMapper).toUser(userDto);
+        verify(userDao).updateUser(user);
+        verify(traineeDao).updateTrainee(trainee);
+        verify(entityMapper).toTraineeDto(trainee);
+        verify(entityMapper).toUpdateTraineeProfileResponse(traineeDto);
+    }
+
+    @Test
+    void testDeleteTraineeByUsername() {
+        String username = "John.Doe";
         String password = "password";
 
-        when(entityMapper.toTrainee(traineeDTO)).thenReturn(trainee);
-        when(entityMapper.toUser(userDto)).thenReturn(user);
-        when(entityMapper.toTraineeDto(updatedTrainee)).thenReturn(updatedTraineeDto);
-        when(entityMapper.toUpdateTraineeProfileResponse(updatedTraineeDto)).thenReturn(response);
-        when(traineeDao.updateTrainee(trainee)).thenReturn(updatedTrainee);
-        when(userService.matchUsernameAndPassword(userDto.getUsername(), password)).thenReturn(true);
-
-        UpdateTraineeProfileResponse result = traineeService.updateTrainee(traineeDTO);
-
-        verify(userService, times(1)).matchUsernameAndPassword(userDto.getUsername(), password);
-        verify(traineeDao, times(1)).updateTrainee(trainee);
-        verify(entityMapper, times(1)).toTraineeDto(updatedTrainee);
-
-        assertEquals(response, result);
-        assertEquals(user, trainee.getUser());
-    }
-
-
-    @Test
-    public void testDeleteTraineeByUsername() {
-        String username = "testUser";
-        String password = "testPassword";
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
-
-        traineeService.deleteTraineeByUsername(username, password);
-
-        verify(traineeDao, times(1)).deleteTraineeByUsername(username);
-    }
-
-    @Test
-    public void testMatchUsernameAndPassword() {
-        String username = "testUser";
-        String password = "testPassword";
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
-
-        boolean result = traineeService.matchUsernameAndPassword(username, password);
+        boolean result = traineeService.deleteTraineeByUsername(username, password);
 
         assertTrue(result);
+        verify(traineeDao).deleteTraineeByUsername(username);
     }
 
-
     @Test
-    public void testActivateUser() {
-        String username = "testuser";
-        String password = "testpass";
+    void testActivate() {
+        String username = "John.Doe";
+        String password = "password";
         Trainee trainee = new Trainee();
         User user = new User();
-        user.setUsername(username);
-        user.setIsActive(false);
         trainee.setUser(user);
 
         when(traineeDao.getTraineeByUsername(username)).thenReturn(trainee);
         when(entityMapper.toUserDto(user)).thenReturn(new UserDto());
-        when(traineeService.isAuthenticated(username,password)).thenReturn(true);
-        traineeService.activate(username, password);
 
-        verify(userService).updateUser(any(UserDto.class));
+        boolean result = traineeService.activate(username, password);
+
+        assertTrue(result);
         assertTrue(user.getIsActive());
+        verify(traineeDao).getTraineeByUsername(username);
+        verify(userService).updateUser(any(UserDto.class));
     }
 
     @Test
-    public void testDeactivateUser() {
-        String username = "testuser";
-        String password = "testpass";
+    void testActivate_TraineeNotFound() {
+        String username = "John.Doe";
+        String password = "password";
+
+        when(traineeDao.getTraineeByUsername(username)).thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            traineeService.activate(username, password);
+        });
+
+        verify(traineeDao).getTraineeByUsername(username);
+        verify(userService, never()).updateUser(any(UserDto.class));
+    }
+
+    @Test
+    void testDeactivate() {
+        String username = "John.Doe";
+        String password = "password";
         Trainee trainee = new Trainee();
         User user = new User();
-        user.setUsername(username);
-        user.setIsActive(true);
         trainee.setUser(user);
 
         when(traineeDao.getTraineeByUsername(username)).thenReturn(trainee);
         when(entityMapper.toUserDto(user)).thenReturn(new UserDto());
-        when(traineeService.isAuthenticated(username,password)).thenReturn(true);
 
-        traineeService.activate(username, password);
+        boolean result = traineeService.deactivate(username, password);
 
+        assertTrue(result);
+        assertFalse(user.getIsActive());
+        verify(traineeDao).getTraineeByUsername(username);
         verify(userService).updateUser(any(UserDto.class));
-        assertTrue(user.getIsActive());
     }
 
-/*
-  @Test
+    @Test
+    void testDeactivate_NotFound() {
+        when(traineeDao.getTraineeByUsername("username")).thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            traineeService.deactivate("username", "password");
+        });
+    }
+
+    @Test
+    void testGetUnassignedTrainers() {
+        Trainee trainee = new Trainee();
+        trainee.setTrainers(new HashSet<>());
+        when(traineeDao.getTraineeByUsername("username")).thenReturn(trainee);
+
+        List<Trainer> allTrainers = new LinkedList<>();
+        allTrainers.add(new Trainer());
+        when(trainerDao.getAllTrainers()).thenReturn(allTrainers);
+
+        assertEquals(1, traineeService.getUnassignedTrainers("username", "password").size());
+    }
+
+    @Test
     public void testGetTraineeTrainings() {
-        String username = "testUser";
-        Date fromDate = new Date();
-        Date toDate = new Date();
-        String trainerName = "trainer";
-        String trainingType = "type";
-        String password = "password";
-        List<Training> trainings = Arrays.asList(new Training(), new Training());
-        List<TrainingDto> trainingDtos = Arrays.asList(new TrainingDto(), new TrainingDto());
-        when(traineeDao.getTraineeTrainings(username, fromDate, toDate, trainerName, trainingType)).thenReturn(trainings);
-        when(entityMapper.toTrainingDto(any(Training.class))).thenReturn(new TrainingDto());
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
-
-        List<TrainingDto> result = traineeService.getTraineeTrainings(username, fromDate, toDate, trainerName, trainingType, password);
-
-        assertNotNull(result);
-        assertEquals(trainingDtos.size(), result.size());
-    }
-*/
-
-
-    @Test
-    public void testUpdateTraineeTrainers() {
-        String username = "testUser";
-        Set<TrainerDto> trainerDtos = new HashSet<>(Arrays.asList(new TrainerDto(), new TrainerDto()));
-        String password = "password";
-        Trainee trainee = new Trainee();
-        when(traineeDao.getTraineeByUsername(username)).thenReturn(trainee);
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
-
-        traineeService.updateTraineeTrainers(username, trainerDtos, password);
-
-        verify(traineeDao, times(1)).updateTrainee(any(Trainee.class));
+        GetTraineeTrainingsRequest request = new GetTraineeTrainingsRequest("username", "password", new Date(), new Date(), "trainerName", "trainingType");
+        List<Training> trainings = new ArrayList<>();
+        when(traineeDao.getTraineeTrainings(anyString(), any(Date.class), any(Date.class), anyString(), anyString())).thenReturn(trainings);
+        when(entityMapper.toGetTrainingResponse(any())).thenReturn(new GetTrainingResponse());
+        List<GetTrainingResponse> responses = traineeService.getTraineeTrainings(request);
+        assertNotNull(responses);
+        assertEquals(0, responses.size());
     }
 
-    @Test
-    void testIsAuthenticated_ValidCredentials() {
-        String username = "validUser";
-        String password = "validPassword";
-
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
-        assertTrue(traineeService.isAuthenticated(username, password));
-    }
-
-    @Test
-    void testIsAuthenticated_InvalidCredentials() {
-        String username = "invalidUser";
-        String password = "invalidPassword";
-
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(false);
-        assertFalse(traineeService.isAuthenticated(username, password));
-    }
 }

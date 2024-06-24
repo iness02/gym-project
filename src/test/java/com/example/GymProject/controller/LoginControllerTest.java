@@ -14,92 +14,79 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestConfig.class})
 
 public class LoginControllerTest {
-    @InjectMocks
-    private LoginController loginController;
-
     @Mock
     private UserService userService;
 
-    @Mock
-    private HttpServletRequest request;
-
-    @Mock
-    private HttpServletResponse response;
+    @InjectMocks
+    private LoginController loginController;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request, response));
     }
 
     @Test
-    public void testLogin_Success() {
-        UserPassRequest request = new UserPassRequest();
-        request.setUsername("testuser");
-        request.setPassword("testpassword");
+    void testLogin_Successful() {
+        UserPassRequest request = new UserPassRequest("username", "password");
 
-        when(userService.matchUsernameAndPassword("testuser", "testpassword")).thenReturn(true);
+        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
 
-        ResponseEntity<String> responseEntity = loginController.login(request);
+        ResponseEntity<String> response = loginController.login(request);
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        verify(userService, times(1)).matchUsernameAndPassword("testuser", "testpassword");
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
-    public void testLogin_Unauthorized() {
-        UserPassRequest request = new UserPassRequest();
-        request.setUsername("testuser");
-        request.setPassword("wrongpassword");
+    void testLogin_Unsuccessful() {
+        UserPassRequest request = new UserPassRequest("username", "password");
 
-        when(userService.matchUsernameAndPassword("testuser", "wrongpassword")).thenReturn(false);
+        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(false);
 
-        ResponseEntity<String> responseEntity = loginController.login(request);
+        ResponseEntity<String> response = loginController.login(request);
 
-        assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
-        verify(userService, times(1)).matchUsernameAndPassword("testuser", "wrongpassword");
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
     @Test
-    public void testChangePassword_Success() {
-        ChangePasswordRequest request = new ChangePasswordRequest();
-        request.setUsername("testuser");
-        request.setNewPassword("newpassword");
-        request.setOldPassword("oldpassword");
+    void testChangePassword_Successful() {
+        ChangePasswordRequest request = new ChangePasswordRequest("username", "oldPassword", "newPassword");
 
-        when(userService.changePassword("testuser", "newpassword", "oldpassword")).thenReturn(true);
+        when(userService.checkUsernameAndPassword("username", "oldPassword")).thenReturn(true);
+        when(userService.changePassword("username", "newPassword", "oldPassword")).thenReturn(true);
 
-        ResponseEntity<String> responseEntity = loginController.changePassword(request);
+        ResponseEntity<String> response = loginController.changePassword(request);
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        verify(userService, times(1)).changePassword("testuser", "newpassword", "oldpassword");
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
-    public void testChangePassword_Unauthorized() {
-        ChangePasswordRequest request = new ChangePasswordRequest();
-        request.setUsername("testuser");
-        request.setNewPassword("newpassword");
-        request.setOldPassword("wrongpassword");
+    void testChangePassword_Unsuccessful_Authentication() {
+        ChangePasswordRequest request = new ChangePasswordRequest("username", "oldPassword", "newPassword");
 
-        when(userService.changePassword("testuser", "newpassword", "wrongpassword")).thenReturn(false);
+        when(userService.checkUsernameAndPassword("username", "oldPassword")).thenReturn(false);
 
-        ResponseEntity<String> responseEntity = loginController.changePassword(request);
+        ResponseEntity<String> response = loginController.changePassword(request);
 
-        assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
-        verify(userService, times(1)).changePassword("testuser", "newpassword", "wrongpassword");
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
+
+    @Test
+    void testChangePassword_Unsuccessful_PasswordChange() {
+        ChangePasswordRequest request = new ChangePasswordRequest("username", "oldPassword", "newPassword");
+
+        when(userService.checkUsernameAndPassword("username", "oldPassword")).thenReturn(true);
+        when(userService.changePassword("username", "newPassword", "oldPassword")).thenReturn(false);
+
+        ResponseEntity<String> response = loginController.changePassword(request);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 }

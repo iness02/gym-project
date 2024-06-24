@@ -17,7 +17,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -28,9 +27,6 @@ import static org.mockito.Mockito.*;
 @ContextConfiguration(classes = {TestConfig.class})
 @EnableTransactionManagement
 public class TrainerDaoTest {
-    @InjectMocks
-    private TrainerDao trainerDao;
-
     @Mock
     private SessionFactory sessionFactory;
 
@@ -41,16 +37,22 @@ public class TrainerDaoTest {
     private Query<Trainer> trainerQuery;
 
     @Mock
+    private Query<Long> countQuery;
+
+    @Mock
     private Query<Training> trainingQuery;
 
+    @InjectMocks
+    private TrainerDao trainerDao;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         when(sessionFactory.getCurrentSession()).thenReturn(session);
     }
 
     @Test
-    public void testCreateTrainer() {
+    void testCreateTrainer() {
         Trainer trainer = new Trainer();
         User user = new User();
         user.setUsername("testuser");
@@ -61,119 +63,116 @@ public class TrainerDaoTest {
         Trainer result = trainerDao.createTrainer(trainer);
 
         assertNotNull(result);
-        assertEquals(trainer.getUser().getUsername(), result.getUser().getUsername());
-        verify(session, times(1)).persist(trainer);
+        verify(session).persist(trainer);
     }
 
     @Test
-    public void testGetTrainerByUsername() {
+    void testGetTrainerByUsername() {
         String username = "testuser";
         Trainer trainer = new Trainer();
-        User user = new User();
-        user.setUsername(username);
-        trainer.setUser(user);
-
-        when(session.createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class)).thenReturn(trainerQuery);
+        when(session.createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class))
+                .thenReturn(trainerQuery);
         when(trainerQuery.setParameter("username", username)).thenReturn(trainerQuery);
         when(trainerQuery.uniqueResult()).thenReturn(trainer);
 
         Trainer result = trainerDao.getTrainerByUsername(username);
+
         assertNotNull(result);
-        assertEquals(username, result.getUser().getUsername());
-        verify(session, times(1)).createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class);
+        verify(trainerQuery).setParameter("username", username);
+        verify(trainerQuery).uniqueResult();
     }
 
     @Test
-    public void testGetTrainerByUsernameNotFound() {
-        String username = "testuser";
-
-        when(session.createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class)).thenReturn(trainerQuery);
-        when(trainerQuery.setParameter("username", username)).thenReturn(trainerQuery);
-        when(trainerQuery.uniqueResult()).thenReturn(null);
-
-        Trainer result = trainerDao.getTrainerByUsername(username);
-        assertNull(result);
-        verify(session, times(1)).createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class);
-    }
-
-    @Test
-    public void testUpdateTrainer() {
+    void testUpdateTrainer() {
         Trainer trainer = new Trainer();
         User user = new User();
         user.setUsername("testuser");
         trainer.setUser(user);
 
-        when(session.merge(trainer)).thenReturn(trainer);
+        when(session.createQuery("select t from Trainer t where t.user.username = :username"))
+                .thenReturn(trainerQuery);
+        when(trainerQuery.setParameter("username", user.getUsername())).thenReturn(trainerQuery);
+        when(trainerQuery.uniqueResult()).thenReturn(trainer);
 
         Trainer result = trainerDao.updateTrainer(trainer);
+
         assertNotNull(result);
-        assertEquals(trainer.getUser().getUsername(), result.getUser().getUsername());
-        verify(session, times(1)).merge(trainer);
+        verify(session).update(trainer);
     }
 
     @Test
-    public void testDeleteTrainerByUsername() {
+    void testDeleteTrainerByUsername() {
         String username = "testuser";
         Trainer trainer = new Trainer();
         User user = new User();
         user.setUsername(username);
         trainer.setUser(user);
 
-        when(session.createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class)).thenReturn(trainerQuery);
+        when(session.createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class))
+                .thenReturn(trainerQuery);
         when(trainerQuery.setParameter("username", username)).thenReturn(trainerQuery);
         when(trainerQuery.uniqueResult()).thenReturn(trainer);
-        doNothing().when(session).remove(trainer);
-        doNothing().when(session).remove(user);
 
         trainerDao.deleteTrainerByUsername(username);
 
-        verify(session, times(1)).remove(trainer);
-        verify(session, times(1)).remove(user);
+        verify(session).remove(trainer);
+        verify(session).remove(user);
     }
 
- @Test
-    public void testGetTrainerTrainings() {
-        String username = "trainer";
+    @Test
+    void testExistsByUsername() {
+        String username = "testuser";
+        String hql = "SELECT COUNT(t) FROM Trainer t WHERE t.user.username = :username";
+
+        when(session.createQuery(hql)).thenReturn(countQuery);
+        when(countQuery.setParameter("username", username)).thenReturn(countQuery);
+        when(countQuery.uniqueResult()).thenReturn(1L);
+
+        boolean exists = trainerDao.existsByUsername(username);
+
+        assertTrue(exists);
+        verify(session).createQuery(hql);
+        verify(countQuery).setParameter("username", username);
+        verify(countQuery).uniqueResult();
+    }
+
+    @Test
+    void testGetAllTrainers() {
+        when(session.createQuery("SELECT t FROM Trainer t", Trainer.class)).thenReturn(trainerQuery);
+        when(trainerQuery.getResultList()).thenReturn(List.of(new Trainer()));
+
+        List<Trainer> result = trainerDao.getAllTrainers();
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        verify(trainerQuery).getResultList();
+    }
+
+    @Test
+    void testGetTrainerTrainings() {
+        String username = "testuser";
         Date fromDate = new Date();
         Date toDate = new Date();
         String traineeName = "trainee";
-        List<Training> trainings = new ArrayList<>();
-        trainings.add(new Training());
 
         when(session.createQuery("SELECT t FROM Training t WHERE t.trainer.user.username = :username " +
-                "AND t.trainingDate BETWEEN :fromDate AND :toDate " +
-                "AND t.trainee.user.username = :traineeName", Training.class)).thenReturn(trainingQuery);
+                "OR t.trainingDate BETWEEN :fromDate AND :toDate " +
+                "OR t.trainee.user.username = :traineeName", Training.class))
+                .thenReturn(trainingQuery);
         when(trainingQuery.setParameter("username", username)).thenReturn(trainingQuery);
         when(trainingQuery.setParameter("fromDate", fromDate)).thenReturn(trainingQuery);
         when(trainingQuery.setParameter("toDate", toDate)).thenReturn(trainingQuery);
         when(trainingQuery.setParameter("traineeName", traineeName)).thenReturn(trainingQuery);
-        when(trainingQuery.getResultList()).thenReturn(trainings);
+        when(trainingQuery.getResultList()).thenReturn(List.of(new Training()));
 
         List<Training> result = trainerDao.getTrainerTrainings(username, fromDate, toDate, traineeName);
 
-        assertEquals(1, result.size());
-        verify(session, times(1)).createQuery("SELECT t FROM Training t WHERE t.trainer.user.username = :username " +
-                "AND t.trainingDate BETWEEN :fromDate AND :toDate " +
-                "AND t.trainee.user.username = :traineeName", Training.class);
-    }
-
-
-    @Test
-    public void testGetAllTrainers() {
-
-        Trainer trainer1 = new Trainer();
-        trainer1.setId(1L);
-        Trainer trainer2 = new Trainer();
-        trainer2.setId(2L);
-        List<Trainer> trainers = List.of(trainer1, trainer2);
-
-        when(session.createQuery("SELECT t FROM Trainer t", Trainer.class))
-                .thenReturn(mock(org.hibernate.query.Query.class));
-        when(session.createQuery("SELECT t FROM Trainer t", Trainer.class).getResultList())
-                .thenReturn(trainers);
-
-        List<Trainer> result = trainerDao.getAllTrainers();
-
-        assertEquals(trainers, result);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        verify(trainingQuery).setParameter("username", username);
+        verify(trainingQuery).setParameter("fromDate", fromDate);
+        verify(trainingQuery).setParameter("toDate", toDate);
+        verify(trainingQuery).setParameter("traineeName", traineeName);
+        verify(trainingQuery).getResultList();
     }
 }

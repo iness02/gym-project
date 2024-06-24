@@ -2,8 +2,9 @@ package com.example.GymProject.controller;
 
 import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.dto.TrainingTypeDto;
-import com.example.GymProject.model.Trainings;
+import com.example.GymProject.dto.request.UserPassRequest;
 import com.example.GymProject.service.TrainingTypeService;
+import com.example.GymProject.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,13 +20,16 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestConfig.class})
 public class TrainingTypeControllerTest {
     @InjectMocks
     private TrainingTypeController trainingTypeController;
+
+    @Mock
+    private UserService userService;
 
     @Mock
     private TrainingTypeService trainingTypeService;
@@ -37,18 +41,40 @@ public class TrainingTypeControllerTest {
 
     @Test
     public void testGetAllTrainingTypes() {
-        TrainingTypeDto trainingType1 = new TrainingTypeDto();
-        trainingType1.setTrainingTypeName(Trainings.FITNESS);
-        TrainingTypeDto trainingType2 = new TrainingTypeDto();
-        trainingType2.setTrainingTypeName(Trainings.CYCLE);
 
-        List<TrainingTypeDto> trainingTypes = Arrays.asList(trainingType1, trainingType2);
+        UserPassRequest request = new UserPassRequest();
+        request.setUsername("username");
+        request.setPassword("password");
 
+        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
+
+        List<TrainingTypeDto> trainingTypes = Arrays.asList(new TrainingTypeDto(), new TrainingTypeDto());
         when(trainingTypeService.getAllTrainingTypes()).thenReturn(trainingTypes);
 
-        ResponseEntity<List<TrainingTypeDto>> response = trainingTypeController.getAllTrainingTypes();
+        ResponseEntity<?> response = trainingTypeController.getAllTrainingTypes(request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(trainingTypes, response.getBody());
+
+        verify(userService, times(1)).checkUsernameAndPassword("username", "password");
+        verify(trainingTypeService, times(1)).getAllTrainingTypes();
+    }
+
+    @Test
+    public void testGetAllTrainingTypesUnauthorized() {
+
+        UserPassRequest request = new UserPassRequest();
+        request.setUsername("username");
+        request.setPassword("password");
+
+        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(false);
+
+        ResponseEntity<?> response = trainingTypeController.getAllTrainingTypes(request);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals("Authentication failed for user:username", response.getBody());
+
+        verify(userService, times(1)).checkUsernameAndPassword("username", "password");
+        verify(trainingTypeService, never()).getAllTrainingTypes();
     }
 }

@@ -11,7 +11,9 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateTraineeTrainersRequest {
+    @NotNull
     private String username;
+    @NotNull
     private String password;
     @NotNull
     private Set<String> trainerUsernames;

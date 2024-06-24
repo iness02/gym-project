@@ -27,21 +27,24 @@ public class LoginController {
     @GetMapping("/login")
     public ResponseEntity<String> login(@Valid @RequestBody UserPassRequest request) {
         logger.info("Login attempt for username: {}", request.getUsername());
-        return userService.matchUsernameAndPassword(request.getUsername(), request.getPassword()) ?
+        return userService.checkUsernameAndPassword(request.getUsername(), request.getPassword()) ?
                 new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/changePassword")
     public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         logger.info("Password change attempt for username: {}", request.getUsername());
-
-        boolean isPasswordChanged = userService.changePassword(request.getUsername(), request.getNewPassword(), request.getOldPassword());
-        if (isPasswordChanged) {
-            logger.info("Password change successful for username: {}", request.getUsername());
-            return new ResponseEntity<>(HttpStatus.OK);
-        } else {
-            logger.warn("Password change failed for username: {}", request.getUsername());
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        if (userService.checkUsernameAndPassword(request.getUsername(), request.getOldPassword())) {
+            boolean isPasswordChanged = userService.changePassword(request.getUsername(), request.getNewPassword(), request.getOldPassword());
+            if (isPasswordChanged) {
+                logger.info("Password change successful for username: {}", request.getUsername());
+                return new ResponseEntity<>(HttpStatus.OK);
+            } else {
+                logger.warn("Password change failed for username: {}", request.getUsername());
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
         }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed for user:" + request.getUsername());
+
     }
 }

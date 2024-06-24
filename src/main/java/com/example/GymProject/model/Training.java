@@ -12,7 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
+
 public class Training {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

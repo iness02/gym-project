@@ -11,6 +11,7 @@ import com.example.GymProject.dto.response.GetTrainingResponse;
 import com.example.GymProject.dto.response.UserPassResponse;
 import com.example.GymProject.dto.response.traineeResponse.GetTraineeProfileResponse;
 import com.example.GymProject.dto.response.traineeResponse.TrainerForTraineeResponse;
+import com.example.GymProject.dto.response.traineeResponse.UnassignedTrainerResponse;
 import com.example.GymProject.dto.response.traineeResponse.UpdateTraineeProfileResponse;
 import com.example.GymProject.exception.ResourceNotFoundException;
 import com.example.GymProject.exception.UserAlreadyRegisteredException;
@@ -71,22 +72,6 @@ public class TraineeService {
         return new UserPassResponse(trainee1.getId(), trainee1.getUser().getUsername(), trainee1.getUser().getPassword());
     }
 
-
-    public TraineeDto getTraineeByUsername(String username, String password) {
-        Assert.notNull(username, "Username cannot be null");
-        Assert.notNull(password, "Password cannot be null");
-        if (isAuthenticated(username, password)) {
-            Trainee trainee = traineeDao.getTraineeByUsername(username);
-            if (trainee == null) {
-                throw new ResourceNotFoundException("Trainee not found with username: " + username);
-            }
-            return entityMapper.toTraineeDto(trainee);
-        }
-        logger.error("Authentication failed for trainee {}", username);
-        return null;
-
-    }
-
     public GetTraineeProfileResponse getTraineeByUsername(String username) {
         Assert.notNull(username, "Username cannot be null");
         Trainee trainee = traineeDao.getTraineeByUsername(username);
@@ -98,180 +83,118 @@ public class TraineeService {
 
     }
 
+
+    @Transactional
     public UpdateTraineeProfileResponse updateTrainee(TraineeDto traineeDto) {
         Assert.notNull(traineeDto, "TraineeDto cannot be null");
-        if (isAuthenticated(traineeDto.getUserDto().getUsername(), traineeDto.getUserDto().getPassword())) {
-            Trainee trainee = entityMapper.toTrainee(traineeDto);
-            User user = entityMapper.toUser(traineeDto.getUserDto());
-            userDao.updateUser(user);
-            trainee.setUser(user);
-            Trainee trainee1 = traineeDao.updateTrainee(trainee);
-            TraineeDto traineeDto1 = entityMapper.toTraineeDto(trainee1);
-            return entityMapper.toUpdateTraineeProfileResponse(traineeDto1);
-        }
-        logger.error("Authentication failed for trainee {}", traineeDto.getUserDto().getUsername());
-        return null;
+        Trainee trainee = entityMapper.toTrainee(traineeDto);
+        User user = entityMapper.toUser(traineeDto.getUserDto());
+        userDao.updateUser(user);
+        trainee.setUser(user);
+        Trainee trainee1 = traineeDao.updateTrainee(trainee);
+        TraineeDto traineeDto1 = entityMapper.toTraineeDto(trainee1);
+        return entityMapper.toUpdateTraineeProfileResponse(traineeDto1);
     }
 
 
     public boolean deleteTraineeByUsername(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");
-        if (isAuthenticated(username, password)) {
-            traineeDao.deleteTraineeByUsername(username);
-            return true;
-        }
-        logger.error("Authentication failed for trainee {}", username);
-        return false;
-
-    }
-
-    public boolean matchUsernameAndPassword(String username, String password) {
-        Assert.notNull(username, "Username cannot be null");
-        Assert.notNull(password, "Password cannot be null");
-        return userService.matchUsernameAndPassword(username, password);
+        traineeDao.deleteTraineeByUsername(username);
+        return true;
     }
 
 
     public boolean activate(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");
-        if (isAuthenticated(username, password)) {
-            Trainee trainee = traineeDao.getTraineeByUsername(username);
-            if (trainee == null) {
-                throw new ResourceNotFoundException("Trainee not found with username: " + username);
-            }
-            logger.info("Activation was successfully performed for trainee {}", username);
-            trainee.getUser().setIsActive(true);
-            userService.updateUser(entityMapper.toUserDto(trainee.getUser()));
-            return true;
+        Trainee trainee = traineeDao.getTraineeByUsername(username);
+        if (trainee == null) {
+            throw new ResourceNotFoundException("Trainee not found with username: " + username);
         }
-        logger.error("Authentication failed for trainee {}", username);
-        return false;
+        logger.info("Activation was successfully performed for trainee {}", username);
+        trainee.getUser().setIsActive(true);
+        userService.updateUser(entityMapper.toUserDto(trainee.getUser()));
+        return true;
     }
 
     public boolean deactivate(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");
-        if (isAuthenticated(username, password)) {
-            Trainee trainee = traineeDao.getTraineeByUsername(username);
-            if (trainee == null) {
-                throw new ResourceNotFoundException("Trainee not found with username: " + username);
-            }
-            logger.info("Deactivation was successfully performed for trainee {}", username);
-            trainee.getUser().setIsActive(false);
-            userService.updateUser(entityMapper.toUserDto(trainee.getUser()));
-
-            return true;
+        Trainee trainee = traineeDao.getTraineeByUsername(username);
+        if (trainee == null) {
+            throw new ResourceNotFoundException("Trainee not found with username: " + username);
         }
-        logger.error("Authentication failed for trainee {}", username);
-        return false;
+        logger.info("Deactivation was successfully performed for trainee {}", username);
+        trainee.getUser().setIsActive(false);
+        userService.updateUser(entityMapper.toUserDto(trainee.getUser()));
+        return true;
     }
-
-  /*  public List<TrainingDto> getTraineeTrainings(String username, Date fromDate, Date toDate, String trainerName, String trainingType, String password) {
-        Assert.notNull(username, "Username cannot be null");
-        if (isAuthenticated(username, password)) {
-            List<Training> trainings = traineeDao.getTraineeTrainings(username, fromDate, toDate, trainerName, trainingType);
-            logger.info("Getting trainings for trainee {}", username);
-            return trainings.stream()
-                    .map(entityMapper::toTrainingDto)
-                    .collect(Collectors.toList());
-        }
-        logger.error("Authentication failed for trainee {}", username);
-        return null;
-    }*/
 
     public List<GetTrainingResponse> getTraineeTrainings(GetTraineeTrainingsRequest request) {
         Assert.notNull(request, "Request cannot be null");
-        if (isAuthenticated(request.getUsername(), request.getPassword())) {
-            List<Training> trainings = traineeDao.getTraineeTrainings(
-                    request.getUsername(), request.getPeriodFrom(), request.getPeriodTo(), request.getTrainerName(), request.getTrainingType());
-            logger.info("Getting trainings for trainee {}", request.getUsername());
-            List<TrainingDto> trainingDtos = trainings.stream()
-                    .map(entityMapper::toTrainingDto)
-                    .collect(Collectors.toList());
-            return trainingDtos.stream()
-                    .map(entityMapper::toGetTrainingResponse)
-                    .collect(Collectors.toList());
-        }
-        logger.error("Authentication failed for trainee {}", request.getUsername());
-        return null;
+        List<Training> trainings = traineeDao.getTraineeTrainings(
+                request.getUsername(), request.getPeriodFrom(), request.getPeriodTo(), request.getTrainerName(), request.getTrainingType());
+        logger.info("Getting trainings for trainee {}", request.getUsername());
+        List<TrainingDto> trainingDtos = trainings.stream()
+                .map(entityMapper::toTrainingDto)
+                .collect(Collectors.toList());
+        return trainingDtos.stream()
+                .map(entityMapper::toGetTrainingResponse)
+                .collect(Collectors.toList());
     }
 
-    public void updateTraineeTrainers(String username, Set<TrainerDto> trainerDtos, String password) {
-        Assert.notNull(username, "Username cannot be null");
-        Assert.notNull(password, "Password cannot be null");
-        if (isAuthenticated(username, password)) {
-            Trainee trainee = traineeDao.getTraineeByUsername(username);
-            logger.info("Updating trainers for trainee {}", username);
-            Set<Trainer> trainers = trainerDtos.stream()
-                    .map(entityMapper::toTrainer)
-                    .collect(Collectors.toSet());
-            trainee.setTrainers(trainers);
-            traineeDao.updateTrainee(trainee);
-        }
-        logger.error("Authentication failed for trainee {}", username);
 
-    }
-
+    @Transactional
     public List<TrainerForTraineeResponse> updateTraineeTrainers(String username, String password, Set<String> trainerUsernames) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");
-        if (isAuthenticated(username, password)) {
-            Set<TrainerDto> assignTrainers = new HashSet<>();
-            TrainerDto trainerDto;
-            List<TrainerForTraineeResponse> trainerForTraineeResponses = new LinkedList<>();
-            for (String user : trainerUsernames) {
-                trainerDto = trainerService.getTrainerByUsername(user);
-                assignTrainers.add(trainerDto);
-                TrainerForTraineeResponse response = new TrainerForTraineeResponse();
-                response.setUserName(user);
-                response.setFirstName(trainerDto.getUserDto().getFirstName());
-                response.setLastName(trainerDto.getUserDto().getLastName());
-                response.setSpecialization(trainerDto.getSpecialization());
-                trainerForTraineeResponses.add(response);
-            }
-            Trainee trainee = traineeDao.getTraineeByUsername(username);
-            if (trainee == null) {
-                throw new ResourceNotFoundException("Trainee not found with username: " + username);
-            }
-            logger.info("Updating trainers for trainee {}", username);
-            Set<Trainer> trainers = assignTrainers.stream()
-                    .map(entityMapper::toTrainer)
-                    .collect(Collectors.toSet());
-            trainee.setTrainers(trainers);
-            traineeDao.updateTrainee(trainee);
-            return trainerForTraineeResponses;
-
+        Set<TrainerDto> assignTrainers = new HashSet<>();
+        TrainerDto trainerDto;
+        List<TrainerForTraineeResponse> trainerForTraineeResponses = new LinkedList<>();
+        for (String user : trainerUsernames) {
+            trainerDto = trainerService.getTrainerByUsername(user);
+            assignTrainers.add(trainerDto);
+            TrainerForTraineeResponse response = new TrainerForTraineeResponse();
+            response.setUserName(user);
+            response.setFirstName(trainerDto.getUserDto().getFirstName());
+            response.setLastName(trainerDto.getUserDto().getLastName());
+            response.setSpecialization(trainerDto.getSpecialization());
+            trainerForTraineeResponses.add(response);
         }
-        logger.error("Authentication failed for trainee {}", username);
-        return null;
-
+        Trainee trainee = traineeDao.getTraineeByUsername(username);
+        if (trainee == null) {
+            throw new ResourceNotFoundException("Trainee not found with username: " + username);
+        }
+        logger.info("Updating trainers for trainee {}", username);
+        Set<Trainer> trainers = assignTrainers.stream()
+                .map(entityMapper::toTrainer)
+                .collect(Collectors.toSet());
+        trainee.setTrainers(trainers);
+        traineeDao.updateTrainee(trainee);
+        return trainerForTraineeResponses;
     }
 
     @Transactional(readOnly = true)
-    public List<TrainerDto> getUnassignedTrainers(String traineeUsername, String password) {
+    public List<UnassignedTrainerResponse> getUnassignedTrainers(String traineeUsername, String password) {
         Assert.notNull(traineeUsername, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");
-        if (isAuthenticated(traineeUsername, password)) {
-            Trainee trainee = traineeDao.getTraineeByUsername(traineeUsername);
-            List<Trainer> allTrainers = trainerDao.getAllTrainers();
+        Trainee trainee = traineeDao.getTraineeByUsername(traineeUsername);
+        List<Trainer> allTrainers = trainerDao.getAllTrainers();
 
-            List<Trainer> assignedTrainers = new ArrayList<>(trainee.getTrainers());
+        List<Trainer> assignedTrainers = new ArrayList<>(trainee.getTrainers());
 
-            List<Trainer> unassignedTrainers = allTrainers.stream()
-                    .filter(trainer -> !assignedTrainers.contains(trainer))
-                    .collect(Collectors.toList());
+        List<Trainer> unassignedTrainers = allTrainers.stream()
+                .filter(trainer -> !assignedTrainers.contains(trainer))
+                .collect(Collectors.toList());
 
-            return unassignedTrainers.stream()
-                    .map(entityMapper::toTrainerDto)
-                    .collect(Collectors.toList());
-        }
-        logger.error("Authentication failed for trainee {}", traineeUsername);
-        return null;
+        List<TrainerDto> unassignedTrainerDtos = unassignedTrainers.stream()
+                .map(entityMapper::toTrainerDto)
+                .collect(Collectors.toList());
+        return unassignedTrainerDtos.stream()
+                .map(entityMapper::toUnassignedTrainerResponse)
+                .collect(Collectors.toList());
     }
 
-    public boolean isAuthenticated(String username, String password) {
-        return matchUsernameAndPassword(username, password);
-    }
+
 }

@@ -6,7 +6,6 @@ import java.util.Set;
 
 @Getter
 @Setter
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrainerDto {

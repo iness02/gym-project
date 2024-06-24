@@ -1,34 +1,128 @@
 package com.example.GymProject.mapper;
 
 import com.example.GymProject.dto.*;
-import com.example.GymProject.model.*;
 import com.example.GymProject.dto.request.traineerRquest.UpdateTraineeProfileRequest;
 import com.example.GymProject.dto.request.trainerRequest.UpdateTrainerProfileRequest;
 import com.example.GymProject.dto.request.trainingRequest.AddTrainingRequest;
 import com.example.GymProject.dto.response.GetTrainingResponse;
 import com.example.GymProject.dto.response.traineeResponse.GetTraineeProfileResponse;
 import com.example.GymProject.dto.response.traineeResponse.TrainerForTraineeResponse;
+import com.example.GymProject.dto.response.traineeResponse.UnassignedTrainerResponse;
 import com.example.GymProject.dto.response.traineeResponse.UpdateTraineeProfileResponse;
 import com.example.GymProject.dto.response.trainerResponse.GetTrainerProfileResponse;
 import com.example.GymProject.dto.response.trainerResponse.TraineeForTrainerResponse;
 import com.example.GymProject.dto.response.trainerResponse.UpdateTrainerProfileResponse;
+import com.example.GymProject.model.*;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants.ComponentModel;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = ComponentModel.SPRING, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface EntityMapper {
-    @Mapping(source = "user", target = "userDto")
-    TraineeDto toTraineeDto(Trainee trainee);
 
     @Mapping(source = "userDto", target = "user")
     Trainee toTrainee(TraineeDto traineeDTO);
 
-    TrainerDto toTrainerDto(Trainer trainer);
+    default TraineeDto toTraineeDto(Trainee trainee) {
+        if (trainee == null) {
+            return null;
+        }
+
+        TraineeDto traineeDto = new TraineeDto();
+
+        traineeDto.setUserDto(toUserDto(trainee.getUser()));
+        traineeDto.setId(trainee.getId());
+        traineeDto.setDateOfBirth(trainee.getDateOfBirth());
+        traineeDto.setAddress(trainee.getAddress());
+        traineeDto.setTrainers(trainerSetToTrainerDtoSet(trainee.getTrainers()));
+
+        return traineeDto;
+    }
+
+    default Set<TrainerDto> trainerSetToTrainerDtoSet(Set<Trainer> trainers) {
+        if (trainers == null) {
+            return null;
+        }
+
+        return trainers.stream()
+                .map(this::toTrainerDto)
+                .collect(Collectors.toSet());
+    }
+
+ /*   default TrainerDto toTrainerDto(Trainer trainer) {
+        if ( trainer == null ) {
+            return null;
+        }
+
+        TrainerDto trainerDto = new TrainerDto();
+
+        trainerDto.setId( trainer.getId() );
+        trainerDto.setUserDto(toUserDto(trainer.getUser()));
+        trainerDto.setSpecialization( trainer.getSpecialization() );
+        trainerDto.setTrainees( traineeSetToTraineeDtoSet( trainer.getTrainees() ) );
+
+        return trainerDto;
+    }*/
+
+    default TrainerDto toTrainerDto(Trainer trainer) {
+        TrainerDto trainerDto = new TrainerDto();
+        trainerDto.setId(trainer.getId());
+        trainerDto.setSpecialization(trainer.getSpecialization());
+
+        // Convert User to UserDto
+        UserDto userDto = new UserDto();
+        userDto.setId(trainer.getUser().getId());
+        userDto.setFirstName(trainer.getUser().getFirstName());
+        userDto.setLastName(trainer.getUser().getLastName());
+        userDto.setUsername(trainer.getUser().getUsername());
+        userDto.setPassword(trainer.getUser().getPassword());
+        userDto.setIsActive(trainer.getUser().getIsActive());
+
+        trainerDto.setUserDto(userDto);
+
+        // Convert Set<Trainee> to Set<TraineeDto>
+        Set<TraineeDto> traineeDtos = new HashSet<>();
+        if (trainer.getTrainees() != null) {
+            for (Trainee trainee : trainer.getTrainees()) {
+                TraineeDto traineeDto = new TraineeDto();
+                traineeDto.setId(trainee.getId());
+                traineeDto.setDateOfBirth(trainee.getDateOfBirth());
+                traineeDto.setAddress(trainee.getAddress());
+
+                // Convert User to UserDto
+                UserDto traineeUserDto = new UserDto();
+                traineeUserDto.setId(trainee.getUser().getId());
+                traineeUserDto.setFirstName(trainee.getUser().getFirstName());
+                traineeUserDto.setLastName(trainee.getUser().getLastName());
+                traineeUserDto.setUsername(trainee.getUser().getUsername());
+                traineeUserDto.setPassword(trainee.getUser().getPassword());
+                traineeUserDto.setIsActive(trainee.getUser().getIsActive());
+
+                traineeDto.setUserDto(traineeUserDto);
+                traineeDtos.add(traineeDto);
+            }
+        }
+        trainerDto.setTrainees(traineeDtos);
+
+        return trainerDto;
+    }
+
+    /*default Set<TraineeDto> traineeSetToTraineeDtoSet(Set<Trainee> trainees) {
+        if (trainees == null) {
+            return null;
+        }
+
+        return trainees.stream()
+                .map(this::toTraineeDto)
+                .collect(Collectors.toSet());
+    }
+*/
 
     default Trainer toTrainer(TrainerDto trainerDto) {
         if (trainerDto == null) {
@@ -106,7 +200,7 @@ public interface EntityMapper {
         return set1;
     }
 
-    default TraineeDto toTraineeDao(UpdateTraineeProfileRequest request) {
+    default TraineeDto toTraineeDto(UpdateTraineeProfileRequest request) {
         if (request == null) {
             return null;
         }
@@ -165,7 +259,7 @@ public interface EntityMapper {
         return new GetTrainingResponse(
                 trainingDto.getTrainingName(),
                 trainingDto.getTrainingDate(),
-                trainingDto.getTrainingType().toString(),
+                trainingDto.getTrainingType().getTrainingTypeName().toString(),
                 trainingDto.getTrainingDuration(),
                 trainingDto.getTrainer().getUserDto().getFirstName() + trainingDto.getTrainer().getUserDto().getLastName()
         );
@@ -234,5 +328,18 @@ public interface EntityMapper {
         trainingDto.setTrainingDuration(request.getDuration());
 
         return trainingDto;
+    }
+
+    default UnassignedTrainerResponse toUnassignedTrainerResponse(TrainerDto trainerDto) {
+        if (trainerDto == null) {
+            return null;
+        }
+        UnassignedTrainerResponse response = new UnassignedTrainerResponse();
+        response.setUsername(trainerDto.getUserDto().getUsername());
+        response.setLastname(trainerDto.getUserDto().getLastName());
+        response.setFirstName(trainerDto.getUserDto().getFirstName());
+        response.setSpecialization(trainerDto.getSpecialization());
+
+        return response;
     }
 }

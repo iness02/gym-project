@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -25,7 +24,6 @@ public class TraineeDao {
     @Transactional
     public Trainee createTrainee(Trainee trainee) {
         try {
-            System.out.println(trainee);
             logger.info("Creating trainee with username: {}", trainee.getUser().getUsername());
             sessionFactory.getCurrentSession().persist(trainee);
             logger.info("Successfully created trainee with username: {}", trainee.getUser().getUsername());
@@ -61,29 +59,27 @@ public class TraineeDao {
         try {
             logger.info("Updating trainee with username: {}", trainee.getUser().getUsername());
             Session session = sessionFactory.getCurrentSession();
-            Trainee existingTrainee = (Trainee) sessionFactory.getCurrentSession()
-                    .createQuery("select t from Trainee t  where t.user.username = :username")
+            Trainee existingTrainee = (Trainee) session
+                    .createQuery("select t from Trainee t where t.user.username = :username")
                     .setParameter("username", trainee.getUser().getUsername())
                     .uniqueResult();
             if (existingTrainee != null) {
-                existingTrainee.setUser(trainee.getUser());
+                User existingUser = existingTrainee.getUser();
+                existingUser.setLastName(trainee.getUser().getLastName());
+                existingUser.setFirstName(trainee.getUser().getFirstName());
+                existingUser.setIsActive(trainee.getUser().getIsActive());
+
+                existingTrainee.setUser(existingUser);
                 existingTrainee.setAddress(trainee.getAddress());
                 existingTrainee.setDateOfBirth(trainee.getDateOfBirth());
                 existingTrainee.setTrainers(trainee.getTrainers());
                 session.update(existingTrainee);
-             /* sessionFactory.getCurrentSession().createQuery("update Trainee set user =:user, address = :address, dateOfBirth =:dateOfBirth, trainers = :trainers where user.username =:username" )
-                      .setParameter("user",existingTrainee.getUser()).
-                      setParameter("address",existingTrainee.getAddress()).
-                      setParameter("dateOfBirth",existingTrainee.getDateOfBirth()).
-                      setParameter("trainers",existingTrainee.getTrainers()).
-                      setParameter("username",existingTrainee.getUser().getUsername()).executeUpdate();*/
-                // sessionFactory.getCurrentSession().merge(existingTrainee);
+                logger.info("Successfully updated trainee with username: {}", trainee.getUser().getUsername());
+                return existingTrainee;
             } else {
                 logger.error("Trainee with username: {} does not exist", trainee.getUser().getUsername());
                 throw new EntityNotFoundException("Trainee not found");
             }
-            logger.info("Successfully updated trainee with username: {}", trainee.getUser().getUsername());
-            return existingTrainee;
         } catch (Exception e) {
             logger.error("Error occurred while updating trainee with username: {}", trainee.getUser().getUsername(), e);
             throw e;
@@ -126,9 +122,9 @@ public class TraineeDao {
             logger.info("Fetching trainings for trainee with username: {}", username);
             List<Training> trainings = sessionFactory.getCurrentSession()
                     .createQuery("SELECT t FROM Training t WHERE t.trainee.user.username = :username " +
-                            "AND t.trainingDate BETWEEN :fromDate AND :toDate " +
-                            "AND t.trainer.user.username = :trainerName " +
-                            "AND t.trainingType.trainingTypeName = :trainingType", Training.class)
+                            "OR t.trainingDate BETWEEN :fromDate AND :toDate " +
+                            "OR t.trainer.user.username = :trainerName " +
+                            "OR t.trainingType.trainingTypeName = :trainingType", Training.class)
                     .setParameter("username", username)
                     .setParameter("fromDate", fromDate)
                     .setParameter("toDate", toDate)

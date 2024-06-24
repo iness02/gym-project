@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,9 +19,11 @@ public class AddTrainingRequest {
     @NotBlank
     private String trainerUsername;
     @NotBlank
+    private String trainerPassword;
+    @NotBlank
     private String name;
     @NotBlank
-    private LocalDate date;
+    private Date date;
     @NotBlank
     private Integer duration;
 }

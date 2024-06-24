@@ -22,12 +22,6 @@ public class TrainingTypeDao {
     public TrainingType addTrainingType(TrainingType trainingType) {
         try {
             logger.info("Adding new trainingType with ID: {}", trainingType.getId());
-
-           /* if (Objects.isNull(sessionFactory.getCurrentSession().find(TrainingType.class, trainingType.getId()))) {
-                sessionFactory.getCurrentSession().persist(trainingType);
-            } else {
-                sessionFactory.getCurrentSession().merge(trainingType);
-            }*/
             sessionFactory.getCurrentSession().persist(trainingType);
             logger.info("Successfully added new trainingType with ID: {}", trainingType.getId());
             return trainingType;
