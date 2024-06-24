@@ -2,6 +2,7 @@ package com.example.GymProject.service;
 
 import com.example.GymProject.dao.TraineeDao;
 import com.example.GymProject.dao.TrainerDao;
+import com.example.GymProject.dao.TrainingDao;
 import com.example.GymProject.dao.UserDao;
 import com.example.GymProject.dto.TraineeDto;
 import com.example.GymProject.dto.TrainerDto;
@@ -37,6 +38,8 @@ public class TraineeService {
     private TraineeDao traineeDao;
     @Autowired
     private TrainerDao trainerDao;
+    @Autowired
+    private TrainingDao trainingDao;
     @Autowired
     private UserDao userDao;
     @Autowired
@@ -100,7 +103,16 @@ public class TraineeService {
     public boolean deleteTraineeByUsername(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");
-        traineeDao.deleteTraineeByUsername(username);
+        Trainee trainee = traineeDao.getTraineeByUsername(username);
+        User user = trainee.getUser();
+        if (trainee != null && user != null) {
+            List<Training> trainings = traineeDao.getTraineeTrainings(username,null,null,null,null);
+            List<Long> trainingIds = trainings.stream().map(Training::getId).collect(Collectors.toList());
+            trainingDao.removeTrainings(trainingIds);
+            traineeDao.deleteTraineeByUsername(username,trainee);
+        } else {
+            logger.warn("No trainee found with username: {}", username);
+        }
         return true;
     }
 

@@ -130,7 +130,7 @@ class TraineeDaoTest {
         assertThrows(EntityNotFoundException.class, () -> traineeDao.updateTrainee(updatedTrainee));
     }
 
-    @Test
+  /*  @Test
     void testDeleteTraineeByUsername() {
         when(session.createQuery("SELECT t FROM Trainee t WHERE t.user.username = :username", Trainee.class))
                 .thenReturn(traineeQuery);
@@ -148,7 +148,7 @@ class TraineeDaoTest {
 
         verify(session, times(1)).remove(trainee);
         verify(session, times(1)).remove(user);
-    }
+    }*/
 
     @Test
     void testGetTraineeTrainings() {

@@ -56,4 +56,19 @@ public class TrainingDao {
             throw e;
         }
     }
+
+    @Transactional
+    public void removeTrainings(List<Long> trainingIds) {
+        try {
+            logger.info("Removing trainings with IDs: {}", trainingIds);
+            sessionFactory.getCurrentSession()
+                    .createQuery("DELETE FROM Training t WHERE t.id IN :trainingIds")
+                    .setParameter("trainingIds", trainingIds)
+                    .executeUpdate();
+            logger.info("Successfully removed trainings with IDs: {}", trainingIds);
+        } catch (Exception e) {
+            logger.error("Error occurred while removing trainings with IDs: {}", trainingIds, e);
+            throw e;
+        }
+    }
 }

@@ -88,27 +88,12 @@ public class TraineeDao {
 
 
     @Transactional
-    public void deleteTraineeByUsername(String username) {
+    public void deleteTraineeByUsername(String username, Trainee trainee) {
         try {
             logger.info("Deleting trainee and their trainings with username: {}", username);
+            sessionFactory.getCurrentSession().remove(trainee);
+            logger.info("Successfully deleted trainee and their trainings with username: {}", username);
 
-            Trainee trainee = getTraineeByUsername(username);
-            User user = trainee.getUser();
-            if (trainee != null && user != null) {
-                List<Training> trainings = sessionFactory.getCurrentSession()
-                        .createQuery("Select t FROM Training t WHERE t.trainee.user.username = :username", Training.class)
-                        .setParameter("username", username)
-                        .list();
-
-                for (Training training : trainings) {
-                    sessionFactory.getCurrentSession().remove(training);
-                }
-                sessionFactory.getCurrentSession().remove(trainee);
-                sessionFactory.getCurrentSession().remove(user);
-                logger.info("Successfully deleted trainee and their trainings with username: {}", username);
-            } else {
-                logger.warn("No trainee found with username: {}", username);
-            }
         } catch (Exception e) {
             logger.error("Error occurred while deleting trainee with username: {}", username, e);
             throw e;

@@ -45,7 +45,7 @@ public class TrainerDao {
                     .setParameter("username", username)
                     .uniqueResult();
             if (trainer != null) {
-                Hibernate.initialize(trainer.getTrainees()); // Ensure trainees are fully initialized
+                Hibernate.initialize(trainer.getTrainees());
                 logger.info("Successfully fetched trainer with username: {}", username);
             } else {
                 logger.warn("No trainer found with username: {}", username);
