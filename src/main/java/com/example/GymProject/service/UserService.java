@@ -3,6 +3,7 @@ package com.example.GymProject.service;
 
 import com.example.GymProject.dao.UserDao;
 import com.example.GymProject.dto.UserDto;
+import com.example.GymProject.exception.ResourceNotFoundException;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.User;
 import org.slf4j.Logger;
@@ -19,17 +20,18 @@ public class UserService {
     private EntityMapper entityMapper;
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    public boolean matchUsernameAndPassword(String username, String password) {
+    public boolean checkUsernameAndPassword(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");
         User user = userDao.findUserByUsername(username);
-        boolean isMatched = user != null && user.getPassword().equals(password);
-        if (isMatched) {
-            logger.info("Username and password are right for user {}", username);
-        } else {
+        if (user == null || !user.getPassword().equals(password)) {
             logger.warn("User with username {} not found or password is wrong", username);
+            return false;
         }
-        return isMatched;
+
+        logger.info("Username and password are right for user {}", username);
+
+        return true;
     }
 
     public UserDto getUserByUsername(String username) {
@@ -40,10 +42,10 @@ public class UserService {
 
     public String generateUniqueUserName(String firstName, String lastName) {
         String baseUserName = firstName + "." + lastName;
-        Boolean userNameExist = userDao.existsByUserName(baseUserName);
+        boolean userNameExist = userDao.existsByUserName(baseUserName);
         if (userNameExist) {
             long nextUserId = getNextAvailableUserId() + 1L;
-            return baseUserName +nextUserId;
+            return baseUserName + nextUserId;
         } else {
             return baseUserName;
         }
@@ -58,4 +60,24 @@ public class UserService {
         User user = entityMapper.toUser(userDto);
         return entityMapper.toUserDto(userDao.updateUser(user));
     }
+
+    public boolean changePassword(String username, String newPassword, String password) {
+        Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
+        Assert.notNull(newPassword, "New password cannot be null");
+        UserDto userDto = getUserByUsername(username);
+        if (userDto == null) {
+            throw new ResourceNotFoundException("User not found with username: " + username);
+        }
+        if (!password.equals(newPassword)) {
+            userDto.setPassword(newPassword);
+            updateUser(userDto);
+            logger.info("Password has successfully changed for trainee {}", username);
+        } else {
+            logger.warn("Cannot change password for user {} since new password is equal to old password", username);
+
+        }
+        return true;
+    }
+
 }

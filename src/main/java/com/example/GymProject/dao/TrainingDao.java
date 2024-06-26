@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -54,6 +53,21 @@ public class TrainingDao {
             return training;
         } catch (Exception e) {
             logger.error("Error occurred while updating training with name: {}", training.getTrainingName(), e);
+            throw e;
+        }
+    }
+
+    @Transactional
+    public void removeTrainings(List<Long> trainingIds) {
+        try {
+            logger.info("Removing trainings with IDs: {}", trainingIds);
+            sessionFactory.getCurrentSession()
+                    .createQuery("DELETE FROM Training t WHERE t.id IN :trainingIds")
+                    .setParameter("trainingIds", trainingIds)
+                    .executeUpdate();
+            logger.info("Successfully removed trainings with IDs: {}", trainingIds);
+        } catch (Exception e) {
+            logger.error("Error occurred while removing trainings with IDs: {}", trainingIds, e);
             throw e;
         }
     }

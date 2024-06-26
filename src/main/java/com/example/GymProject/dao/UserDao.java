@@ -1,15 +1,15 @@
 package com.example.GymProject.dao;
 
 import com.example.GymProject.model.User;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.sql.DataSource;
+import javax.persistence.EntityNotFoundException;
 
 @Repository
 public class UserDao {
@@ -17,8 +17,6 @@ public class UserDao {
     @Autowired
     private SessionFactory sessionFactory;
 
-    @Autowired
-    private DataSource dataSource;
 
     @Transactional
     public void createUser(User user) {
@@ -56,14 +54,30 @@ public class UserDao {
     public User updateUser(User user) {
         try {
             logger.info("Updating user with username: {}", user.getUsername());
-            sessionFactory.getCurrentSession().merge(user);
-            logger.info("Successfully updated user with username: {}", user.getUsername());
-            return user;
+            Session session = sessionFactory.getCurrentSession();
+            User existingUser = (User) session.createQuery("select u from User u where u.username = :username")
+                    .setParameter("username", user.getUsername())
+                    .uniqueResult();
+
+            if (existingUser != null) {
+                existingUser.setIsActive(user.getIsActive());
+                existingUser.setUsername(user.getUsername());
+                existingUser.setPassword(user.getPassword());
+                existingUser.setFirstName(user.getFirstName());
+                existingUser.setLastName(user.getLastName());
+                session.update(existingUser);
+                logger.info("Successfully updated user with username: {}", user.getUsername());
+                return existingUser;
+            } else {
+                logger.error("User with username: {} does not exist", user.getUsername());
+                throw new EntityNotFoundException("User not found");
+            }
         } catch (Exception e) {
             logger.error("Error occurred while updating user with username: {}", user.getUsername(), e);
             throw e;
         }
     }
+
 
     @Transactional(readOnly = true)
     public boolean existsByUserName(String username) {
@@ -96,23 +110,5 @@ public class UserDao {
             throw e;
         }
     }
-   /* public void deleteUserByUsername(String username) {
-        Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
-            transaction = session.beginTransaction();
-            logger.info("Deleting user with username: {}", username);
-            User user = findUserByUsername(username);
-            if (user != null) {
-                session.remove(user);
-            }
-            transaction.commit();
-            logger.info("Successfully deleted user with username: {}", username);
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-                logger.warn("Transaction rolled back while deleting user with username: {}", username);
-            }
-            logger.error("Error occurred while deleting user with username: {}", username, e);
-        }
-    }*/
+
 }

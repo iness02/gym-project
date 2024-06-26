@@ -3,6 +3,7 @@ package com.example.GymProject.dao;
 import com.example.GymProject.model.Trainee;
 import com.example.GymProject.model.Training;
 import com.example.GymProject.model.User;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.Date;
 import java.util.List;
 
@@ -22,7 +24,6 @@ public class TraineeDao {
     @Transactional
     public Trainee createTrainee(Trainee trainee) {
         try {
-            System.out.println(trainee);
             logger.info("Creating trainee with username: {}", trainee.getUser().getUsername());
             sessionFactory.getCurrentSession().persist(trainee);
             logger.info("Successfully created trainee with username: {}", trainee.getUser().getUsername());
@@ -57,37 +58,42 @@ public class TraineeDao {
     public Trainee updateTrainee(Trainee trainee) {
         try {
             logger.info("Updating trainee with username: {}", trainee.getUser().getUsername());
-            sessionFactory.getCurrentSession().merge(trainee);
-            logger.info("Successfully updated trainee with username: {}", trainee.getUser().getUsername());
-            return trainee;
+            Session session = sessionFactory.getCurrentSession();
+            Trainee existingTrainee = (Trainee) session
+                    .createQuery("select t from Trainee t where t.user.username = :username")
+                    .setParameter("username", trainee.getUser().getUsername())
+                    .uniqueResult();
+            if (existingTrainee != null) {
+                User existingUser = existingTrainee.getUser();
+                existingUser.setLastName(trainee.getUser().getLastName());
+                existingUser.setFirstName(trainee.getUser().getFirstName());
+                existingUser.setIsActive(trainee.getUser().getIsActive());
+
+                existingTrainee.setUser(existingUser);
+                existingTrainee.setAddress(trainee.getAddress());
+                existingTrainee.setDateOfBirth(trainee.getDateOfBirth());
+                existingTrainee.setTrainers(trainee.getTrainers());
+                session.update(existingTrainee);
+                logger.info("Successfully updated trainee with username: {}", trainee.getUser().getUsername());
+                return existingTrainee;
+            } else {
+                logger.error("Trainee with username: {} does not exist", trainee.getUser().getUsername());
+                throw new EntityNotFoundException("Trainee not found");
+            }
         } catch (Exception e) {
             logger.error("Error occurred while updating trainee with username: {}", trainee.getUser().getUsername(), e);
             throw e;
         }
     }
 
+
     @Transactional
-    public void deleteTraineeByUsername(String username) {
+    public void deleteTraineeByUsername(String username, Trainee trainee) {
         try {
             logger.info("Deleting trainee and their trainings with username: {}", username);
+            sessionFactory.getCurrentSession().remove(trainee);
+            logger.info("Successfully deleted trainee and their trainings with username: {}", username);
 
-            Trainee trainee = getTraineeByUsername(username);
-            User user = trainee.getUser();
-            if (trainee != null && user != null) {
-                List<Training> trainings = sessionFactory.getCurrentSession()
-                        .createQuery("Select t FROM Training t WHERE t.trainee.user.username = :username", Training.class)
-                        .setParameter("username", username)
-                        .list();
-
-                for (Training training : trainings) {
-                    sessionFactory.getCurrentSession().remove(training);
-                }
-                sessionFactory.getCurrentSession().remove(trainee);
-                sessionFactory.getCurrentSession().remove(user);
-                logger.info("Successfully deleted trainee and their trainings with username: {}", username);
-            } else {
-                logger.warn("No trainee found with username: {}", username);
-            }
         } catch (Exception e) {
             logger.error("Error occurred while deleting trainee with username: {}", username, e);
             throw e;
@@ -101,9 +107,9 @@ public class TraineeDao {
             logger.info("Fetching trainings for trainee with username: {}", username);
             List<Training> trainings = sessionFactory.getCurrentSession()
                     .createQuery("SELECT t FROM Training t WHERE t.trainee.user.username = :username " +
-                            "AND t.trainingDate BETWEEN :fromDate AND :toDate " +
-                            "AND t.trainer.user.username = :trainerName " +
-                            "AND t.trainingType.trainingTypeName = :trainingType", Training.class)
+                            "OR t.trainingDate BETWEEN :fromDate AND :toDate " +
+                            "OR t.trainer.user.username = :trainerName " +
+                            "OR t.trainingType.trainingTypeName = :trainingType", Training.class)
                     .setParameter("username", username)
                     .setParameter("fromDate", fromDate)
                     .setParameter("toDate", toDate)
@@ -116,6 +122,15 @@ public class TraineeDao {
             logger.error("Error occurred while fetching trainings for trainee with username: {}", username, e);
             throw e;
         }
+    }
+
+    public boolean existsByUsername(String username) {
+        String hql = "SELECT COUNT(t) FROM Trainee t WHERE t.user.username = :username";
+        Long count = (Long) sessionFactory.getCurrentSession()
+                .createQuery(hql)
+                .setParameter("username", username)
+                .uniqueResult();
+        return count > 0;
     }
 }
 

@@ -1,16 +1,17 @@
 package com.example.GymProject.service;
 
+import com.example.GymProject.dao.TraineeDao;
+import com.example.GymProject.dao.TrainerDao;
 import com.example.GymProject.dao.TrainingDao;
+import com.example.GymProject.dao.TrainingTypeDao;
 import com.example.GymProject.dto.TrainingDto;
 import com.example.GymProject.mapper.EntityMapper;
-import com.example.GymProject.model.Trainee;
-import com.example.GymProject.model.Trainer;
-import com.example.GymProject.model.Training;
-import com.example.GymProject.model.TrainingType;
+import com.example.GymProject.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.List;
@@ -19,7 +20,13 @@ import java.util.stream.Collectors;
 @Service
 public class TrainingService {
     @Autowired
-    private TrainingDao trainingDao ;
+    private TrainingDao trainingDao;
+    @Autowired
+    private TraineeDao traineeDao;
+    @Autowired
+    private TrainerDao trainerDao;
+    @Autowired
+    private TrainingTypeDao trainingTypeDao;
     @Autowired
     private UserService userService;
     @Autowired
@@ -27,16 +34,28 @@ public class TrainingService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    public TrainingDto addTraining(TrainingDto trainingDTO) {
-        Assert.notNull(trainingDTO, "TrainingDto cannot be null");
-        System.out.println(trainingDTO);
-        Training training = entityMapper.toTraining(trainingDTO);
-        Trainee trainee = entityMapper.toTrainee(trainingDTO.getTrainee());
-        Trainer trainer = entityMapper.toTrainer(trainingDTO.getTrainer());
-        TrainingType trainingType = entityMapper.toTrainingType(trainingDTO.getTrainingType());
-        training.setTrainee(trainee);
-        training.setTrainer(trainer);
-        training.setTrainingType(trainingType);
+    @Transactional
+    public TrainingDto addTraining(TrainingDto trainingDto) {
+        Assert.notNull(trainingDto, "TrainingDto cannot be null");
+        Training training = entityMapper.toTraining(trainingDto);
+        Trainee trainee = entityMapper.toTrainee(trainingDto.getTrainee());
+        Trainer trainer = entityMapper.toTrainer(trainingDto.getTrainer());
+        TrainingType trainingType = entityMapper.toTrainingType(trainingDto.getTrainingType());
+
+        if (trainingType == null) {
+            TrainingType trainingType1 = new TrainingType();
+            trainingType1.setTrainingTypeName(Trainings.FITNESS);
+            if (trainingTypeDao.findTrainingByName(trainingType1.getTrainingTypeName()) == null)
+                trainingTypeDao.addTrainingType(trainingType1);
+            else
+                trainingType1 = trainingTypeDao.findTrainingByName(trainingType1.getTrainingTypeName());
+            training.setTrainingType(trainingType1);
+        } else {
+            training.setTrainingType(trainingType);
+
+        }
+        training.setTrainee(traineeDao.getTraineeByUsername(trainee.getUser().getUsername()));
+        training.setTrainer(trainerDao.getTrainerByUsername(trainer.getUser().getUsername()));
         return entityMapper.toTrainingDto(trainingDao.addTraining(training));
     }
 
@@ -47,17 +66,19 @@ public class TrainingService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public TrainingDto updateTraining(TrainingDto trainingDTO, String username, String password) {
-        if(isAuthenticated(username, password)) {
-            Assert.notNull(trainingDTO, "TrainingDto cannot be null");
+        Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
+        if (isAuthenticated(username, password)) {
             Training training = entityMapper.toTraining(trainingDTO);
             return entityMapper.toTrainingDto(trainingDao.updateTraining(training));
         }
-        logger.error("Authentication failed for trainee {}",username);
+        logger.error("Authentication failed for trainee {}", username);
         return null;
     }
 
-    public boolean isAuthenticated(String username,String password){
-        return userService.matchUsernameAndPassword(username, password);
+    public boolean isAuthenticated(String username, String password) {
+        return userService.checkUsernameAndPassword(username, password);
     }
 }

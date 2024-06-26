@@ -1,10 +1,17 @@
 package com.example.GymProject.service;
 
+import com.example.GymProject.dao.TraineeDao;
 import com.example.GymProject.dao.TrainerDao;
 import com.example.GymProject.dao.UserDao;
 import com.example.GymProject.dto.TrainerDto;
 import com.example.GymProject.dto.TrainingDto;
 import com.example.GymProject.dto.UserDto;
+import com.example.GymProject.dto.request.trainerRequest.GetTrainerTrainingsRequest;
+import com.example.GymProject.dto.response.GetTrainingResponse;
+import com.example.GymProject.dto.response.UserPassResponse;
+import com.example.GymProject.dto.response.trainerResponse.UpdateTrainerProfileResponse;
+import com.example.GymProject.exception.ResourceNotFoundException;
+import com.example.GymProject.exception.UserAlreadyRegisteredException;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.Trainer;
 import com.example.GymProject.model.Training;
@@ -17,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +34,8 @@ public class TrainerService {
 
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private TraineeDao traineeDao;
 
     @Autowired
     private UserService userService;
@@ -38,127 +46,120 @@ public class TrainerService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     @Transactional
-    public TrainerDto createTrainer(TrainerDto trainerDto) {
-        Assert.notNull(trainerDto, "TraineeDto cannot be null");
+    public UserPassResponse createTrainer(TrainerDto trainerDto) {
+        Assert.notNull(trainerDto, "TrainerDto cannot be null");
+        String username = userService.generateUniqueUserName(trainerDto.getUserDto().getFirstName(), trainerDto.getUserDto().getLastName());
+
+        if (trainerDao.existsByUsername(username) || traineeDao.existsByUsername(username)) {
+            throw new UserAlreadyRegisteredException("User is already registered as a trainer or trainee");
+        }
+
         Trainer trainer = entityMapper.toTrainer(trainerDto);
         User user = entityMapper.toUser(trainerDto.getUserDto());
-        user.setUsername(userService.generateUniqueUserName(user.getFirstName(), user.getLastName()));
+        user.setUsername(username);
         user.setPassword(Utils.generatePassword());
         user.setIsActive(true);
+
         logger.info("Creating username for trainer with id {}", trainerDto.getId());
         userDao.createUser(user);
         trainer.setUser(user);
-        return entityMapper.toTrainerDto(trainerDao.createTrainer(trainer));
+        Trainer trainer1 = trainerDao.createTrainer(trainer);
+        entityMapper.toTrainerDto(trainer1);
+        return new UserPassResponse(trainer1.getId(), trainer1.getUser().getUsername(), trainer1.getUser().getPassword());
     }
 
     public TrainerDto getTrainerByUsername(String username, String password) {
-        if(isAuthenticated(username, password)) {
-            Assert.notNull(username, "Username cannot be null");
-            Trainer trainer = trainerDao.getTrainerByUsername(username);
-            UserDto userDto = entityMapper.toUserDto(trainer.getUser());
-            TrainerDto trainerDto = entityMapper.toTrainerDto(trainer);
-            trainerDto.setUserDto(userDto);
-            return trainerDto;
+        Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
+        Trainer trainer = trainerDao.getTrainerByUsername(username);
+        if (trainer == null) {
+            throw new ResourceNotFoundException("Trainer not found with username: " + username);
         }
-        logger.error("Authentication failed for trainee {}",username);
-        return null;
+        UserDto userDto = entityMapper.toUserDto(trainer.getUser());
+        TrainerDto trainerDto = entityMapper.toTrainerDto(trainer);
+        trainerDto.setUserDto(userDto);
+        return trainerDto;
+    }
+
+    public TrainerDto getTrainerByUsername(String username) {
+        Assert.notNull(username, "Username cannot be null");
+        Trainer trainer = trainerDao.getTrainerByUsername(username);
+        if (trainer == null) {
+            throw new ResourceNotFoundException("Trainer not found with username: " + username);
+        }
+        UserDto userDto = entityMapper.toUserDto(trainer.getUser());
+        TrainerDto trainerDto = entityMapper.toTrainerDto(trainer);
+        trainerDto.setUserDto(userDto);
+        return trainerDto;
+
+    }
+
+    @Transactional
+    public UpdateTrainerProfileResponse updateTrainer(TrainerDto trainerDto) {
+        Assert.notNull(trainerDto, "TrainerDto cannot be null");
+        Trainer trainer = entityMapper.toTrainer(trainerDto);
+        User user = entityMapper.toUser(trainerDto.getUserDto());
+        userDao.updateUser(user);
+        trainer.setUser(user);
+        Trainer trainer1 = trainerDao.updateTrainer(trainer);
+        TrainerDto trainerDto1 = entityMapper.toTrainerDto(trainer1);
+        return entityMapper.toUpdateTrainerProfileResponse(trainerDto1);
     }
 
 
-    public TrainerDto updateTrainer(TrainerDto trainerDTO, String password) {
-        if(isAuthenticated(trainerDTO.getUserDto().getUsername(), password)) {
-            Assert.notNull(trainerDTO, "TrainerDto cannot be null");
-            Trainer trainer = entityMapper.toTrainer(trainerDTO);
-            User user = entityMapper.toUser(trainerDTO.getUserDto());
-            trainer.setUser(user);
-            return entityMapper.toTrainerDto(trainerDao.updateTrainer(trainer));
-        }
-        logger.error("Authentication failed for trainee {}",trainerDTO.getUserDto().getUsername());
-        return null;
-    }
-
-
-    public void changeTrainerPassword(String username, String newPassword, String password) {
-        if(isAuthenticated(username, password)) {
-            Assert.notNull(username, "Username cannot be null");
-            Assert.notNull(newPassword, "New password cannot be null");
-            UserDto userDTO = userService.getUserByUsername(username);
-            if (userDTO != null) {
-                userDTO.setPassword(newPassword);
-                userService.updateUser(userDTO);
-                logger.info("Password has successfully changed for trainer {}", username);
-            } else {
-                logger.warn("Cannot change password for trainer {} since such user was not found", username);
-            }
-        }
-        logger.error("Authentication failed for trainee {}",username);
-    }
-
+    @Transactional
     public void deleteTrainerByUsername(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
-        if(isAuthenticated(username, password)) {
+        Assert.notNull(password, "Password cannot be null");
+        Trainer trainer = trainerDao.getTrainerByUsername(username);
+        User user = trainer.getUser();
+        if (trainer != null && user != null) {
             trainerDao.deleteTrainerByUsername(username);
+        } else {
+            logger.warn("No trainer found with username: {}", username);
         }
-        logger.error("Authentication failed for trainee {}",username);
-
     }
 
-    public void activateDeactivateTrainer(String username, boolean isActive, String password) {
-        if(isAuthenticated(username, password)) {
-            Assert.notNull(username, "Username cannot be null");
-            Trainer trainer = trainerDao.getTrainerByUsername(username);
-            if (trainer != null) {
-                logger.info("Activation/Deactivation was successfully performed for trainer {}", username);
-                trainer.getUser().setIsActive(isActive);
-                userService.updateUser(entityMapper.toUserDto(trainer.getUser()));
-            }
-        }
-        logger.error("Authentication failed for trainee {}",username);
-
-    }
-
-    public void activate(String username,String password){
-        if(isAuthenticated(username, password)) {
-            Assert.notNull(username, "Username cannot be null");
-            Trainer trainer = trainerDao.getTrainerByUsername(username);
-            if (trainer != null) {
-                logger.info("Activation was successfully performed for trainer {}", username);
-                trainer.getUser().setIsActive(true);
-                userService.updateUser(entityMapper.toUserDto(trainer.getUser()));
-            }
-        }
-        logger.error("Authentication failed for trainee {}",username);
-    }
-
-    public void deactivate(String username,String password){
-        if(isAuthenticated(username, password)) {
+    @Transactional
+    public boolean activate(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
+        Trainer trainer = trainerDao.getTrainerByUsername(username);
+        if (trainer == null) {
+            throw new ResourceNotFoundException("Trainee not found with username: " + username);
+        }
+
+        logger.info("Activation was successfully performed for trainer {}", username);
+        trainer.getUser().setIsActive(true);
+        userService.updateUser(entityMapper.toUserDto(trainer.getUser()));
+
+        return true;
+    }
+
+    @Transactional
+    public boolean deactivate(String username, String password) {
+        Assert.notNull(username, "Username cannot be null");
+        Assert.notNull(password, "Password cannot be null");
         Trainer trainer = trainerDao.getTrainerByUsername(username);
         if (trainer != null) {
             logger.info("Deactivation was successfully performed for trainer {}", username);
             trainer.getUser().setIsActive(false);
             userService.updateUser(entityMapper.toUserDto(trainer.getUser()));
-            }
         }
-        logger.error("Authentication failed for trainee {}",username);
-
+        return true;
     }
 
 
-    public List<TrainingDto> getTrainerTrainings(String username, Date fromDate, Date toDate, String traineeName, String password) {
-        if(isAuthenticated(username, password)) {
-            Assert.notNull(username, "Username cannot be null");
-            List<Training> trainings = trainerDao.getTrainerTrainings(username, fromDate, toDate, traineeName);
-            logger.info("Getting trainings for trainer {}", username);
-            return trainings.stream()
-                    .map(entityMapper::toTrainingDto)
-                    .collect(Collectors.toList());
-        }
-        logger.error("Authentication failed for trainee {}",username);
-        return null;
-    }
-
-    public boolean isAuthenticated(String username,String password){
-        return userService.matchUsernameAndPassword(username, password);
+    public List<GetTrainingResponse> getTrainerTrainings(GetTrainerTrainingsRequest request) {
+        Assert.notNull(request, "Request cannot be null");
+        Assert.notNull(request.getUsername(), "Username cannot be null");
+        List<Training> trainings = trainerDao.getTrainerTrainings(request.getUsername(), request.getPeriodFrom(), request.getPeriodTo(), request.getTrainerName());
+        logger.info("Getting trainings for trainer {}", request.getUsername());
+        List<TrainingDto> trainingDtos = trainings.stream()
+                .map(entityMapper::toTrainingDto)
+                .collect(Collectors.toList());
+        return trainingDtos.stream()
+                .map(entityMapper::toGetTrainingResponse)
+                .collect(Collectors.toList());
     }
 }

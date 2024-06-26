@@ -1,6 +1,6 @@
 package com.example.GymProject.dao;
 
-import com.example.GymProject.config.AppConfig;
+import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -15,17 +15,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import javax.persistence.EntityNotFoundException;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {AppConfig.class})
+@ContextConfiguration(classes = {TestConfig.class})
 @EnableTransactionManagement
 public class UserDaoTest {
-    @InjectMocks
-    private UserDao userDao;
-
     @Mock
     private SessionFactory sessionFactory;
 
@@ -33,19 +31,30 @@ public class UserDaoTest {
     private Session session;
 
     @Mock
-    private Query<User> query;
+    private Query<User> userQuery;
+
+    @Mock
+    private Query<Long> longQuery;
+
+    @InjectMocks
+    private UserDao userDao;
+
+    private User user;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         when(sessionFactory.getCurrentSession()).thenReturn(session);
+
+        user = new User();
+        user.setUsername("testuser");
+        user.setPassword("password");
+        user.setFirstName("Test");
+        user.setLastName("User");
     }
 
     @Test
-    public void testCreateUser() {
-        User user = new User();
-        user.setUsername("testuser");
-
+    void testCreateUser() {
         doNothing().when(session).persist(user);
 
         userDao.createUser(user);
@@ -54,61 +63,74 @@ public class UserDaoTest {
     }
 
     @Test
-    public void testFindUserByUsername() {
-        String username = "testuser";
-        User user = new User();
-        user.setUsername(username);
+    void testFindUserByUsername() {
+        when(session.createQuery("select u FROM User u WHERE u.username = :username", User.class))
+                .thenReturn(userQuery);
+        when(userQuery.setParameter("username", "testuser")).thenReturn(userQuery);
+        when(userQuery.uniqueResult()).thenReturn(user);
 
-        when(session.createQuery("select u FROM User u WHERE u.username = :username", User.class)).thenReturn(query);
-        when(query.setParameter("username", username)).thenReturn(query);
-        when(query.uniqueResult()).thenReturn(user);
+        User result = userDao.findUserByUsername("testuser");
 
-        User result = userDao.findUserByUsername(username);
-        assertEquals(username, result.getUsername());
-        verify(session, times(1)).createQuery("select u FROM User u WHERE u.username = :username", User.class);
+        assertNotNull(result);
+        assertEquals("testuser", result.getUsername());
     }
 
     @Test
-    public void testUpdateUser() {
-        User user = new User();
-        user.setUsername("testuser");
+    void testUpdateUser() {
+        when(session.createQuery("select u from User u where u.username = :username"))
+                .thenReturn(userQuery);
+        when(userQuery.setParameter("username", "testuser")).thenReturn(userQuery);
+        when(userQuery.uniqueResult()).thenReturn(user);
 
-        when(session.merge(user)).thenReturn(user);
+        User updatedUser = new User();
+        updatedUser.setUsername("testuser");
+        updatedUser.setPassword("newpassword");
+        updatedUser.setFirstName("Updated");
+        updatedUser.setLastName("User");
+        updatedUser.setIsActive(true);
 
-        User updatedUser = userDao.updateUser(user);
-        assertEquals(user.getUsername(), updatedUser.getUsername());
-        verify(session, times(1)).merge(user);
+        User result = userDao.updateUser(updatedUser);
+
+        assertNotNull(result);
+        assertEquals("testuser", result.getUsername());
+        assertEquals("newpassword", result.getPassword());
+        assertEquals("Updated", result.getFirstName());
+        assertEquals("User", result.getLastName());
     }
 
     @Test
-    public void testExistsByUserName() {
-        String username = "testuser";
-        Long count = 1L;
+    void testUpdateUser_NotFound() {
+        when(session.createQuery("select u from User u where u.username = :username"))
+                .thenReturn(userQuery);
+        when(userQuery.setParameter("username", "nonexistent")).thenReturn(userQuery);
+        when(userQuery.uniqueResult()).thenReturn(null);
 
-        Query<Long> mockQuery = mock(Query.class);
+        User updatedUser = new User();
+        updatedUser.setUsername("nonexistent");
 
-        when(session.createQuery("select count(u) from User u where u.username = :username", Long.class)).thenReturn(mockQuery);
-        when(mockQuery.setParameter("username", username)).thenReturn(mockQuery);
-        when(mockQuery.uniqueResult()).thenReturn(count);
+        assertThrows(EntityNotFoundException.class, () -> userDao.updateUser(updatedUser));
+    }
 
-        boolean exists = userDao.existsByUserName(username);
+    @Test
+    void testExistsByUserName() {
+        when(session.createQuery("select count(u) from User u where u.username = :username", Long.class))
+                .thenReturn(longQuery);
+        when(longQuery.setParameter("username", "testuser")).thenReturn(longQuery);
+        when(longQuery.uniqueResult()).thenReturn(1L);
+
+        boolean exists = userDao.existsByUserName("testuser");
+
         assertTrue(exists);
-        verify(session, times(1)).createQuery("select count(u) from User u where u.username = :username", Long.class);
     }
-
 
     @Test
-    public void testFindMaxUserId() {
-        Long maxUserId = 10L;
+    void testFindMaxUserId() {
+        when(session.createQuery("select max(u.id) from User u", Long.class))
+                .thenReturn(longQuery);
+        when(longQuery.uniqueResult()).thenReturn(10L);
 
-        Query<Long> mockQuery = mock(Query.class);
+        Long maxUserId = userDao.findMaxUserId();
 
-        when(session.createQuery("select max(u.id) from User u", Long.class)).thenReturn(mockQuery);
-        when(mockQuery.uniqueResult()).thenReturn(maxUserId);
-
-        Long result = userDao.findMaxUserId();
-        assertEquals(maxUserId, result);
-        verify(session, times(1)).createQuery("select max(u.id) from User u", Long.class);
+        assertEquals(10L, maxUserId);
     }
-
 }

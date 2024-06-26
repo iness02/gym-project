@@ -1,6 +1,6 @@
 package com.example.GymProject.dao;
 
-import com.example.GymProject.config.AppConfig;
+import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.model.Training;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {AppConfig.class})
+@ContextConfiguration(classes = {TestConfig.class})
 @EnableTransactionManagement
 public class TrainingDaoTest {
     @Mock
@@ -30,7 +30,6 @@ public class TrainingDaoTest {
 
     @Mock
     private Session session;
-
 
     @Mock
     private Query<Training> query;

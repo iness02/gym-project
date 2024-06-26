@@ -1,13 +1,13 @@
 package com.example.GymProject.service;
 
-import com.example.GymProject.config.AppConfig;
+import com.example.GymProject.config.TestConfig;
+import com.example.GymProject.dao.TraineeDao;
+import com.example.GymProject.dao.TrainerDao;
 import com.example.GymProject.dao.TrainingDao;
+import com.example.GymProject.dao.TrainingTypeDao;
 import com.example.GymProject.dto.TrainingDto;
 import com.example.GymProject.mapper.EntityMapper;
-import com.example.GymProject.model.Trainee;
-import com.example.GymProject.model.Trainer;
-import com.example.GymProject.model.Training;
-import com.example.GymProject.model.TrainingType;
+import com.example.GymProject.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,16 +24,20 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {AppConfig.class})
+@ContextConfiguration(classes = {TestConfig.class})
 class TrainingServiceTest {
     @Mock
     private TrainingDao trainingDao;
-
     @Mock
     private UserService userService;
-
     @Mock
     private EntityMapper entityMapper;
+    @Mock
+    private TrainingTypeDao trainingTypeDao;
+    @Mock
+    private TraineeDao traineeDao;
+    @Mock
+    private TrainerDao trainerDao;
 
     @InjectMocks
     private TrainingService trainingService;
@@ -49,6 +53,11 @@ class TrainingServiceTest {
         Training training = new Training();
         Trainee trainee = new Trainee();
         Trainer trainer = new Trainer();
+        User user = new User();
+        user.setUsername("username");
+        User user1 = new User();
+        trainer.setUser(user1);
+        trainee.setUser(user);
         TrainingType trainingType = new TrainingType();
 
         when(entityMapper.toTraining(trainingDto)).thenReturn(training);
@@ -93,7 +102,7 @@ class TrainingServiceTest {
         TrainingDto trainingDto = new TrainingDto();
         Training training = new Training();
 
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
+        when(userService.checkUsernameAndPassword(username, password)).thenReturn(true);
         when(entityMapper.toTraining(trainingDto)).thenReturn(training);
         when(trainingDao.updateTraining(training)).thenReturn(training);
         when(entityMapper.toTrainingDto(training)).thenReturn(trainingDto);
@@ -101,7 +110,7 @@ class TrainingServiceTest {
         TrainingDto result = trainingService.updateTraining(trainingDto, username, password);
 
         assertEquals(trainingDto, result);
-        verify(userService).matchUsernameAndPassword(username, password);
+        verify(userService).checkUsernameAndPassword(username, password);
         verify(entityMapper).toTraining(trainingDto);
         verify(trainingDao).updateTraining(training);
         verify(entityMapper).toTrainingDto(training);
@@ -113,24 +122,22 @@ class TrainingServiceTest {
         String password = "password";
         TrainingDto trainingDto = new TrainingDto();
 
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(false);
+        when(userService.checkUsernameAndPassword(username, password)).thenReturn(false);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            trainingService.updateTraining(trainingDto, username, password);
-        });
 
-        assertEquals("Authentication failed for user " + username, exception.getMessage());
-        verify(userService).matchUsernameAndPassword(username, password);
+        assertEquals(null, trainingService.updateTraining(trainingDto, username, password));
+        verify(userService).checkUsernameAndPassword(username, password);
         verify(entityMapper, never()).toTraining(trainingDto);
         verify(trainingDao, never()).updateTraining(any(Training.class));
         verify(entityMapper, never()).toTrainingDto(any(Training.class));
     }
+
     @Test
     void testIsAuthenticated_ValidCredentials() {
         String username = "validUser";
         String password = "validPassword";
 
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(true);
+        when(userService.checkUsernameAndPassword(username, password)).thenReturn(true);
         assertTrue(trainingService.isAuthenticated(username, password));
     }
 
@@ -139,7 +146,7 @@ class TrainingServiceTest {
         String username = "invalidUser";
         String password = "invalidPassword";
 
-        when(userService.matchUsernameAndPassword(username, password)).thenReturn(false);
+        when(userService.checkUsernameAndPassword(username, password)).thenReturn(false);
         assertFalse(trainingService.isAuthenticated(username, password));
     }
 }
