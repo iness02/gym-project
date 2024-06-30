@@ -1,10 +1,12 @@
 package com.example.GymProject.model;
 
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
 @Table(name = "training")
@@ -12,7 +14,6 @@ import java.util.Date;
 @NoArgsConstructor
 @Getter
 @Setter
-
 public class Training {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +36,7 @@ public class Training {
 
     @Temporal(TemporalType.DATE)
     @Column(name = "training_date", nullable = false)
-    private Date trainingDate;
+    private LocalDate trainingDate;
 
     @Column(name = "training_duration", nullable = false)
     private Integer trainingDuration;

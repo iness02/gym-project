@@ -1,17 +1,14 @@
 package com.example.GymProject;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.example.GymProject.config.AppConfig;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
-
+@SpringBootApplication
 public class GymProjectApplication {
 
     public static void main(String[] args) {
-
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-
-
+        SpringApplication.run(GymProjectApplication.class, args);
     }
 
 }
+

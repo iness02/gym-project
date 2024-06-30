@@ -1,38 +1,36 @@
 package com.example.GymProject.controller;
 
-import com.example.GymProject.dto.request.ChangePasswordRequest;
-import com.example.GymProject.dto.request.UserPassRequest;
+import com.example.GymProject.dto.request.ChangePasswordRequestDto;
+import com.example.GymProject.dto.request.UserPassRequestDto;
 import com.example.GymProject.service.UserService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-
-@RestController
+@Controller
 @RequestMapping("/api")
 public class LoginController {
-
     @Autowired
     UserService userService;
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
 
     @GetMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody UserPassRequest request) {
+    public ResponseEntity<String> login(@Valid @RequestBody UserPassRequestDto request) {
         logger.info("Login attempt for username: {}", request.getUsername());
         return userService.checkUsernameAndPassword(request.getUsername(), request.getPassword()) ?
                 new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/changePassword")
-    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequestDto request) {
         logger.info("Password change attempt for username: {}", request.getUsername());
         if (userService.checkUsernameAndPassword(request.getUsername(), request.getOldPassword())) {
             boolean isPasswordChanged = userService.changePassword(request.getUsername(), request.getNewPassword(), request.getOldPassword());
