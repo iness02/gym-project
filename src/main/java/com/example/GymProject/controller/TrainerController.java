@@ -28,8 +28,6 @@ public class TrainerController {
     @Autowired
     private TrainerService trainerService;
     @Autowired
-    private EntityMapper entityMapper;
-    @Autowired
     private UserService userService;
     private static final Logger logger = LoggerFactory.getLogger(TrainerController.class);
 

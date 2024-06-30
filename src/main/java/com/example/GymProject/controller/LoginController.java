@@ -3,6 +3,8 @@ package com.example.GymProject.controller;
 import com.example.GymProject.dto.request.ChangePasswordRequestDto;
 import com.example.GymProject.dto.request.UserPassRequestDto;
 import com.example.GymProject.service.UserService;
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +23,8 @@ public class LoginController {
     UserService userService;
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
-
+    @Counted(value = "login.attempts", description = "Counts login attempts")
+    @Timed(value = "login.time", description = "Time taken for login method execution")
     @GetMapping("/login")
     public ResponseEntity<String> login(@Valid @RequestBody UserPassRequestDto request) {
         logger.info("Login attempt for username: {}", request.getUsername());
@@ -29,6 +32,8 @@ public class LoginController {
                 new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
+    @Counted(value = "password.change.attempts", description = "Counts password change attempts")
+    @Timed(value = "password.change.time", description = "Time taken for changePassword method execution")
     @GetMapping("/changePassword")
     public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequestDto request) {
         logger.info("Password change attempt for username: {}", request.getUsername());
@@ -43,6 +48,5 @@ public class LoginController {
             }
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed for user:" + request.getUsername());
-
     }
 }

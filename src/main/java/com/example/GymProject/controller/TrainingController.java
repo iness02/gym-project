@@ -21,8 +21,6 @@ public class TrainingController {
     @Autowired
     private TrainingService trainingService;
     @Autowired
-    private EntityMapper entityMapper;
-    @Autowired
     private UserService userService;
 
     private static final Logger logger = LoggerFactory.getLogger(TrainingController.class);
