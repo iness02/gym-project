@@ -1,11 +1,10 @@
 package com.example.GymProject.dto;
 
+import jakarta.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -13,15 +12,15 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class UserDto {
     private Long id;
-    @NotNull
+    @Nonnull
     private String firstName;
-    @NotNull
+    @Nonnull
     private String lastName;
-    @NotNull
+    @Nonnull
     private String username;
-    @NotNull
+    @Nonnull
     private String password;
-    @NotNull
+    @Nonnull
     private Boolean isActive;
 
     public UserDto(String firstName, String lastName) {

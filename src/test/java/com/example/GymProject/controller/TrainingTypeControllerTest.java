@@ -1,20 +1,18 @@
 package com.example.GymProject.controller;
 
-import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.dto.TrainingTypeDto;
-import com.example.GymProject.dto.request.UserPassRequest;
+import com.example.GymProject.dto.request.UserPassRequestDto;
 import com.example.GymProject.service.TrainingTypeService;
 import com.example.GymProject.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,8 +20,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestConfig.class})
+@SpringBootTest
+@ActiveProfiles("test")
 public class TrainingTypeControllerTest {
     @InjectMocks
     private TrainingTypeController trainingTypeController;
@@ -42,7 +40,7 @@ public class TrainingTypeControllerTest {
     @Test
     public void testGetAllTrainingTypes() {
 
-        UserPassRequest request = new UserPassRequest();
+        UserPassRequestDto request = new UserPassRequestDto();
         request.setUsername("username");
         request.setPassword("password");
 
@@ -63,7 +61,7 @@ public class TrainingTypeControllerTest {
     @Test
     public void testGetAllTrainingTypesUnauthorized() {
 
-        UserPassRequest request = new UserPassRequest();
+        UserPassRequestDto request = new UserPassRequestDto();
         request.setUsername("username");
         request.setPassword("password");
 

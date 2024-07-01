@@ -1,11 +1,11 @@
 
 package com.example.GymProject.service;
 
-import com.example.GymProject.dao.UserDao;
 import com.example.GymProject.dto.UserDto;
 import com.example.GymProject.exception.ResourceNotFoundException;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.User;
+import com.example.GymProject.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +14,9 @@ import org.springframework.util.Assert;
 
 @Service
 public class UserService {
+
     @Autowired
-    private UserDao userDao;
+    UserRepository userRepository;
     @Autowired
     private EntityMapper entityMapper;
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
@@ -23,7 +24,7 @@ public class UserService {
     public boolean checkUsernameAndPassword(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");
-        User user = userDao.findUserByUsername(username);
+        User user = userRepository.findByUsername(username);
         if (user == null || !user.getPassword().equals(password)) {
             logger.warn("User with username {} not found or password is wrong", username);
             return false;
@@ -36,13 +37,13 @@ public class UserService {
 
     public UserDto getUserByUsername(String username) {
         Assert.notNull(username, "Username cannot be null");
-        User user = userDao.findUserByUsername(username);
+        User user = userRepository.findByUsername(username);
         return entityMapper.toUserDto(user);
     }
 
     public String generateUniqueUserName(String firstName, String lastName) {
         String baseUserName = firstName + "." + lastName;
-        boolean userNameExist = userDao.existsByUserName(baseUserName);
+        boolean userNameExist = userRepository.existsByUsername(baseUserName);
         if (userNameExist) {
             long nextUserId = getNextAvailableUserId() + 1L;
             return baseUserName + nextUserId;
@@ -52,13 +53,13 @@ public class UserService {
     }
 
     public long getNextAvailableUserId() {
-        return userDao.findMaxUserId();
+        return userRepository.findMaxId();
     }
 
     public UserDto updateUser(UserDto userDto) {
         Assert.notNull(userDto, "UserDto cannot be null");
         User user = entityMapper.toUser(userDto);
-        return entityMapper.toUserDto(userDao.updateUser(user));
+        return entityMapper.toUserDto(userRepository.save(user));
     }
 
     public boolean changePassword(String username, String newPassword, String password) {
@@ -79,5 +80,4 @@ public class UserService {
         }
         return true;
     }
-
 }

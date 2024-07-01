@@ -1,27 +1,36 @@
 version: '3.8'
 services:
-  postgres:
-    image: postgres:latest
+  postgresql_dev:
+    image: postgres
     environment:
+      POSTGRES_DB: gym_dev
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/docker/volumes/gymproject_postgres_data/_data
+      - "5433:5432"
 
-  spring-app:
-    build: .
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
+  postgresql_stg:
+    image: postgres
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym-project
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_JPA_HIBERNATE_DDL_AUTO: create
+      POSTGRES_DB: gym_stg
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
 
-volumes:
-  postgres_data:
+  postgresql_prod:
+    image: postgres
+    environment:
+      POSTGRES_DB: gym_prod
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+  postgresql_local:
+    image: postgres
+    environment:
+     POSTGRES_DB: gym_local
+     POSTGRES_USER: postgres
+     POSTGRES_PASSWORD: postgres
+    ports:
+      - "5436:5432"

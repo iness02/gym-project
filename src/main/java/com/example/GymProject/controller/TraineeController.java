@@ -1,62 +1,44 @@
 package com.example.GymProject.controller;
 
-import com.example.GymProject.dto.TraineeDto;
-import com.example.GymProject.dto.UserDto;
-import com.example.GymProject.dto.request.DeleteRequest;
-import com.example.GymProject.dto.request.UserPassRequest;
-import com.example.GymProject.dto.request.traineerRquest.GetTraineeTrainingsRequest;
-import com.example.GymProject.dto.request.traineerRquest.TraineeRegistrationRequest;
-import com.example.GymProject.dto.request.traineerRquest.UpdateTraineeProfileRequest;
-import com.example.GymProject.dto.request.traineerRquest.UpdateTraineeTrainersRequest;
-import com.example.GymProject.dto.response.GetTrainingResponse;
-import com.example.GymProject.dto.response.UserPassResponse;
-import com.example.GymProject.dto.response.traineeResponse.GetTraineeProfileResponse;
-import com.example.GymProject.dto.response.traineeResponse.TrainerForTraineeResponse;
-import com.example.GymProject.dto.response.traineeResponse.UnassignedTrainerResponse;
-import com.example.GymProject.dto.response.traineeResponse.UpdateTraineeProfileResponse;
-import com.example.GymProject.mapper.EntityMapper;
+import com.example.GymProject.dto.request.*;
+import com.example.GymProject.dto.respone.*;
 import com.example.GymProject.service.TraineeService;
 import com.example.GymProject.service.UserService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/api/trainees")
 public class TraineeController {
-
     @Autowired
     private TraineeService traineeService;
-    @Autowired
-    private EntityMapper entityMapper;
     @Autowired
     private UserService userService;
 
     private static final Logger logger = LoggerFactory.getLogger(TraineeController.class);
 
-
     @PostMapping("/register")
-    public ResponseEntity<UserPassResponse> createTrainee(@Valid @RequestBody TraineeRegistrationRequest registrationRequest) {
+    public ResponseEntity<UserPassResponseDto> createTrainee(@Valid @RequestBody TraineeRegistrationRequestDto registrationRequest) {
         logger.info("Received request to create trainee: {}", registrationRequest);
-        UserDto userDto = new UserDto(registrationRequest.getFirstName(), registrationRequest.getLastName());
-        TraineeDto traineeDto = new TraineeDto(null, registrationRequest.getDateOfBirth(), registrationRequest.getAddress(), userDto, null);
-        UserPassResponse response = traineeService.createTrainee(traineeDto);
+        UserPassResponseDto response = traineeService.createTrainee(registrationRequest);
         logger.info("Trainee created successfully: {}", response.getId());
         return ResponseEntity.ok(response);
     }
 
 
     @GetMapping("/trainee")
-    public ResponseEntity<?> getTraineeByUsername(@Valid @RequestBody UserPassRequest request) {
+    public ResponseEntity<?> getTraineeByUsername(@Valid @RequestBody UserPassRequestDto request) {
         logger.info("Received request to get trainee by username: {}", request.getUsername());
         if (userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())) {
-            GetTraineeProfileResponse response = traineeService.getTraineeByUsername(request.getUsername());
+            TraineeProfileResponseDto response = traineeService.getTraineeByUsername(request.getUsername());
             logger.info("Retrieved trainee profile: {}", response);
             return ResponseEntity.ok(response);
         }
@@ -65,10 +47,10 @@ public class TraineeController {
 
     @PutMapping("/trainee")
     public ResponseEntity<?> updateTrainee(
-            @Valid @RequestBody UpdateTraineeProfileRequest newData) {
+            @Valid @RequestBody UpdateTraineeProfileRequestDto newData) {
         logger.info("Received request to update trainee profile: {}", newData);
         if (userService.checkUsernameAndPassword(newData.getUsername(), newData.getPassword())) {
-            UpdateTraineeProfileResponse response = traineeService.updateTrainee(entityMapper.toTraineeDto(newData));
+            UpdateTraineeProfileResponseDto response = traineeService.updateTrainee(newData);
             logger.info("Updated trainee profile: {}", response);
             return ResponseEntity.ok(response);
         }
@@ -78,7 +60,7 @@ public class TraineeController {
 
     @DeleteMapping("/trainee")
     public ResponseEntity<String> deleteTrainee(
-            @Valid @RequestBody DeleteRequest request) {
+            @Valid @RequestBody DeleteRequestDto request) {
         logger.info("Received request to delete trainee: {}", request);
         if (userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())) {
             boolean isDeleted = traineeService.deleteTraineeByUsername(request.getUsername(), request.getPassword());
@@ -96,10 +78,10 @@ public class TraineeController {
     @PutMapping("/{traineeId}/trainers")
     public ResponseEntity<?> updateTraineeTrainers(
             @PathVariable Long traineeId,
-            @Valid @RequestBody UpdateTraineeTrainersRequest requestDto) {
+            @Valid @RequestBody UpdateTraineeTrainersRequestDto requestDto) {
         logger.info("Received request to update trainee trainers list: {}", requestDto);
         if (userService.checkUsernameAndPassword(requestDto.getUsername(), requestDto.getPassword())) {
-            List<TrainerForTraineeResponse> response = traineeService.
+            List<TrainerForTraineeResponseDto> response = traineeService.
                     updateTraineeTrainers(requestDto.getUsername(), requestDto.getPassword(), requestDto.getTrainerUsernames());
             logger.info("Updated trainee trainers list: {}", response);
             return ResponseEntity.ok(response);
@@ -112,10 +94,10 @@ public class TraineeController {
     @GetMapping("/{traineeId}/trainings")
     public ResponseEntity<?> getTrainingList(
             @PathVariable Long traineeId,
-            @Valid @RequestBody GetTraineeTrainingsRequest request) {
+            @Valid @RequestBody TraineeTrainingsRequestDto request) {
         logger.info("Received request to get training list for trainee: {}", request);
         if (userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())) {
-            List<GetTrainingResponse> response = traineeService.getTraineeTrainings(request);
+            List<GetTrainingResponseDto> response = traineeService.getTraineeTrainings(request);
             logger.info("Retrieved training list: {}", response);
             return ResponseEntity.ok(response);
         }
@@ -124,11 +106,11 @@ public class TraineeController {
 
     @GetMapping("/{traineeId}/unassignedTrainers")
     public ResponseEntity<?> getUnassignedTrainers(@PathVariable Long traineeId,
-                                                   @Valid @RequestBody UserPassRequest request) {
+                                                   @Valid @RequestBody UserPassRequestDto request) {
 
         logger.info("Received request to get unassigned trainers for trainee: {}", request);
         if (userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())) {
-            List<UnassignedTrainerResponse> trainerDtos = traineeService.getUnassignedTrainers(request.getUsername(), request.getPassword());
+            List<UnassignedTrainerResponseDto> trainerDtos = traineeService.getUnassignedTrainers(request.getUsername(), request.getPassword());
             logger.info("Retrieved unassigned trainers list: {}", trainerDtos);
             return ResponseEntity.ok(trainerDtos);
         }
@@ -136,7 +118,7 @@ public class TraineeController {
     }
 
     @PatchMapping("/activate")
-    public ResponseEntity<String> activateTrainee(@Valid @RequestBody UserPassRequest request) {
+    public ResponseEntity<String> activateTrainee(@Valid @RequestBody UserPassRequestDto request) {
 
         logger.info("Received request to activate trainee: {}", request);
         if (userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())) {
@@ -154,7 +136,7 @@ public class TraineeController {
     }
 
     @PatchMapping("/deactivate")
-    public ResponseEntity<String> deactivateTrainee(@Valid @RequestBody UserPassRequest request) {
+    public ResponseEntity<String> deactivateTrainee(@Valid @RequestBody UserPassRequestDto request) {
         logger.info("Received request to deactivate trainee: {}", request);
         if (userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())) {
             boolean isDeactivated = traineeService.deactivate(request.getUsername(), request.getPassword());

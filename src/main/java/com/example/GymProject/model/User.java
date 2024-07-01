@@ -1,8 +1,8 @@
 package com.example.GymProject.model;
 
+import jakarta.persistence.*;
 import lombok.*;
 
-import javax.persistence.*;
 
 @Entity
 @Table(name = "users")

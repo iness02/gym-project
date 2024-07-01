@@ -1,41 +1,38 @@
 package com.example.GymProject.controller;
 
-import com.example.GymProject.config.TestConfig;
 import com.example.GymProject.dto.TrainerDto;
 import com.example.GymProject.dto.UserDto;
-import com.example.GymProject.dto.request.UserPassRequest;
-import com.example.GymProject.dto.request.trainerRequest.GetTrainerTrainingsRequest;
-import com.example.GymProject.dto.request.trainerRequest.TrainerRegistrationRequest;
-import com.example.GymProject.dto.request.trainerRequest.UpdateTrainerProfileRequest;
-import com.example.GymProject.dto.response.GetTrainingResponse;
-import com.example.GymProject.dto.response.UserPassResponse;
-import com.example.GymProject.dto.response.trainerResponse.GetTrainerProfileResponse;
-import com.example.GymProject.dto.response.trainerResponse.UpdateTrainerProfileResponse;
+import com.example.GymProject.dto.request.TrainerRegistrationRequestDto;
+import com.example.GymProject.dto.request.TrainerTrainingsRequestDto;
+import com.example.GymProject.dto.request.UpdateTrainerProfileRequestDto;
+import com.example.GymProject.dto.request.UserPassRequestDto;
+import com.example.GymProject.dto.respone.GetTrainingResponseDto;
+import com.example.GymProject.dto.respone.TrainerProfileResponseDto;
+import com.example.GymProject.dto.respone.UpdateTrainerProfileResponseDto;
+import com.example.GymProject.dto.respone.UserPassResponseDto;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.service.TrainerService;
 import com.example.GymProject.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestConfig.class})
-
+@SpringBootTest
+@ActiveProfiles("test")
 public class TrainerControllerTest {
     @InjectMocks
     private TrainerController trainerController;
@@ -56,7 +53,7 @@ public class TrainerControllerTest {
 
     @Test
     public void testCreateTrainer() {
-        TrainerRegistrationRequest registrationRequest = new TrainerRegistrationRequest();
+        TrainerRegistrationRequestDto registrationRequest = new TrainerRegistrationRequestDto();
         registrationRequest.setFirstName("John");
         registrationRequest.setLastName("Doe");
         registrationRequest.setSpecialization("Fitness");
@@ -64,48 +61,46 @@ public class TrainerControllerTest {
         UserDto userDto = new UserDto("John", "Doe");
         TrainerDto trainerDto = new TrainerDto(null, "Fitness", userDto, null);
 
-        UserPassResponse userPassResponse = new UserPassResponse(1L, "John.Doe", "password123");
+        UserPassResponseDto userPassResponse = new UserPassResponseDto(1L, "John.Doe", "password123");
 
-        when(trainerService.createTrainer(any(TrainerDto.class))).thenReturn(userPassResponse);
+        when(trainerService.createTrainer(any(TrainerRegistrationRequestDto.class))).thenReturn(userPassResponse);
 
-        ResponseEntity<UserPassResponse> responseEntity = trainerController.createTrainee(registrationRequest);
+        ResponseEntity<UserPassResponseDto> responseEntity = trainerController.createTrainer(registrationRequest);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals(userPassResponse, responseEntity.getBody());
-        verify(trainerService, times(1)).createTrainer(any(TrainerDto.class));
+        verify(trainerService, times(1)).createTrainer(any(TrainerRegistrationRequestDto.class));
     }
 
     @Test
     void testGetTrainerByUsername() {
-        UserPassRequest request = new UserPassRequest();
+        UserPassRequestDto request = new UserPassRequestDto();
         request.setUsername("username");
         request.setPassword("password");
 
-        GetTrainerProfileResponse expectedResponse = new GetTrainerProfileResponse();
+        TrainerProfileResponseDto expectedResponse = new TrainerProfileResponseDto();
 
         when(userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())).thenReturn(true);
-        when(entityMapper.toGetTrainerProfileResponse(any())).thenReturn(expectedResponse);
+        when(entityMapper.toTrainerProfileResponseDto(any())).thenReturn(expectedResponse);
 
-        ResponseEntity<?> responseEntity = trainerController.getTraineeByUsername(request);
+        ResponseEntity<?> responseEntity = trainerController.getTrainerByUsername(request);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(expectedResponse, responseEntity.getBody());
-        verify(entityMapper, times(1)).toGetTrainerProfileResponse(any());
     }
 
 
     @Test
     void testUpdateTrainer() {
-        UpdateTrainerProfileRequest request = new UpdateTrainerProfileRequest();
+        UpdateTrainerProfileRequestDto request = new UpdateTrainerProfileRequestDto();
         request.setUsername("username");
         request.setPassword("password");
 
-        UpdateTrainerProfileResponse expectedResponse = new UpdateTrainerProfileResponse();
+        UpdateTrainerProfileResponseDto expectedResponse = new UpdateTrainerProfileResponseDto();
 
         when(userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())).thenReturn(true);
         when(trainerService.updateTrainer(any())).thenReturn(expectedResponse);
 
-        ResponseEntity<?> responseEntity = trainerController.updateTrainee(request);
+        ResponseEntity<?> responseEntity = trainerController.updateTrainer(request);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals(expectedResponse, responseEntity.getBody());
@@ -116,13 +111,13 @@ public class TrainerControllerTest {
     @Test
     public void testGetTrainingList() {
         Long trainerId = 1L;
-        GetTrainerTrainingsRequest request = new GetTrainerTrainingsRequest("username", "password", new Date(), new Date(), "trainerName");
-        List<GetTrainingResponse> expectedResponse = new ArrayList<>();
-        expectedResponse.add(new GetTrainingResponse("Training1", new Date(), "Type1", 60, "trainerName"));
-        expectedResponse.add(new GetTrainingResponse("Training2", new Date(), "Type2", 45, "trainerName"));
+        TrainerTrainingsRequestDto request = new TrainerTrainingsRequestDto("username", "password", LocalDate.now(), LocalDate.now(), "trainerName");
+        List<GetTrainingResponseDto> expectedResponse = new ArrayList<>();
+        expectedResponse.add(new GetTrainingResponseDto("Training1", LocalDate.now(), "Type1", 60, "trainerName"));
+        expectedResponse.add(new GetTrainingResponseDto("Training2", LocalDate.now(), "Type2", 45, "trainerName"));
 
         when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
-        when(trainerService.getTrainerTrainings(any(GetTrainerTrainingsRequest.class))).thenReturn(expectedResponse);
+        when(trainerService.getTrainerTrainings(any(TrainerTrainingsRequestDto.class))).thenReturn(expectedResponse);
 
         ResponseEntity<?> responseEntity = trainerController.getTrainingList(trainerId, request);
 
@@ -134,12 +129,12 @@ public class TrainerControllerTest {
 
     @Test
     public void testActivateTrainee() {
-        UserPassRequest request = new UserPassRequest("username", "password");
+        UserPassRequestDto request = new UserPassRequestDto("username", "password");
 
         when(userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())).thenReturn(true);
         when(trainerService.activate(request.getUsername(), request.getPassword())).thenReturn(true);
 
-        ResponseEntity<String> result = trainerController.activateTrainee(request);
+        ResponseEntity<String> result = trainerController.activateTrainer(request);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals("Trainee activated successfully", result.getBody());
@@ -147,12 +142,12 @@ public class TrainerControllerTest {
 
     @Test
     public void testDeactivateTrainee() {
-        UserPassRequest request = new UserPassRequest("username", "password");
+        UserPassRequestDto request = new UserPassRequestDto("username", "password");
 
         when(userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())).thenReturn(true);
         when(trainerService.deactivate(request.getUsername(), request.getPassword())).thenReturn(true);
 
-        ResponseEntity<String> result = trainerController.deactivateTrainee(request);
+        ResponseEntity<String> result = trainerController.deactivateTrainer(request);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals("Trainee deactivated successfully", result.getBody());

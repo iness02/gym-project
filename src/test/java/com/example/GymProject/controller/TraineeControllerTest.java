@@ -1,49 +1,34 @@
 package com.example.GymProject.controller;
 
-import com.example.GymProject.config.TestConfig;
-import com.example.GymProject.dto.TraineeDto;
-import com.example.GymProject.dto.UserDto;
-import com.example.GymProject.dto.request.DeleteRequest;
-import com.example.GymProject.dto.request.UserPassRequest;
-import com.example.GymProject.dto.request.traineerRquest.GetTraineeTrainingsRequest;
-import com.example.GymProject.dto.request.traineerRquest.TraineeRegistrationRequest;
-import com.example.GymProject.dto.request.traineerRquest.UpdateTraineeProfileRequest;
-import com.example.GymProject.dto.request.traineerRquest.UpdateTraineeTrainersRequest;
-import com.example.GymProject.dto.response.GetTrainingResponse;
-import com.example.GymProject.dto.response.UserPassResponse;
-import com.example.GymProject.dto.response.traineeResponse.GetTraineeProfileResponse;
-import com.example.GymProject.dto.response.traineeResponse.TrainerForTraineeResponse;
-import com.example.GymProject.dto.response.traineeResponse.UnassignedTrainerResponse;
-import com.example.GymProject.dto.response.traineeResponse.UpdateTraineeProfileResponse;
-import com.example.GymProject.mapper.EntityMapper;
+import com.example.GymProject.dto.request.*;
+import com.example.GymProject.dto.respone.*;
 import com.example.GymProject.service.TraineeService;
 import com.example.GymProject.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.ActiveProfiles;
 
-import java.util.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestConfig.class})
-
+@SpringBootTest
+@ActiveProfiles("test")
 public class TraineeControllerTest {
     @Mock
     private TraineeService traineeService;
-
-    @Mock
-    private EntityMapper entityMapper;
     @Mock
     private UserService userService;
 
@@ -52,29 +37,26 @@ public class TraineeControllerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
     public void testCreateTrainee() {
-        TraineeRegistrationRequest registrationRequest = new TraineeRegistrationRequest();
+        TraineeRegistrationRequestDto registrationRequest = new TraineeRegistrationRequestDto();
         registrationRequest.setFirstName("John");
         registrationRequest.setLastName("Doe");
-        registrationRequest.setDateOfBirth(new Date(2002, Calendar.OCTOBER, 22));
+        registrationRequest.setDateOfBirth(LocalDate.of(1990, 1, 1));
         registrationRequest.setAddress("123 Main St");
 
-        UserDto userDto = new UserDto("John", "Doe");
-        TraineeDto traineeDto = new TraineeDto(null, new Date(2002, Calendar.OCTOBER, 22), "123 Main St", userDto, null);
+        UserPassResponseDto userPassResponse = new UserPassResponseDto(1L, "John.Doe", "password123");
 
-        UserPassResponse userPassResponse = new UserPassResponse(1L, "John.Doe", "password123");
+        when(traineeService.createTrainee(any(TraineeRegistrationRequestDto.class))).thenReturn(userPassResponse);
 
-        when(traineeService.createTrainee(any(TraineeDto.class))).thenReturn(userPassResponse);
-
-        ResponseEntity<UserPassResponse> responseEntity = traineeController.createTrainee(registrationRequest);
+        ResponseEntity<UserPassResponseDto> responseEntity = traineeController.createTrainee(registrationRequest);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals(userPassResponse, responseEntity.getBody());
-        verify(traineeService, times(1)).createTrainee(any(TraineeDto.class));
+        verify(traineeService, times(1)).createTrainee(any(TraineeRegistrationRequestDto.class));
     }
 
     @Test
@@ -82,9 +64,9 @@ public class TraineeControllerTest {
         String username = "username";
         String password = "password";
 
-        GetTraineeProfileResponse expectedResponse = new GetTraineeProfileResponse();
+        TraineeProfileResponseDto expectedResponse = new TraineeProfileResponseDto();
 
-        UserPassRequest request = new UserPassRequest();
+        UserPassRequestDto request = new UserPassRequestDto();
         request.setUsername(username);
         request.setPassword(password);
 
@@ -101,16 +83,16 @@ public class TraineeControllerTest {
 
     @Test
     void testUpdateTrainee() {
-        UpdateTraineeProfileRequest request = new UpdateTraineeProfileRequest();
+        UpdateTraineeProfileRequestDto request = new UpdateTraineeProfileRequestDto();
         request.setUsername("username");
         request.setPassword("password");
         request.setFirstName("John");
         request.setLastName("Doe");
-        request.setDateOfBirth(new Date());
+        request.setDateOfBirth(LocalDate.now());
         request.setAddress("123 Main St");
         request.setIsActive(true);
 
-        UpdateTraineeProfileResponse expectedResponse = new UpdateTraineeProfileResponse();
+        UpdateTraineeProfileResponseDto expectedResponse = new UpdateTraineeProfileResponseDto();
 
         when(userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())).thenReturn(true);
         when(traineeService.updateTrainee(any())).thenReturn(expectedResponse);
@@ -125,7 +107,7 @@ public class TraineeControllerTest {
 
     @Test
     void testDeleteTrainee() {
-        DeleteRequest request = new DeleteRequest();
+        DeleteRequestDto request = new DeleteRequestDto();
         request.setUsername("username");
         request.setPassword("password");
 
@@ -142,11 +124,11 @@ public class TraineeControllerTest {
     @Test
     void testGetTrainingList() {
         Long traineeId = 1L;
-        GetTraineeTrainingsRequest request = new GetTraineeTrainingsRequest();
+        TraineeTrainingsRequestDto request = new TraineeTrainingsRequestDto();
         request.setUsername("username");
         request.setPassword("password");
 
-        List<GetTrainingResponse> expectedResponse = new ArrayList<>();
+        List<GetTrainingResponseDto> expectedResponse = new ArrayList<>();
         when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
         when(traineeService.getTraineeTrainings(request)).thenReturn(expectedResponse);
 
@@ -158,8 +140,8 @@ public class TraineeControllerTest {
 
     @Test
     void testGetUnassignedTrainers() {
-        UserPassRequest request = new UserPassRequest("username", "password");
-        List<UnassignedTrainerResponse> response = Collections.singletonList(new UnassignedTrainerResponse());
+        UserPassRequestDto request = new UserPassRequestDto("username", "password");
+        List<UnassignedTrainerResponseDto> response = Collections.singletonList(new UnassignedTrainerResponseDto());
 
         when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
         when(traineeService.getUnassignedTrainers("username", "password")).thenReturn(response);
@@ -172,7 +154,7 @@ public class TraineeControllerTest {
 
     @Test
     void testActivateTrainee() {
-        UserPassRequest request = new UserPassRequest("username", "password");
+        UserPassRequestDto request = new UserPassRequestDto("username", "password");
 
         when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
         when(traineeService.activate("username", "password")).thenReturn(true);
@@ -185,7 +167,7 @@ public class TraineeControllerTest {
 
     @Test
     void testDeactivateTrainee() {
-        UserPassRequest request = new UserPassRequest("username", "password");
+        UserPassRequestDto request = new UserPassRequestDto("username", "password");
 
         when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
         when(traineeService.deactivate("username", "password")).thenReturn(true);
@@ -199,10 +181,10 @@ public class TraineeControllerTest {
     @Test
     public void testUpdateTraineeTrainers() {
         Long traineeId = 1L;
-        UpdateTraineeTrainersRequest requestDto = new UpdateTraineeTrainersRequest("username", "password", Set.of("trainer1", "trainer2"));
-        List<TrainerForTraineeResponse> expectedResponse = new ArrayList<>();
-        expectedResponse.add(new TrainerForTraineeResponse("user1", "joe", "dao", "trainer1"));
-        expectedResponse.add(new TrainerForTraineeResponse("user2", "jone", "brown", "trainer2"));
+        UpdateTraineeTrainersRequestDto requestDto = new UpdateTraineeTrainersRequestDto("username", "password", Set.of("trainer1", "trainer2"));
+        List<TrainerForTraineeResponseDto> expectedResponse = new ArrayList<>();
+        expectedResponse.add(new TrainerForTraineeResponseDto("user1", "joe", "dao", "trainer1"));
+        expectedResponse.add(new TrainerForTraineeResponseDto("user2", "jone", "brown", "trainer2"));
         when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
         when(traineeService.updateTraineeTrainers(anyString(), anyString(), anySet())).thenReturn(expectedResponse);
 
@@ -213,4 +195,3 @@ public class TraineeControllerTest {
         assertEquals(expectedResponse, responseEntity.getBody());
     }
 }
-

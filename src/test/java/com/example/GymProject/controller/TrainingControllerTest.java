@@ -1,29 +1,27 @@
 package com.example.GymProject.controller;
 
-import com.example.GymProject.config.TestConfig;
-import com.example.GymProject.dto.request.trainingRequest.AddTrainingRequest;
+import com.example.GymProject.dto.request.AddTrainingRequestDto;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.service.TrainingService;
 import com.example.GymProject.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestConfig.class})
+@SpringBootTest
+@ActiveProfiles("test")
 public class TrainingControllerTest {
     @Mock
     private TrainingService trainingService;
@@ -42,7 +40,7 @@ public class TrainingControllerTest {
 
     @Test
     public void testAddTraining() {
-        AddTrainingRequest request = new AddTrainingRequest("traineeUsername", "trainerUsername", "trainerPassword", "name", new Date(), 60);
+        AddTrainingRequestDto request = new AddTrainingRequestDto("traineeUsername", "trainerUsername", "trainerPassword", "name", LocalDate.now(), 60);
 
         when(userService.checkUsernameAndPassword(request.getTrainerUsername(), request.getTrainerPassword())).thenReturn(true);
 
@@ -54,7 +52,7 @@ public class TrainingControllerTest {
 
     @Test
     public void testAddTrainingAuthenticationFailure() {
-        AddTrainingRequest request = new AddTrainingRequest("traineeUsername", "trainerUsername", "trainerPassword", "name", new Date(), 60);
+        AddTrainingRequestDto request = new AddTrainingRequestDto("traineeUsername", "trainerUsername", "trainerPassword", "name", LocalDate.now(), 60);
 
         when(userService.checkUsernameAndPassword(request.getTrainerUsername(), request.getTrainerPassword())).thenReturn(false);
 

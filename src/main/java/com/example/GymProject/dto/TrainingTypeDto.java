@@ -1,9 +1,8 @@
 package com.example.GymProject.dto;
 
 import com.example.GymProject.model.Trainings;
+import jakarta.annotation.Nonnull;
 import lombok.*;
-
-import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -12,6 +11,6 @@ import javax.validation.constraints.NotNull;
 @ToString
 public class TrainingTypeDto {
     private Long id;
-    @NotNull
+    @Nonnull
     private Trainings trainingTypeName;
 }

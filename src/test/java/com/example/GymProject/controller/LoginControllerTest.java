@@ -1,26 +1,23 @@
 package com.example.GymProject.controller;
 
-import com.example.GymProject.config.TestConfig;
-import com.example.GymProject.dto.request.ChangePasswordRequest;
-import com.example.GymProject.dto.request.UserPassRequest;
+import com.example.GymProject.dto.request.ChangePasswordRequestDto;
+import com.example.GymProject.dto.request.UserPassRequestDto;
 import com.example.GymProject.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestConfig.class})
-
+@SpringBootTest
+@ActiveProfiles("test")
 public class LoginControllerTest {
     @Mock
     private UserService userService;
@@ -35,7 +32,7 @@ public class LoginControllerTest {
 
     @Test
     void testLogin_Successful() {
-        UserPassRequest request = new UserPassRequest("username", "password");
+        UserPassRequestDto request = new UserPassRequestDto("username", "password");
 
         when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
 
@@ -46,7 +43,7 @@ public class LoginControllerTest {
 
     @Test
     void testLogin_Unsuccessful() {
-        UserPassRequest request = new UserPassRequest("username", "password");
+        UserPassRequestDto request = new UserPassRequestDto("username", "password");
 
         when(userService.checkUsernameAndPassword("username", "password")).thenReturn(false);
 
@@ -57,7 +54,7 @@ public class LoginControllerTest {
 
     @Test
     void testChangePassword_Successful() {
-        ChangePasswordRequest request = new ChangePasswordRequest("username", "oldPassword", "newPassword");
+        ChangePasswordRequestDto request = new ChangePasswordRequestDto("username", "oldPassword", "newPassword");
 
         when(userService.checkUsernameAndPassword("username", "oldPassword")).thenReturn(true);
         when(userService.changePassword("username", "newPassword", "oldPassword")).thenReturn(true);
@@ -69,7 +66,7 @@ public class LoginControllerTest {
 
     @Test
     void testChangePassword_Unsuccessful_Authentication() {
-        ChangePasswordRequest request = new ChangePasswordRequest("username", "oldPassword", "newPassword");
+        ChangePasswordRequestDto request = new ChangePasswordRequestDto("username", "oldPassword", "newPassword");
 
         when(userService.checkUsernameAndPassword("username", "oldPassword")).thenReturn(false);
 
@@ -80,7 +77,7 @@ public class LoginControllerTest {
 
     @Test
     void testChangePassword_Unsuccessful_PasswordChange() {
-        ChangePasswordRequest request = new ChangePasswordRequest("username", "oldPassword", "newPassword");
+        ChangePasswordRequestDto request = new ChangePasswordRequestDto("username", "oldPassword", "newPassword");
 
         when(userService.checkUsernameAndPassword("username", "oldPassword")).thenReturn(true);
         when(userService.changePassword("username", "newPassword", "oldPassword")).thenReturn(false);
