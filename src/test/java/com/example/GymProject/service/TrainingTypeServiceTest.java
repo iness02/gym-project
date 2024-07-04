@@ -1,19 +1,17 @@
 package com.example.GymProject.service;
 
-import com.example.GymProject.config.TestConfig;
-import com.example.GymProject.dao.TrainingTypeDao;
 import com.example.GymProject.dto.TrainingTypeDto;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.model.TrainingType;
 import com.example.GymProject.model.Trainings;
+import com.example.GymProject.repository.TrainingTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,11 +19,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestConfig.class})
+@SpringBootTest
+@ActiveProfiles("test")
 public class TrainingTypeServiceTest {
     @Mock
-    private TrainingTypeDao trainingTypeDao;
+    private TrainingTypeRepository trainingTypeRepository;
 
     @Mock
     private EntityMapper entityMapper;
@@ -51,7 +49,7 @@ public class TrainingTypeServiceTest {
 
         List<TrainingType> trainingTypes = Arrays.asList(trainingType1, trainingType2);
 
-        when(trainingTypeDao.getAllTrainingTypes()).thenReturn(trainingTypes);
+        when(trainingTypeRepository.findAll()).thenReturn(trainingTypes);
 
         TrainingTypeDto trainingTypeDto1 = new TrainingTypeDto();
         trainingTypeDto1.setId(1L);
@@ -70,7 +68,7 @@ public class TrainingTypeServiceTest {
         assertEquals(Trainings.FITNESS, result.get(0).getTrainingTypeName());
         assertEquals(Trainings.CYCLE, result.get(1).getTrainingTypeName());
 
-        verify(trainingTypeDao, times(1)).getAllTrainingTypes();
+        verify(trainingTypeRepository, times(1)).findAll();
         verify(entityMapper, times(1)).toTrainingTypeDto(trainingType1);
         verify(entityMapper, times(1)).toTrainingTypeDto(trainingType2);
     }
