@@ -24,6 +24,7 @@ import com.example.GymProject.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -50,6 +51,9 @@ public class TrainerService {
     @Autowired
     private EntityMapper entityMapper;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     @Transactional
@@ -66,7 +70,7 @@ public class TrainerService {
         user.setUsername(username);
         user.setFirstName(trainerDto.getFirstName());
         user.setLastName(trainerDto.getLastName());
-        user.setPassword(Utils.generatePassword());
+        user.setPassword(passwordEncoder.encode(trainerDto.getPassword()));
         user.setIsActive(true);
         logger.info("Creating user for trainee with name {}", trainerDto.getFirstName() + " " + trainerDto.getLastName());
         userRepository.save(user);

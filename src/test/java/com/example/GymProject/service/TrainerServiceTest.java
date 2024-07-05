@@ -67,7 +67,7 @@ public class TrainerServiceTest {
 
     @Test
     void testCreateTrainer() {
-        TrainerRegistrationRequestDto requestDto = new TrainerRegistrationRequestDto("John", "Doe", "Specialization");
+        TrainerRegistrationRequestDto requestDto = new TrainerRegistrationRequestDto("John", "Doe","password", "Specialization");
         String username = "John.Doe";
         Trainer trainer = new Trainer();
 

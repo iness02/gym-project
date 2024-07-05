@@ -9,6 +9,7 @@ import com.example.GymProject.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -21,6 +22,8 @@ public class UserService {
     UserRepository userRepository;
     @Autowired
     private EntityMapper entityMapper;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
     private static final int MAX_FAILED_ATTEMPTS = 3;
@@ -41,7 +44,7 @@ public class UserService {
             return false;
         }
 
-        if (user.getPassword().equals(password) && user.getFailedAttempts() !=0) {
+        if (passwordEncoder.matches(password, user.getPassword()) && user.getFailedAttempts() !=0) {
             resetFailedAttempts(username);
             logger.info("Username and password are right for user {}", username);
             return true;
@@ -52,10 +55,6 @@ public class UserService {
         }
     }
 
-    public int getFailedAttempts(String username){
-        User user = userRepository.findByUsername(username);
-        return user.getFailedAttempts();
-    }
     private void increaseFailedAttempts(String username) {
         User user = userRepository.findByUsername(username);
         int newFailAttempts = user.getFailedAttempts() + 1;

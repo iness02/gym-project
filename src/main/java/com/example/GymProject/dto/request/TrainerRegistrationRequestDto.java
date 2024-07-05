@@ -17,5 +17,7 @@ public class TrainerRegistrationRequestDto {
     @Nonnull
     private String lastName;
     @Nonnull
+    private String password;
+    @Nonnull
     private String specialization;
 }

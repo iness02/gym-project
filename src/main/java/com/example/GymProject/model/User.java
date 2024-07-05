@@ -33,7 +33,7 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
-    @Column(name = "failed_attempts",columnDefinition = "int default 0")
+    @Column(name = "failed_attempts", columnDefinition = "int default 0")
     private int failedAttempts;
 
     @Column(name = "lock_time")

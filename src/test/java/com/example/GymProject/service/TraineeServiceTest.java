@@ -67,7 +67,7 @@ public class TraineeServiceTest {
 
     @Test
     void testCreateTrainee() {
-        TraineeRegistrationRequestDto requestDto = new TraineeRegistrationRequestDto("John", "Doe", LocalDate.now(), "Address");
+        TraineeRegistrationRequestDto requestDto = new TraineeRegistrationRequestDto("John", "Doe","password", LocalDate.now(), "Address");
         String username = "johndoe";
         Trainee trainee = new Trainee();
 
