@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.time.LocalDateTime;
+
 @Service
 public class UserService {
 
@@ -19,21 +21,59 @@ public class UserService {
     UserRepository userRepository;
     @Autowired
     private EntityMapper entityMapper;
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+    private static final int MAX_FAILED_ATTEMPTS = 3;
+    private static final long LOCK_TIME_DURATION = 5; // in minutes
 
     public boolean checkUsernameAndPassword(String username, String password) {
         Assert.notNull(username, "Username cannot be null");
         Assert.notNull(password, "Password cannot be null");
+
         User user = userRepository.findByUsername(username);
-        if (user == null || !user.getPassword().equals(password)) {
-            logger.warn("User with username {} not found or password is wrong", username);
+        if (user == null) {
+            logger.warn("User with username {} not found", username);
             return false;
         }
 
-        logger.info("Username and password are right for user {}", username);
+        if (user.getLockTime() != null && user.getLockTime().isAfter(LocalDateTime.now().minusMinutes(LOCK_TIME_DURATION))) {
+            logger.warn("User with username {} is locked", username);
+            return false;
+        }
 
-        return true;
+        if (user.getPassword().equals(password) && user.getFailedAttempts() !=0) {
+            resetFailedAttempts(username);
+            logger.info("Username and password are right for user {}", username);
+            return true;
+        } else {
+            logger.warn("Password is wrong for user {}", username);
+            increaseFailedAttempts(username);
+            return false;
+        }
     }
+
+    public int getFailedAttempts(String username){
+        User user = userRepository.findByUsername(username);
+        return user.getFailedAttempts();
+    }
+    private void increaseFailedAttempts(String username) {
+        User user = userRepository.findByUsername(username);
+        int newFailAttempts = user.getFailedAttempts() + 1;
+        userRepository.updateFailedAttempts(newFailAttempts, username);
+        if (newFailAttempts >= MAX_FAILED_ATTEMPTS) {
+            lockUser(username);
+        }
+    }
+
+    private void resetFailedAttempts(String username) {
+        userRepository.updateFailedAttempts(0, username);
+    }
+
+    private void lockUser(String username) {
+        userRepository.updateLockTime(LocalDateTime.now(), username);
+        logger.info("User {} is locked due to too many failed attempts", username);
+    }
+
 
     public UserDto getUserByUsername(String username) {
         Assert.notNull(username, "Username cannot be null");

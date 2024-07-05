@@ -28,8 +28,12 @@ public class LoginController {
     @GetMapping("/login")
     public ResponseEntity<String> login(@Valid @RequestBody UserPassRequestDto request) {
         logger.info("Login attempt for username: {}", request.getUsername());
-        return userService.checkUsernameAndPassword(request.getUsername(), request.getPassword()) ?
-                new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+        if (userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Login failed.Wrong username or password", HttpStatus.UNAUTHORIZED);
+        }
     }
 
     @Counted(value = "password.change.attempts", description = "Counts password change attempts")
