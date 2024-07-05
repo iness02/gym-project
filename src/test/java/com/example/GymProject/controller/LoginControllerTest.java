@@ -36,7 +36,7 @@ public class LoginControllerTest {
 
         when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
 
-        ResponseEntity<String> response = loginController.login(request);
+        ResponseEntity<?> response = loginController.login(request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -47,7 +47,7 @@ public class LoginControllerTest {
 
         when(userService.checkUsernameAndPassword("username", "password")).thenReturn(false);
 
-        ResponseEntity<String> response = loginController.login(request);
+        ResponseEntity<?> response = loginController.login(request);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }

@@ -2,6 +2,8 @@ package com.example.GymProject.controller;
 
 import com.example.GymProject.dto.request.ChangePasswordRequestDto;
 import com.example.GymProject.dto.request.UserPassRequestDto;
+import com.example.GymProject.dto.respone.AuthResponseDto;
+import com.example.GymProject.security.jwt.JwtTokenProvider;
 import com.example.GymProject.service.UserService;
 import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
@@ -11,6 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,20 +26,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/api")
 public class LoginController {
     @Autowired
-    UserService userService;
+    private UserService userService;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+    @Autowired
+    private AuthenticationManager authenticationManager;
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     @Counted(value = "login.attempts", description = "Counts login attempts")
     @Timed(value = "login.time", description = "Time taken for login method execution")
     @GetMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody UserPassRequestDto request) {
+    public ResponseEntity<?> login(@Valid @RequestBody UserPassRequestDto request) {
         logger.info("Login attempt for username: {}", request.getUsername());
-
-        if (userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Login failed.Wrong username or password", HttpStatus.UNAUTHORIZED);
-        }
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getUsername(),
+                        request.getPassword())
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String token = jwtTokenProvider.generateToken(authentication);
+        return new ResponseEntity<>(new AuthResponseDto(token), HttpStatus.OK);
     }
 
     @Counted(value = "password.change.attempts", description = "Counts password change attempts")
