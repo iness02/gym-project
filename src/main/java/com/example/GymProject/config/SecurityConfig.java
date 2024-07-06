@@ -26,6 +26,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -39,6 +43,16 @@ public class SecurityConfig {
                                                    CustomAuthFilter customAuthFilter) throws Exception {
         http
                 .csrf().disable()
+                .cors(httpSecurityCorsConfigurer -> {
+                    UrlBasedCorsConfigurationSource source =
+                            new UrlBasedCorsConfigurationSource();
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowCredentials(true);
+                    config.addAllowedOrigin("http://localhost**");
+                    config.setAllowedHeaders(List.of("Content-Type", "Authorization"));
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
+                    source.registerCorsConfiguration("/**", config);
+                })
                 .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint)
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
