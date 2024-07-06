@@ -83,7 +83,7 @@ public class LoginController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
-        SecurityContextHolder.clearContext();
+        SecurityContextHolder.getContext().setAuthentication(null);
         return new ResponseEntity<>("User logged out successfully", HttpStatus.OK);
     }
 }

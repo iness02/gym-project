@@ -37,8 +37,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,AuthenticationManager authenticationManager,
                                                    CustomAuthFilter customAuthFilter) throws Exception {
-        customAuthFilter.setAuthenticationManager(authenticationManager);
-
         http
                 .csrf().disable()
                 .exceptionHandling()
@@ -46,7 +44,7 @@ public class SecurityConfig {
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests((authorizeRequests) -> authorizeRequests
-                        .requestMatchers("/api/trainees/register", "/api/trainers/register", 
+                        .requestMatchers("/api/trainees/register", "/api/trainers/register",
                                 "/api/login", "/api/changePassword","/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -60,7 +58,7 @@ public class SecurityConfig {
                 })
                 .deleteCookies("JSESSIONID")
                 .invalidateHttpSession(true);
-        http.addFilterBefore(customAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
