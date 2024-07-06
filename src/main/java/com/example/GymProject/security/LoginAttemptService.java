@@ -1,18 +1,13 @@
 package com.example.GymProject.security;
 
-import com.example.GymProject.model.Token;
 import com.example.GymProject.model.User;
-import com.example.GymProject.repository.TokenRepository;
 import com.example.GymProject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor

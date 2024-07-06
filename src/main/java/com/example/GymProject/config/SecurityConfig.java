@@ -3,6 +3,7 @@ package com.example.GymProject.config;
 import com.example.GymProject.security.CustomAuthFilter;
 import com.example.GymProject.security.jwt.JwtAuthenticationEntryPoint;
 import com.example.GymProject.security.jwt.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +19,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -49,7 +51,15 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
-                .logout((logout) -> logout.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK)));
+                .logout()
+                .logoutUrl("/api/logout")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    SecurityContextHolder.clearContext();
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().flush();
+                })
+                .deleteCookies("JSESSIONID")
+                .invalidateHttpSession(true);
         http.addFilterBefore(customAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
