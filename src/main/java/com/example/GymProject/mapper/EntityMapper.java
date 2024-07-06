@@ -397,4 +397,11 @@ public interface EntityMapper {
         return response;
     }
 
+    default Token mapTokenToTokenEntity(String token, String username) {
+        Token tokenEntity = new Token();
+        tokenEntity.setToken(token);
+        tokenEntity.setIsValid(true);
+        tokenEntity.setUsername(username);
+        return tokenEntity;
+    }
 }

@@ -22,11 +22,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE User u SET u.failedAttempts = ?1 WHERE u.username = ?2")
-    void updateFailedAttempts(int failedAttempts, String username);
-
-    @Transactional
-    @Modifying
     @Query("UPDATE User u SET u.lockTime = ?1 WHERE u.username = ?2")
     void updateLockTime(LocalDateTime lockTime, String username);
 

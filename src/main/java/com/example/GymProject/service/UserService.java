@@ -44,7 +44,7 @@ public class UserService {
             return false;
         }
 
-        if (passwordEncoder.matches(password, user.getPassword()) && user.getFailedAttempts() !=0) {
+        if (passwordEncoder.matches(password, user.getPassword()) ) {
             resetFailedAttempts(username);
             logger.info("Username and password are right for user {}", username);
             return true;
@@ -56,16 +56,16 @@ public class UserService {
     }
 
     private void increaseFailedAttempts(String username) {
-        User user = userRepository.findByUsername(username);
+     /*   User user = userRepository.findByUsername(username);
         int newFailAttempts = user.getFailedAttempts() + 1;
         userRepository.updateFailedAttempts(newFailAttempts, username);
         if (newFailAttempts >= MAX_FAILED_ATTEMPTS) {
             lockUser(username);
-        }
+        }*/
     }
 
     private void resetFailedAttempts(String username) {
-        userRepository.updateFailedAttempts(0, username);
+      //  userRepository.updateFailedAttempts(0, username);
     }
 
     private void lockUser(String username) {
