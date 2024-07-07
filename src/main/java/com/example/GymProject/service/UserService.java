@@ -9,6 +9,7 @@ import com.example.GymProject.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -19,21 +20,9 @@ public class UserService {
     UserRepository userRepository;
     @Autowired
     private EntityMapper entityMapper;
+
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
-
-    public boolean checkUsernameAndPassword(String username, String password) {
-        Assert.notNull(username, "Username cannot be null");
-        Assert.notNull(password, "Password cannot be null");
-        User user = userRepository.findByUsername(username);
-        if (user == null || !user.getPassword().equals(password)) {
-            logger.warn("User with username {} not found or password is wrong", username);
-            return false;
-        }
-
-        logger.info("Username and password are right for user {}", username);
-
-        return true;
-    }
 
     public UserDto getUserByUsername(String username) {
         Assert.notNull(username, "Username cannot be null");

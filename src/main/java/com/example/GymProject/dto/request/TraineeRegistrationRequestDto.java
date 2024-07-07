@@ -17,6 +17,8 @@ public class TraineeRegistrationRequestDto {
     private String firstName;
     @Nonnull
     private String lastName;
+    @Nonnull
+    private String password;
     private LocalDate dateOfBirth;
     private String address;
 }

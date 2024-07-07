@@ -1,13 +1,11 @@
 package com.example.GymProject.util;
 
 
-import com.example.GymProject.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.PropertySource;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 

@@ -12,7 +12,6 @@ import com.example.GymProject.dto.respone.UpdateTrainerProfileResponseDto;
 import com.example.GymProject.dto.respone.UserPassResponseDto;
 import com.example.GymProject.mapper.EntityMapper;
 import com.example.GymProject.service.TrainerService;
-import com.example.GymProject.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -43,8 +42,6 @@ public class TrainerControllerTest {
     @Mock
     private EntityMapper entityMapper;
 
-    @Mock
-    private UserService userService;
 
     @BeforeEach
     public void setUp() {
@@ -80,7 +77,6 @@ public class TrainerControllerTest {
 
         TrainerProfileResponseDto expectedResponse = new TrainerProfileResponseDto();
 
-        when(userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())).thenReturn(true);
         when(entityMapper.toTrainerProfileResponseDto(any())).thenReturn(expectedResponse);
 
         ResponseEntity<?> responseEntity = trainerController.getTrainerByUsername(request);
@@ -97,7 +93,6 @@ public class TrainerControllerTest {
 
         UpdateTrainerProfileResponseDto expectedResponse = new UpdateTrainerProfileResponseDto();
 
-        when(userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())).thenReturn(true);
         when(trainerService.updateTrainer(any())).thenReturn(expectedResponse);
 
         ResponseEntity<?> responseEntity = trainerController.updateTrainer(request);
@@ -116,7 +111,6 @@ public class TrainerControllerTest {
         expectedResponse.add(new GetTrainingResponseDto("Training1", LocalDate.now(), "Type1", 60, "trainerName"));
         expectedResponse.add(new GetTrainingResponseDto("Training2", LocalDate.now(), "Type2", 45, "trainerName"));
 
-        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
         when(trainerService.getTrainerTrainings(any(TrainerTrainingsRequestDto.class))).thenReturn(expectedResponse);
 
         ResponseEntity<?> responseEntity = trainerController.getTrainingList(trainerId, request);
@@ -131,7 +125,6 @@ public class TrainerControllerTest {
     public void testActivateTrainee() {
         UserPassRequestDto request = new UserPassRequestDto("username", "password");
 
-        when(userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())).thenReturn(true);
         when(trainerService.activate(request.getUsername(), request.getPassword())).thenReturn(true);
 
         ResponseEntity<String> result = trainerController.activateTrainer(request);
@@ -144,7 +137,6 @@ public class TrainerControllerTest {
     public void testDeactivateTrainee() {
         UserPassRequestDto request = new UserPassRequestDto("username", "password");
 
-        when(userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())).thenReturn(true);
         when(trainerService.deactivate(request.getUsername(), request.getPassword())).thenReturn(true);
 
         ResponseEntity<String> result = trainerController.deactivateTrainer(request);
