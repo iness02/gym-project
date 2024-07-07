@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
@@ -55,6 +56,9 @@ public class TraineeServiceTest {
     private TrainerService trainerService;
 
     @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
     private EntityMapper entityMapper;
 
     @InjectMocks
@@ -75,12 +79,11 @@ public class TraineeServiceTest {
 
         when(traineeRepository.existsByUserUsername(username)).thenReturn(false);
         when(trainerRepository.existsByUserUsername(username)).thenReturn(false);
-
-
         when(entityMapper.toTrainee(any(TraineeRegistrationRequestDto.class))).thenReturn(trainee);
-
         when(userRepository.save(any())).thenReturn(new User());
         when(traineeRepository.save(any())).thenReturn(trainee);
+        when(passwordEncoder.encode(any())).thenReturn("password");
+
 
         UserPassResponseDto responseDto = traineeService.createTrainee(requestDto);
 
@@ -91,6 +94,7 @@ public class TraineeServiceTest {
         verify(userService).generateUniqueUserName(requestDto.getFirstName(), requestDto.getLastName());
         verify(traineeRepository).existsByUserUsername(username);
         verify(trainerRepository).existsByUserUsername(username);
+        verify(passwordEncoder).encode(any());
         verify(userRepository).save(any());
         verify(traineeRepository).save(any());
         verify(entityMapper).toTrainee(requestDto);

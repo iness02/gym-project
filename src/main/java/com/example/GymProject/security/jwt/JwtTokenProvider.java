@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 
-import static java.security.KeyRep.Type.SECRET;
-
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
@@ -33,7 +31,7 @@ public class JwtTokenProvider {
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(expirationDate)
-                .signWith(getSignKey(),SignatureAlgorithm.HS256)
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
 
         return token;
@@ -46,11 +44,11 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 
-    public boolean validateToken(String token){
-        try{
+    public boolean validateToken(String token) {
+        try {
             Jwts.parser().setSigningKey(jwtSecret).build().parseClaimsJws(token);
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new AuthenticationCredentialsNotFoundException("JWT was expired or incorrect");
         }
     }

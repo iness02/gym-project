@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtTokenProvider jwtTokenProvider;
-    private final EntityMapper entityMapper;
     private final LoginAttemptService loginAttemptService;
 
     @Override

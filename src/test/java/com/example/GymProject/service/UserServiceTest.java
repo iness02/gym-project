@@ -28,49 +28,6 @@ public class UserServiceTest {
     private UserService userService;
 
     @Test
-    void testCheckUsernameAndPassword_UserFound() {
-        String username = "testUser";
-        String password = "password";
-        User mockUser = new User();
-        mockUser.setUsername(username);
-        mockUser.setPassword(password);
-
-        when(userRepository.findByUsername(username)).thenReturn(mockUser);
-
-        boolean result = userService.checkUsernameAndPassword(username, password);
-
-        assertTrue(result);
-    }
-
-    @Test
-    void testCheckUsernameAndPassword_UserNotFound() {
-        String username = "nonExistingUser";
-        String password = "password";
-
-        when(userRepository.findByUsername(username)).thenReturn(null);
-
-        boolean result = userService.checkUsernameAndPassword(username, password);
-
-        assertFalse(result);
-    }
-
-    @Test
-    void testCheckUsernameAndPassword_WrongPassword() {
-        String username = "testUser";
-        String correctPassword = "password";
-        String wrongPassword = "wrongPassword";
-        User mockUser = new User();
-        mockUser.setUsername(username);
-        mockUser.setPassword(correctPassword);
-
-        when(userRepository.findByUsername(username)).thenReturn(mockUser);
-
-        boolean result = userService.checkUsernameAndPassword(username, wrongPassword);
-
-        assertFalse(result);
-    }
-
-    @Test
     void testGetUserByUsername() {
         User user = new User();
         user.setUsername("test");

@@ -3,7 +3,6 @@ package com.example.GymProject.controller;
 import com.example.GymProject.dto.request.*;
 import com.example.GymProject.dto.respone.*;
 import com.example.GymProject.service.TraineeService;
-import com.example.GymProject.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -29,8 +28,6 @@ import static org.mockito.Mockito.*;
 public class TraineeControllerTest {
     @Mock
     private TraineeService traineeService;
-    @Mock
-    private UserService userService;
 
     @InjectMocks
     private TraineeController traineeController;
@@ -70,7 +67,6 @@ public class TraineeControllerTest {
         request.setUsername(username);
         request.setPassword(password);
 
-        when(userService.checkUsernameAndPassword(username, password)).thenReturn(true);
         when(traineeService.getTraineeByUsername(username)).thenReturn(expectedResponse);
 
         ResponseEntity<?> responseEntity = traineeController.getTraineeByUsername(request);
@@ -94,7 +90,6 @@ public class TraineeControllerTest {
 
         UpdateTraineeProfileResponseDto expectedResponse = new UpdateTraineeProfileResponseDto();
 
-        when(userService.checkUsernameAndPassword(request.getUsername(), request.getPassword())).thenReturn(true);
         when(traineeService.updateTrainee(any())).thenReturn(expectedResponse);
 
         ResponseEntity<?> responseEntity = traineeController.updateTrainee(request);
@@ -111,7 +106,6 @@ public class TraineeControllerTest {
         request.setUsername("username");
         request.setPassword("password");
 
-        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
         when(traineeService.deleteTraineeByUsername("username", "password")).thenReturn(true);
 
         ResponseEntity<String> result = traineeController.deleteTrainee(request);
@@ -129,7 +123,6 @@ public class TraineeControllerTest {
         request.setPassword("password");
 
         List<GetTrainingResponseDto> expectedResponse = new ArrayList<>();
-        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
         when(traineeService.getTraineeTrainings(request)).thenReturn(expectedResponse);
 
         ResponseEntity<?> result = traineeController.getTrainingList(traineeId, request);
@@ -143,7 +136,6 @@ public class TraineeControllerTest {
         UserPassRequestDto request = new UserPassRequestDto("username", "password");
         List<UnassignedTrainerResponseDto> response = Collections.singletonList(new UnassignedTrainerResponseDto());
 
-        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
         when(traineeService.getUnassignedTrainers("username", "password")).thenReturn(response);
 
         ResponseEntity<?> result = traineeController.getUnassignedTrainers(11L, request);
@@ -156,7 +148,6 @@ public class TraineeControllerTest {
     void testActivateTrainee() {
         UserPassRequestDto request = new UserPassRequestDto("username", "password");
 
-        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
         when(traineeService.activate("username", "password")).thenReturn(true);
 
         ResponseEntity<String> result = traineeController.activateTrainee(request);
@@ -169,7 +160,6 @@ public class TraineeControllerTest {
     void testDeactivateTrainee() {
         UserPassRequestDto request = new UserPassRequestDto("username", "password");
 
-        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
         when(traineeService.deactivate("username", "password")).thenReturn(true);
 
         ResponseEntity<String> result = traineeController.deactivateTrainee(request);
@@ -185,7 +175,6 @@ public class TraineeControllerTest {
         List<TrainerForTraineeResponseDto> expectedResponse = new ArrayList<>();
         expectedResponse.add(new TrainerForTraineeResponseDto("user1", "joe", "dao", "trainer1"));
         expectedResponse.add(new TrainerForTraineeResponseDto("user2", "jone", "brown", "trainer2"));
-        when(userService.checkUsernameAndPassword("username", "password")).thenReturn(true);
         when(traineeService.updateTraineeTrainers(anyString(), anyString(), anySet())).thenReturn(expectedResponse);
 
         ResponseEntity<?> responseEntity = traineeController.updateTraineeTrainers(traineeId, requestDto);
