@@ -12,8 +12,8 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,7 +34,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager,
                                                    CustomAuthFilter customAuthFilter) throws Exception {
         http
-                .csrf().disable()
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(httpSecurityCorsConfigurer -> {
                     UrlBasedCorsConfigurationSource source =
                             new UrlBasedCorsConfigurationSource();
@@ -45,25 +45,24 @@ public class SecurityConfig {
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
                     source.registerCorsConfiguration("/**", config);
                 })
-                .exceptionHandling()
-                .authenticationEntryPoint(authenticationEntryPoint)
-                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeHttpRequests((authorizeRequests) -> authorizeRequests
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(authenticationEntryPoint))
+                .sessionManagement(sessionManagement -> sessionManagement
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/api/trainees/register", "/api/trainers/register",
-                                "/api/login", "/api/changePassword", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .anyRequest().authenticated()
-                )
+                                "/api/login", "/api/changePassword", "/swagger-ui/**", "/v3/api-docs/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
-                .logout()
-                .logoutUrl("/api/logout")
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    SecurityContextHolder.clearContext();
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().flush();
-                })
-                .deleteCookies("JSESSIONID")
-                .invalidateHttpSession(true);
+                .logout(logout -> logout
+                        .logoutUrl("/api/logout")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            response.getWriter().flush();
+                        })
+                        .deleteCookies("JSESSIONID")
+                        .invalidateHttpSession(true));
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

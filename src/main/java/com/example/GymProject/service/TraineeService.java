@@ -76,7 +76,7 @@ public class TraineeService {
         userRepository.save(user);
         trainee.setUser(user);
         Trainee trainee1 = traineeRepository.save(trainee);
-        return new UserPassResponseDto(trainee1.getId(), trainee1.getUser().getUsername(), trainee1.getUser().getPassword());
+        return new UserPassResponseDto(trainee1.getId(), trainee1.getUser().getUsername());
     }
 
 

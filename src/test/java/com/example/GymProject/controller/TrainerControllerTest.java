@@ -58,7 +58,7 @@ public class TrainerControllerTest {
         UserDto userDto = new UserDto("John", "Doe");
         TrainerDto trainerDto = new TrainerDto(null, "Fitness", userDto, null);
 
-        UserPassResponseDto userPassResponse = new UserPassResponseDto(1L, "John.Doe", "password123");
+        UserPassResponseDto userPassResponse = new UserPassResponseDto(1L, "John.Doe");
 
         when(trainerService.createTrainer(any(TrainerRegistrationRequestDto.class))).thenReturn(userPassResponse);
 

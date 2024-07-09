@@ -76,7 +76,7 @@ public class TrainerService {
         userRepository.save(user);
         trainer.setUser(user);
         Trainer trainer1 = trainerRepository.save(trainer);
-        return new UserPassResponseDto(trainer1.getId(), trainer1.getUser().getUsername(), trainer1.getUser().getPassword());
+        return new UserPassResponseDto(trainer1.getId(), trainer1.getUser().getUsername());
     }
 
     public TrainerDto getTrainerDtoByUsername(String username) {

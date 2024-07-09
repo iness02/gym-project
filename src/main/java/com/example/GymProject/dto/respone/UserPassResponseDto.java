@@ -12,5 +12,4 @@ import lombok.Setter;
 public class UserPassResponseDto {
     private Long id;
     private String username;
-    private String password;
 }

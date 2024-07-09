@@ -45,7 +45,7 @@ public class TraineeControllerTest {
         registrationRequest.setDateOfBirth(LocalDate.of(1990, 1, 1));
         registrationRequest.setAddress("123 Main St");
 
-        UserPassResponseDto userPassResponse = new UserPassResponseDto(1L, "John.Doe", "password123");
+        UserPassResponseDto userPassResponse = new UserPassResponseDto(1L, "John.Doe");
 
         when(traineeService.createTrainee(any(TraineeRegistrationRequestDto.class))).thenReturn(userPassResponse);
 
