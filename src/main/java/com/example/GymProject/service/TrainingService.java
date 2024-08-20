@@ -29,15 +29,13 @@ public class TrainingService {
     @Autowired
     private TrainingTypeRepository trainingTypeRepository;
     @Autowired
-    private UserService userService;
-    @Autowired
     private EntityMapper entityMapper;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     @Transactional
     public TrainingDto addTraining(AddTrainingRequestDto request) {
-
+        logger.info("Adding training with name {} ", request.getName());
         Assert.notNull(request, "AddTrainingRequestDto cannot be null");
         TrainingDto trainingDto = entityMapper.toTrainingDto(request);
         Training training = entityMapper.toTraining(trainingDto);

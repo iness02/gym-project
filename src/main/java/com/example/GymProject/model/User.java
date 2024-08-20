@@ -3,6 +3,8 @@ package com.example.GymProject.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "users")
@@ -30,4 +32,7 @@ public class User {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
+
+    @Column(name = "lock_time")
+    private LocalDateTime lockTime;
 }

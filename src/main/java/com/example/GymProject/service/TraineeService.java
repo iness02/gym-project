@@ -22,10 +22,16 @@ import com.example.GymProject.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.codec.Hex;
+import org.springframework.security.crypto.keygen.KeyGenerators;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,6 +52,8 @@ public class TraineeService {
     EntityMapper entityMapper;
     @Autowired
     TrainerService trainerService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     @Transactional
@@ -62,7 +70,7 @@ public class TraineeService {
         user.setUsername(username);
         user.setFirstName(traineeDto.getFirstName());
         user.setLastName(traineeDto.getLastName());
-        user.setPassword(Utils.generatePassword());
+        user.setPassword(passwordEncoder.encode(traineeDto.getPassword()));
         user.setIsActive(true);
         logger.info("Creating user for trainee with name {}", traineeDto.getFirstName() + " " + traineeDto.getLastName());
         userRepository.save(user);
@@ -70,6 +78,7 @@ public class TraineeService {
         Trainee trainee1 = traineeRepository.save(trainee);
         return new UserPassResponseDto(trainee1.getId(), trainee1.getUser().getUsername(), trainee1.getUser().getPassword());
     }
+
 
     public TraineeProfileResponseDto getTraineeByUsername(String username) {
         Assert.notNull(username, "Username cannot be null");
