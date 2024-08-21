@@ -1,10 +1,9 @@
-package com.example.trainer_workload.dto;
+package com.example.GymProject.dto.request;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 @Getter
