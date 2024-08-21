@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  postgresql_dev:
+    image: postgres
+    environment:
+      POSTGRES_DB: gym_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+
+  postgresql_stg:
+    image: postgres
+    environment:
+      POSTGRES_DB: gym_stg
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+
+  postgresql_prod:
+    image: postgres
+    environment:
+      POSTGRES_DB: gym_prod
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+  postgresql_local:
+    image: postgres
+    environment:
+     POSTGRES_DB: gym_local
+     POSTGRES_USER: postgres
+     POSTGRES_PASSWORD: postgres
+    ports:
+      - "5436:5432"
