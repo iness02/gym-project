@@ -1,5 +1,6 @@
 package com.example.trainer_workload.security;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,14 +28,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         extractTokenFromRequest(request)
-                .map(jwtDecoder::decode)
-                .map(jwtToPrincipalConverter::convert)
+                .map(token -> jwtDecoder.decode(token))
+                .map(jwt -> jwtToPrincipalConverter.convert(jwt))
                 .map(UserPrincipalAuthenticationToken::new)
-                .ifPresent(authentication -> SecurityContextHolder.getContext().setAuthentication(authentication));
+                .ifPresent(authentication -> SecurityContextHolder.getContext().setAuthentication(authentication));  // Set authentication
 
         filterChain.doFilter(request, response);
     }
 
+    //sa ashxatum e normal
     private Optional<String> extractTokenFromRequest(HttpServletRequest request){
         String token = request.getHeader("Authorization");
         if(!StringUtils.hasText(token) || !token.startsWith("Bearer ")){
@@ -42,6 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         return Optional.of(token.substring(7));
+
 
     }
 }

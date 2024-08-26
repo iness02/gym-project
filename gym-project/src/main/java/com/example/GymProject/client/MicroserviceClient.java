@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @FeignClient(name = "MICROSERVICE", fallback = MicroserviceFallback.class)
 public interface MicroserviceClient {
 
-    @PostMapping("/workloads")
+    @PostMapping("/workload")
     void actionTraining(@RequestBody TrainingRequest trainingRequest,
                         @RequestHeader("Transaction-ID") String transactionId,
                         @RequestHeader("Authorization") String Authorization);

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/workloads")
+@RequestMapping("/workload")
 @RequiredArgsConstructor
 public class TrainingWorkController {
     private final TrainingWorkService trainingWorkService;
@@ -19,6 +19,6 @@ public class TrainingWorkController {
     @PostMapping
     public ResponseEntity<String> actionTraining(@RequestBody TrainingRequest trainingRequest) {
         trainingWorkService.acceptTrainerWork(trainingRequest);
-        return new ResponseEntity<>(trainingRequest.getAction() + "Action Completed successfully", HttpStatus.OK);
+        return new ResponseEntity<>(trainingRequest.getAction() + " Action Completed successfully", HttpStatus.OK);
     }
 }

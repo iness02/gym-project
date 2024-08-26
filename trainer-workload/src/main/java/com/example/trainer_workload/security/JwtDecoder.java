@@ -1,22 +1,30 @@
 package com.example.trainer_workload.security;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.DecodedJWT;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.SignatureAlgorithm;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 
 @Component
 public class JwtDecoder {
 
-    @Value("${security.jwt.secret-key}")
+    @Value("${jwt.secret}")
     String secretKey;
 
-    public DecodedJWT decode(String token){
-        return JWT.require(Algorithm.HMAC256(secretKey))
-                .build()
-                .verify(token);
+    public Jwt<?, ?> decode(String token){
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        SecretKey secretKey1= Keys.hmacShaKeyFor(keyBytes);
+        JwtParser jwtParser = Jwts.parser()
+                .verifyWith(secretKey1)
+                .build();
+        return jwtParser.parse(token);
     }
 }

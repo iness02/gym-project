@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .and()
                 .authorizeHttpRequests((authorizeRequests) -> authorizeRequests
                         .requestMatchers("/api/trainees/register", "/api/trainers/register",
-                                "/api/login", "/api/changePassword", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                "/api/login", "/api/changePassword", "/swagger-ui/**", "/v3/api-docs/**" , "/h2-console/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
@@ -67,7 +67,6 @@ public class SecurityConfig {
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

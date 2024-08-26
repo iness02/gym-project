@@ -16,6 +16,7 @@ public class AuthorizationFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String bearerToken = httpRequest.getHeader(AUTHORIZATION_HEADER);
         if (StringUtils.hasText(bearerToken)) {
+            System.out.printf("bearer token " + bearerToken);
             MDC.put(AUTHORIZATION_HEADER, bearerToken);
         }
         try {
